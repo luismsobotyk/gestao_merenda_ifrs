@@ -13,14 +13,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/home', function () {
     return view('dashboard.home');
-})->name('listarAlunos');
-
-Route::get('/criaracessos', function (){
-    return view('dashboard.criaracessos');
-})->name('criarAcessos');
-
-Route::get('/criarmodelos', function (){
-    return view('dashboard.criarmodelos');
-})->name('criarModelos');
+})->name('home');
 
 Route::post('/teste', [MainController::class, 'teste'])->name('teste');
+
+Route::get('/contratos', function (){
+    return view('dashboard.listaContratos');
+})->name('contratos');
+
+Route::get('/contrato/{id?}', function (){
+    return view('dashboard.contrato');
+})->name('contrato');
+
+Route::get('/cardapio', function (){
+    return view('dashboard.gerenciaCardapio');
+})->name('cardapio');
