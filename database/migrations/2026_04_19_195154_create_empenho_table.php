@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('empenho', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('contrato_uuid')->constrained('contrato')->cascadeOnDelete();
+
+            $table->string('numero_empenho');
+            $table->decimal('valor_total', 15, 2);
+            $table->decimal('valor_utilizado', 15, 2)->default(0);
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('empenho');
+    }
+};
