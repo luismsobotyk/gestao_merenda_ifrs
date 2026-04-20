@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContratoController;
 
 Route::get('/', [MainController::class, 'index']);
 
@@ -17,13 +18,11 @@ Route::get('/home', function () {
 
 Route::post('/teste', [MainController::class, 'teste'])->name('teste');
 
-Route::get('/contratos', function (){
-    return view('dashboard.listaContratos');
-})->name('contratos');
+Route::get('/contratos', [ContratoController::class, 'listaContratos'])->name('contratos');
 
-Route::get('/contrato/{id?}', function (){
-    return view('dashboard.contrato');
-})->name('contrato');
+Route::get('/contrato/{id}', [ContratoController::class, 'visualizaContrato'])->name('contrato.visualizar');
+
+Route::get('/contrato/{id}/editar', [ContratoController::class, 'visualizaContrato'])->name('contrato.editar');
 
 Route::get('/cardapio', function (){
     return view('dashboard.gerenciaCardapio');
