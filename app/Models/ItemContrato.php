@@ -11,4 +11,13 @@ class ItemContrato extends Model
 
     protected $table = 'item_contrato';
     protected $guarded = [];
+
+    public function itensEmpenho()
+    {
+        return $this->hasMany(ItemEmpenho::class, 'item_contrato_uuid');
+    }
+    public function unidade()
+    {
+        return $this->belongsTo(Unidade::class, 'unidade_uuid');
+    }
 }

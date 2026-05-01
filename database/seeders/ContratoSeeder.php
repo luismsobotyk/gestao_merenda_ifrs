@@ -13,7 +13,6 @@ class ContratoSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Criar as Unidades de Medida (Vamos reaproveitar essas para os 10 novos)
         $unidadeKgId = Str::uuid();
         $unidadeUnId = Str::uuid();
 
@@ -21,10 +20,6 @@ class ContratoSeeder extends Seeder
             ['id' => $unidadeKgId, 'descricao' => 'Quilograma', 'sigla' => 'kg', 'created_at' => now(), 'updated_at' => now()],
             ['id' => $unidadeUnId, 'descricao' => 'Unidade', 'sigla' => 'un', 'created_at' => now(), 'updated_at' => now()],
         ]);
-
-        // =========================================================================
-        // ENTRADA PRINCIPAL MANUAL (COOMAVIT) - MANTIDA INTACTA
-        // =========================================================================
 
         $fornecedorId = Str::uuid();
         DB::table('fornecedor')->insert([
@@ -40,7 +35,8 @@ class ContratoSeeder extends Seeder
             'id' => Str::uuid(), 'fornecedor_responsavel_id' => $responsavelId, 'tipo' => 'Email', 'valor' => 'contato@coomavit.com.br', 'created_at' => now(), 'updated_at' => now(),
         ]);
 
-        $contratoId = Str::uuid();
+        $contratoId = '227fda00-a3a5-421e-862f-26be91022b09';
+
         DB::table('contrato')->insert([
             'id' => $contratoId, 'fornecedor_id' => $fornecedorId, 'processo' => '23344.001234/2026-10', 'inicio_vigencia' => '2026-01-01', 'fim_vigencia' => '2026-12-31', 'valor_global' => 150000.00, 'status' => 'Vigente', 'pregao' => '05/2026', 'created_at' => now(), 'updated_at' => now(),
         ]);
@@ -87,31 +83,23 @@ class ContratoSeeder extends Seeder
             ['id' => Str::uuid(), 'pedido_uuid' => $pedido2Id, 'item_empenho_uuid' => $itemEmpMacaId, 'quantidade' => 50.00, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
+        $faker = \Faker\Factory::create('pt_BR');
 
-        // =========================================================================
-        // LOOP PARA GERAR +10 CONTRATOS ALEATÓRIOS COM O FAKER
-        // =========================================================================
-
-        $faker = \Faker\Factory::create('pt_BR'); // Instancia o gerador de dados brasileiros
-
-        // Lista de alimentos para sortear
         $alimentos = ['Feijão Preto', 'Arroz Parboilizado', 'Carne Moída', 'Leite Integral', 'Macarrão', 'Óleo de Soja', 'Biscoito Doce', 'Ovos', 'Frango Congelado', 'Iogurte'];
-        $statusContrato = ['Vigente', 'Vigente', 'Vigente', 'Encerrado', 'Pausado']; // Mais chance de cair vigente
+        $statusContrato = ['Vigente', 'Vigente', 'Vigente', 'Encerrado', 'Pausado'];
 
         for ($i = 0; $i < 10; $i++) {
 
-            // 1. Fornecedor Dinâmico
             $novoFornecedorId = Str::uuid();
             $nomeFornecedor = $faker->company;
             DB::table('fornecedor')->insert([
                 'id' => $novoFornecedorId,
                 'cnpj' => $faker->unique()->cnpj,
                 'nome' => $nomeFornecedor,
-                'sigla' => strtoupper(substr($nomeFornecedor, 0, 4)),
+                'sigla' => Str::upper(Str::substr($nomeFornecedor, 0, 4)),
                 'created_at' => now(), 'updated_at' => now(),
             ]);
 
-            // 2. Responsável Dinâmico
             $novoRespId = Str::uuid();
             DB::table('fornecedor_responsavel')->insert([
                 'id' => $novoRespId, 'fornecedor_uuid' => $novoFornecedorId, 'nome' => $faker->name, 'is_principal' => true, 'created_at' => now(), 'updated_at' => now(),
@@ -121,7 +109,6 @@ class ContratoSeeder extends Seeder
                 'id' => Str::uuid(), 'fornecedor_responsavel_id' => $novoRespId, 'tipo' => 'Email', 'valor' => $faker->companyEmail, 'created_at' => now(), 'updated_at' => now(),
             ]);
 
-            // 3. Contrato Dinâmico
             $novoContratoId = Str::uuid();
             $anoPregao = $faker->numberBetween(2023, 2026);
             DB::table('contrato')->insert([
@@ -130,13 +117,12 @@ class ContratoSeeder extends Seeder
                 'processo' => '23344.' . $faker->randomNumber(6, true) . '/' . $anoPregao . '-' . $faker->randomNumber(2, true),
                 'inicio_vigencia' => $anoPregao . '-01-01',
                 'fim_vigencia' => $anoPregao . '-12-31',
-                'valor_global' => $faker->randomFloat(2, 20000, 300000), // Entre 20 mil e 300 mil
+                'valor_global' => $faker->randomFloat(2, 20000, 300000),
                 'status' => $faker->randomElement($statusContrato),
                 'pregao' => $faker->numberBetween(1, 20) . '/' . $anoPregao,
                 'created_at' => now(), 'updated_at' => now(),
             ]);
 
-            // 4. Um Item Dinâmico para o contrato
             $novoItemId = Str::uuid();
             DB::table('item_contrato')->insert([
                 'id' => $novoItemId,
@@ -148,7 +134,6 @@ class ContratoSeeder extends Seeder
                 'created_at' => now(), 'updated_at' => now()
             ]);
 
-            // 5. Um Empenho Dinâmico
             $novoEmpenhoId = Str::uuid();
             DB::table('empenho')->insert([
                 'id' => $novoEmpenhoId,
@@ -159,7 +144,6 @@ class ContratoSeeder extends Seeder
                 'created_at' => now(), 'updated_at' => now(),
             ]);
 
-            // 6. Vinculando item ao empenho
             $novoItemEmpenhoId = Str::uuid();
             DB::table('item_empenho')->insert([
                 'id' => $novoItemEmpenhoId,

@@ -2,28 +2,32 @@
 
 @section('custom_css')
     <style>
-        /* Estilos específicos para a gestão de saldos */
-        .money-card {
-            transition: transform 0.2s;
-        }
-        .money-card:hover {
-            transform: translateY(-5px);
-        }
-        .progress-consumption {
-            height: 8px; /* Ligeiramente menor para caber na tabela de itens */
-            border-radius: 5px;
-        }
+        .money-card { transition: transform 0.2s; }
+        .money-card:hover { transform: translateY(-5px); }
+        .progress-consumption { height: 8px; border-radius: 5px; }
         .table-vencimento td, .table-vencimento th,
-        .table-empenhos td, .table-empenhos th {
-            vertical-align: middle;
-        }
-        .item-row:hover {
-            background-color: rgba(25, 135, 84, 0.05) !important; /* Verde IFRS bem claro no hover */
-        }
+        .table-empenhos td, .table-empenhos th { vertical-align: middle; }
+        .item-row:hover { background-color: rgba(25, 135, 84, 0.05) !important; }
     </style>
 @endsection
 
 @section('content')
+    @php
+        // Encontra o contato principal
+        $responsavelPrincipal = $contrato->fornecedor->responsaveis->where('is_principal', true)->first();
+        $emailPrincipal = $responsavelPrincipal ? $responsavelPrincipal->contatos->where('tipo', 'Email')->first() : null;
+
+        // Matemática Financeira
+        $totalContratado = $contrato->valor_global;
+        $totalEmpenhado = $contrato->empenhos->sum('valor_total') ?? 0;
+        $saldoContrato = $totalContratado - $totalEmpenhado;
+
+        // Controle de cor da badge de Status
+        $corStatus = 'success';
+        if($contrato->status === 'Encerrado') $corStatus = 'danger';
+        if($contrato->status === 'Pausado') $corStatus = 'warning text-dark';
+    @endphp
+
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Gestão de Contrato Individualizado</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
@@ -34,15 +38,12 @@
                     </svg>
                     Voltar à Lista
                 </a>
-                {{-- Botão Fazer Pedido removido daqui --}}
             </div>
-            <span class="badge bg-success d-flex align-items-center p-2 text-uppercase">Contrato Vigente</span>
+            <span class="badge bg-{{ $corStatus }} d-flex align-items-center p-2 text-uppercase">Contrato {{ $contrato->status }}</span>
         </div>
     </div>
 
-    {{-- ETAPA 1 e 3: Resumo do Contrato e Saldos Financeiros Totais --}}
     <div class="row mb-4">
-        {{-- Detalhes Burocráticos (Etapa 1) --}}
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-light text-uppercase fw-bold small text-body-secondary">
@@ -50,15 +51,15 @@
                 </div>
 
                 <div class="card-body">
-                    <h5 class="card-title text-primary">Fornecedor: Coomavit</h5>
-                    <p class="card-text mb-1"><strong>Nº Pregão/Chamada:</strong> 05/2026</p>
-                    <p class="card-text mb-1"><strong>Processo SIPAC:</strong> 23344.001234/2026-10</p>
-                    <p class="card-text mb-2"><strong>Vigência:</strong> 01/01/2026 a 31/12/2026</p>
+                    <h5 class="card-title text-primary">Fornecedor: {{ $contrato->fornecedor->nome }}</h5>
+                    <p class="card-text mb-1"><strong>Nº Pregão/Chamada:</strong> {{ $contrato->pregao }}</p>
+                    <p class="card-text mb-1"><strong>Processo SIPAC:</strong> {{ $contrato->processo }}</p>
+                    <p class="card-text mb-2"><strong>Vigência:</strong> {{ \Carbon\Carbon::parse($contrato->inicio_vigencia)->format('d/m/Y') }} a {{ \Carbon\Carbon::parse($contrato->fim_vigencia)->format('d/m/Y') }}</p>
 
                     <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
                         <div>
                             <span class="d-block small text-muted">Contato Principal:</span>
-                            <strong>contato@coomavit.com.br</strong>
+                            <strong>{{ $emailPrincipal ? $emailPrincipal->valor : 'Não cadastrado' }}</strong>
                         </div>
                         <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalDetalhesContrato" title="Ver contatos adicionais">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
@@ -70,19 +71,18 @@
                 </div>
 
                 <div class="card-footer bg-white border-top-0">
-                    <button class="btn btn-sm btn-outline-secondary w-100">Editar Dados do Contrato</button>
+                    <a href="{{ route('contrato.editar', $contrato->id) }}" class="btn btn-sm btn-outline-secondary w-100">Editar Dados do Contrato</a>
                 </div>
             </div>
         </div>
 
-        {{-- Visão Geral Financeira Monetária (VALORES ATUALIZADOS) --}}
         <div class="col-md-8">
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="card money-card shadow-sm border-primary bg-primary bg-opacity-10 h-100">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-muted small">Total Contratado</h6>
-                            <h3 class="card-title text-primary">R$ 150.000,00</h3>
+                            <h3 class="card-title text-primary">R$ {{ number_format($totalContratado, 2, ',', '.') }}</h3>
                             <p class="text-muted small mb-0">Valor global do processo</p>
                         </div>
                     </div>
@@ -91,18 +91,16 @@
                     <div class="card money-card shadow-sm border-info bg-info bg-opacity-10 h-100">
                         <div class="card-body text-center">
                             <h6 class="text-uppercase text-muted small">Total Empenhado</h6>
-                            {{-- Valor ajustado: 5966 + 9030 + 6900 = 21896 --}}
-                            <h3 class="card-title text-info">R$ 21.896,00</h3>
-                            <p class="text-muted small mb-0">Soma de todas pedidos</p>
+                            <h3 class="card-title text-info">R$ {{ number_format($totalEmpenhado, 2, ',', '.') }}</h3>
+                            <p class="text-muted small mb-0">Soma de todas as notas</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card money-card shadow-sm border-success bg-success bg-opacity-10 h-100">
+                    <div class="card money-card shadow-sm border-{{ $saldoContrato <= 0 ? 'danger' : 'success' }} bg-{{ $saldoContrato <= 0 ? 'danger' : 'success' }} bg-opacity-10 h-100">
                         <div class="card-body text-center">
-                            <h6 class="text-uppercase text-muted small">Saldo Empenhos</h6>
-                            {{-- Valor ajustado com base nos saldos quantitativos --}}
-                            <h3 class="card-title text-success">R$ 3.785,00</h3>
+                            <h6 class="text-uppercase text-muted small">Saldo do Contrato</h6>
+                            <h3 class="card-title text-{{ $saldoContrato <= 0 ? 'danger' : 'success' }}">R$ {{ number_format($saldoContrato, 2, ',', '.') }}</h3>
                             <p class="text-muted small mb-0">Disponível em R$</p>
                         </div>
                     </div>
@@ -111,32 +109,29 @@
         </div>
     </div>
 
-    {{-- Modal Detalhes Completos do Contrato --}}
     <div class="modal fade" id="modalDetalhesContrato" tabindex="-1" aria-labelledby="modalDetalhesContratoLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h1 class="modal-title h5 text-uppercase fw-bold" id="modalDetalhesContratoLabel">Contatos adicionais</h1>
+                    <h1 class="modal-title h5 text-uppercase fw-bold" id="modalDetalhesContratoLabel">Todos os Contatos</h1>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="card bg-body-tertiary border-0 shadow-none mb-3">
                         <div class="card-body">
                             <ul class="list-group list-group-flush" id="listaResponsaveis">
-                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center p-2">
-                                    <div>
-                                        <strong>Fulano Alves</strong><br>
-                                        <strong class="text-primary">•</strong> fulano@coomavita.com.br <br>
-                                        <strong class="text-primary">•</strong> (51) 91234 9876
-                                    </div>
-                                </li>
-                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center p-2">
-                                    <div>
-                                        <strong>João Silva</strong><br>
-                                        <strong class="text-primary">•</strong> joao@coomavita.com.br <br>
-                                        <strong class="text-primary">•</strong> (51) 99654 3514
-                                    </div>
-                                </li>
+                                @forelse($contrato->fornecedor->responsaveis as $responsavel)
+                                    <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center p-2">
+                                        <div>
+                                            <strong>{{ $responsavel->nome }}</strong> {!! $responsavel->is_principal ? '<span class="badge bg-primary ms-1">Principal</span>' : '' !!} <br>
+                                            @foreach($responsavel->contatos as $contato)
+                                                <strong class="text-primary">•</strong> {{ $contato->tipo }}: {{ $contato->valor }} <br>
+                                            @endforeach
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li class="list-group-item bg-transparent text-muted text-center p-3">Nenhum contato cadastrado.</li>
+                                @endforelse
                             </ul>
                         </div>
                     </div>
@@ -148,7 +143,6 @@
         </div>
     </div>
 
-    {{-- NOVA SEÇÃO: Saldos de Itens Individualizados --}}
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
@@ -160,7 +154,6 @@
                         <table class="table table-striped table-hover table-vencimento mb-0">
                             <thead class="table-light text-uppercase small">
                             <tr>
-                                <th>#</th>
                                 <th>Item</th>
                                 <th>Unidade</th>
                                 <th>Qtd. Empenhada</th>
@@ -170,34 +163,36 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr class="item-row">
-                                <td>1</td>
-                                <td><strong>Banana</strong></td>
-                                <td>Quilo (kg)</td>
-                                <td>950,00</td>
-                                <td>400,00</td>
-                                <td class="fw-bold text-success fs-5">500,00 kg</td>
-                                <td>
-                                    <div class="progress progress-consumption" role="progressbar" aria-label="Consumo Arroz" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar bg-success" style="width: 42.1%"></div>
-                                    </div>
-                                    <small class="text-muted">42,10% do empenhado</small>
-                                </td>
-                            </tr>
-                            <tr class="item-row">
-                                <td>5</td>
-                                <td><strong>Maçã</strong></td>
-                                <td>Quilo (kg)</td>
-                                <td>700,00</td>
-                                <td>650,00</td>
-                                <td class="fw-bold text-danger fs-5">50,00 kg</td>
-                                <td>
-                                    <div class="progress progress-consumption" role="progressbar" aria-label="Consumo Feijão" aria-valuenow="93" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar bg-danger" style="width: 92.85%"></div>
-                                    </div>
-                                    <small class="text-muted">92,85% - Necessário novo empenho</small>
-                                </td>
-                            </tr>
+                            @forelse($contrato->itens as $item)
+                                @php
+                                    $empenhada = $item->itensEmpenho->sum('quantidade_empenhada');
+
+                                    $consumida = $item->itensEmpenho->flatMap->itensPedido->sum('quantidade');
+
+                                    $saldoItem = $empenhada - $consumida;
+                                    $porcentagem = $empenhada > 0 ? ($consumida / $empenhada) * 100 : 0;
+                                    $corBarra = $porcentagem > 85 ? 'danger' : ($porcentagem > 60 ? 'warning' : 'success');
+
+                                    $sigla = $item->unidade->sigla ?? '-';
+                                @endphp
+                                <tr class="item-row">
+                                    <td><strong>{{ $item->nome }}</strong></td>
+                                    <td>{{ $sigla }}</td>
+                                    <td>{{ number_format($empenhada, 2, ',', '.') }}</td>
+                                    <td>{{ number_format($consumida, 2, ',', '.') }}</td>
+                                    <td class="fw-bold text-{{ $saldoItem <= 0 ? 'danger' : 'success' }} fs-5">
+                                        {{ number_format($saldoItem, 2, ',', '.') }}
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-consumption" role="progressbar" aria-valuenow="{{ $porcentagem }}" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar bg-{{ $corBarra }}" style="width: {{ $porcentagem }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ number_format($porcentagem, 1, ',', '.') }}% do empenhado</small>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="text-center text-muted p-4">Nenhum item cadastrado para este contrato.</td></tr>
+                            @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -206,74 +201,77 @@
         </div>
     </div>
 
-    {{-- DIVS INVERTIDAS --}}
     <div class="row">
 
-        {{-- ÁREA DOS ÚLTIMOS PEDIDOS AGORA NA ESQUERDA (col-lg-4) --}}
         <div class="col-lg-4 col-md-12 mb-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white border-bottom-0 pt-3 d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">Últimos Pedidos</h5>
-                    {{-- Botão para gerar um novo pedido de fornecimento --}}
-                    <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" title="Solicitar nova entrega">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16">
-                            <path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9z"/>
-                            <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
-                        </svg>
+                    <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalLancarConsumo" title="Solicitar nova entrega">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16"><path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9z"/><path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>
                         Novo
                     </button>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-start p-3">
-                            <div class="ms-2 me-auto">
-                                <div class="fw-bold text-primary mb-1">Pedido #1042</div>
-                                <span class="d-block small text-dark mb-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
-                                Banana (70kg)
-                            </span>
-                                <span class="d-block text-muted small" style="font-size: 0.75rem;">Solicitado: 29/04/2026</span>
-                                <span class="d-block text-muted small" style="font-size: 0.75rem;">Previsto: 08/05/2026</span>
-                            </div>
-                            <div class="text-end d-flex flex-column align-items-end gap-2">
-                                <span class="badge bg-warning text-dark text-uppercase shadow-sm">Aguardando</span>
-                                <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;" title="Confirmar recebimento dos itens">
-                                    Receber
-                                </button>
-                            </div>
-                        </li>
+                        @php
+                            $pedidos = $contrato->empenhos->flatMap->pedidos->sortByDesc('data_pedido')->take(5);
+                        @endphp
 
-                        <li class="list-group-item d-flex justify-content-between align-items-start p-3 bg-danger bg-opacity-10 border-danger border-opacity-25">
-                            <div class="ms-2 me-auto">
-                                <div class="fw-bold text-danger mb-1">Pedido #1038</div>
-                                <span class="d-block small text-dark mb-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-boxes me-1" viewBox="0 0 16 16"><path d="M7.752.066a.5.5 0 0 1 .496 0l3.75 2.143a.5.5 0 0 1 .252.434v3.995l3.498 2A.5.5 0 0 1 16 9.07v4.286a.5.5 0 0 1-.252.434l-3.75 2.143a.5.5 0 0 1-.496 0l-3.502-2-3.502 2.001a.5.5 0 0 1-.496 0l-3.75-2.143A.5.5 0 0 1 0 13.357V9.071a.5.5 0 0 1 .252-.434L3.75 6.638V2.643a.5.5 0 0 1 .252-.434zM4.25 7.504 1.508 9.071l2.742 1.567 2.742-1.567zM7.5 9.933l-2.75 1.571v3.134l2.75-1.571zm1 3.134 2.75 1.571v-3.134L8.5 9.933zm.508-3.996 2.742 1.567 2.742-1.567-2.742-1.567zm2.242-2.433V3.504L8.5 5.076V8.21zM7.5 8.21V5.076L4.75 3.504v3.134zM5.258 2.643 8 4.21l2.742-1.567L8 1.076zM15 9.933l-2.75 1.571v3.134L15 13.067zM3.75 14.638v-3.134L1 9.933v3.134z"/></svg>
-                                Maçã
-                            </span>
-                                <span class="d-block text-muted small" style="font-size: 0.75rem;">Solicitado: 20/03/2026</span>
-                                <span class="d-block text-danger fw-bold small" style="font-size: 0.75rem;">Atrasado desde: 02/04/2026</span>
-                            </div>
-                            <div class="text-end d-flex flex-column align-items-end gap-2">
-                                <span class="badge bg-danger text-uppercase shadow-sm">Atrasado</span>
-                                <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;" title="Registrar chegada com atraso">
-                                    Receber
-                                </button>
-                            </div>
-                        </li>
+                        @forelse($pedidos as $pedido)
+                            @php
+                                $bgClass = '';
+                                $badgeClass = 'bg-warning text-dark';
+                                $btnClass = 'btn-outline-success';
 
-                        <li class="list-group-item d-flex justify-content-between align-items-start p-3 bg-light opacity-75">
-                            <div class="ms-2 me-auto">
-                                <div class="fw-bold text-muted mb-1 text-decoration-line-through">Pedido #1020</div>
-                                <span class="d-block small text-muted mb-1">Óleo de Soja (50L)</span>
-                                <span class="d-block text-muted small" style="font-size: 0.75rem;">Recebido em: 15/03/2026</span>
-                            </div>
-                            <div class="text-end d-flex flex-column align-items-end gap-2">
-                                <span class="badge bg-secondary text-uppercase shadow-sm">Concluído</span>
-                                <a href="#" class="text-decoration-none small text-primary" style="font-size: 0.75rem;">
-                                    Ver NF #5543
-                                </a>
-                            </div>
-                        </li>
+                                if($pedido->status === 'Atrasado') {
+                                    $bgClass = 'bg-danger bg-opacity-10 border-danger border-opacity-25';
+                                    $badgeClass = 'bg-danger';
+                                    $btnClass = 'btn-outline-danger';
+                                } elseif($pedido->status === 'Recebido' || $pedido->status === 'Concluído') {
+                                    $bgClass = 'bg-light opacity-75';
+                                    $badgeClass = 'bg-secondary';
+                                }
+
+                                $primeiroItem = $pedido->itensPedido->first();
+                                $nomeAlimento = $primeiroItem ? $primeiroItem->itemEmpenho->itemContrato->nome : 'Item não identificado';
+                                $quantidade = $primeiroItem ? $primeiroItem->quantidade : 0;
+                                $codigoPedido = strtoupper(substr($pedido->id, 0, 6));
+                            @endphp
+
+                            <li class="list-group-item d-flex justify-content-between align-items-start p-3 {{ $bgClass }}">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold {{ $pedido->status === 'Atrasado' ? 'text-danger' : ($pedido->status === 'Recebido' ? 'text-muted text-decoration-line-through' : 'text-primary') }} mb-1">
+                                        Pedido #{{ $codigoPedido }}
+                                    </div>
+                                    <span class="d-block small text-dark mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
+                                        {{ $nomeAlimento }} ({{ number_format($quantidade, 0, ',', '.') }})
+                                    </span>
+                                    <span class="d-block text-muted small" style="font-size: 0.75rem;">Solicitado: {{ \Carbon\Carbon::parse($pedido->data_pedido)->format('d/m/Y') }}</span>
+
+                                    @if($pedido->status === 'Atrasado')
+                                        <span class="d-block text-danger fw-bold small" style="font-size: 0.75rem;">Atrasado desde: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
+                                    @elseif($pedido->status === 'Recebido')
+                                        <span class="d-block text-muted small" style="font-size: 0.75rem;">Recebido em: {{ \Carbon\Carbon::parse($pedido->updated_at)->format('d/m/Y') }}</span>
+                                    @else
+                                        <span class="d-block text-muted small" style="font-size: 0.75rem;">Previsto: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
+                                    @endif
+                                </div>
+                                <div class="text-end d-flex flex-column align-items-end gap-2">
+                                    <span class="badge {{ $badgeClass }} text-uppercase shadow-sm">{{ $pedido->status }}</span>
+                                    @if($pedido->status !== 'Recebido' && $pedido->status !== 'Concluído')
+                                        <button class="btn btn-sm {{ $btnClass }} py-0 px-2" style="font-size: 0.75rem;" title="Confirmar recebimento">
+                                            Receber
+                                        </button>
+                                    @else
+                                        <a href="#" class="text-decoration-none small text-primary" style="font-size: 0.75rem;">Ver NF</a>
+                                    @endif
+                                </div>
+                            </li>
+                        @empty
+                            <li class="list-group-item text-center text-muted p-5">Nenhum pedido registrado.</li>
+                        @endforelse
                     </ul>
                 </div>
                 <div class="card-footer bg-white border-top-0">
@@ -282,7 +280,6 @@
             </div>
         </div>
 
-        {{-- ÁREA NOTAS DE EMPENHO AGORA NA DIREITA (col-lg-8) --}}
         <div class="col-lg-8 col-md-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3">
@@ -310,121 +307,48 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>
-                                    <strong>2026NE00123</strong><br>
-                                    <span class="text-muted small">15/01/2026</span>
-                                </td>
-                                <td>1</td>
-                                <td>Banana</td>
-                                <td>950,00 kg</td>
-                                <td>R$ 5.966,00</td>
-                                <td><span class="badge bg-success">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary" title="Ver Detalhes">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
-                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>2026NE00122</strong><br>
-                                    <span class="text-muted small">15/01/2026</span>
-                                </td>
-                                <td>5</td>
-                                <td>Maçã</td>
-                                <td>700,00 kg</td>
-                                <td>R$ 9.030,00</td>
-                                <td><span class="badge bg-warning text-dark">Esgotando</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary" title="Ver Detalhes">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
-                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>2025NE00005</strong><br>
-                                    <span class="text-muted small">02/08/2025</span>
-                                </td>
-                                <td>7</td>
-                                <td>Pão de Batata</td>
-                                <td>1000,00 un</td>
-                                <td>R$ 6.900,00</td>
-                                <td><span class="badge bg-danger">Finalizado</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
-                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
+                            @forelse($contrato->empenhos as $index => $empenho)
+                                @php
+                                    $valorTotal = $empenho->valor_total ?? 0;
+                                    $valorUtilizado = $empenho->valor_utilizado ?? 0;
+                                    $usoPercentual = $valorTotal > 0 ? ($valorUtilizado / $valorTotal) * 100 : 0;
+
+                                    if ($usoPercentual >= 100) {
+                                        $statusBadge = '<span class="badge bg-danger">Finalizado</span>';
+                                    } elseif ($usoPercentual >= 80) {
+                                        $statusBadge = '<span class="badge bg-warning text-dark">Esgotando</span>';
+                                    } else {
+                                        $statusBadge = '<span class="badge bg-success">Ativo</span>';
+                                    }
+
+                                    $itemEmpenho = $empenho->itensEmpenho->first() ?? null;
+                                    $nomeItem = $itemEmpenho ? $itemEmpenho->itemContrato->nome : '-';
+                                    $qtdEmpenhada = $itemEmpenho ? $itemEmpenho->quantidade_empenhada : 0;
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <strong>{{ $empenho->numero_empenho ?? 'Sem Número' }}</strong><br>
+                                        <span class="text-muted small">{{ isset($empenho->created_at) ? \Carbon\Carbon::parse($empenho->created_at)->format('d/m/Y') : '-' }}</span>
+                                    </td>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $nomeItem }}</td>
+                                    <td>{{ number_format($qtdEmpenhada, 2, ',', '.') }}</td>
+                                    <td class="fw-bold">R$ {{ number_format($valorTotal, 2, ',', '.') }}</td>
+                                    <td>{!! $statusBadge !!}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-secondary" title="Ver Detalhes">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="7" class="text-center text-muted p-4">Nenhum empenho registrado.</td></tr>
+                            @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-
-    {{-- Modais de Cadastro (Os modais permanecem iguais) --}}
-
-    {{-- Modal Cadastrar Empenho (Etapa 2) --}}
-    <div class="modal fade" id="modalCadastrarEmpenho" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form class="modal-content" method="POST" action="#">
-                @csrf
-                <div class="modal-header">
-                    <h1 class="modal-title h5">Inserir Nova Nota de Empenho (NE)</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label fw-bold">Selecione o Item do Contrato a Empenhar</label>
-                            <select class="form-select form-select-lg border-primary" name="item_contrato_id" required>
-                                <option value="" selected disabled>Escolha o item...</option>
-                                <option value="1">Arroz Branco Tipo 1 (kg) - Saldo a Empenhar: 2.000 kg</option>
-                                <option value="2">Feijão Preto Tipo 1 (kg) - Saldo a Empenhar: 1.500 kg</option>
-                                <option value="3">Óleo de Soja (L) - Saldo a Empenhar: 500 L</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Número da NE (ex: 2026NE00...)</label>
-                            <input type="text" class="form-control" name="numero_ne" required placeholder="Digite o número">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Data de Emissão</label>
-                            <input type="date" class="form-control" name="data_emissao" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Quantidade a Empenhar (na unidade do item)</label>
-                            <input type="number" step="0.01" class="form-control" name="quantidade" required placeholder="Ex: 500.50">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Valor Total Disponibilizado</label>
-                            <div class="input-group">
-                                <span class="input-group-text">R$</span>
-                                <input type="number" step="0.01" class="form-control" name="valor_total" required placeholder="0,00">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Cadastrar Empenho</button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -446,9 +370,22 @@
                         <label class="form-label fw-bold">Item Consumido</label>
                         <select class="form-select form-select-lg border-primary" name="item_contrato_id" id="selectItemConsumo" required>
                             <option value="" selected disabled>Escolha o item...</option>
-                            <option value="1" data-saldo="1800" data-unidade="kg">Arroz Branco Tipo 1 (kg)</option>
-                            <option value="2" data-saldo="100" data-unidade="kg">Feijão Preto Tipo 1 (kg)</option>
-                            <option value="3" data-saldo="500" data-unidade="L">Óleo de Soja (L)</option>
+
+                            @foreach($contrato->itens as $item)
+                                @php
+                                    $empenhada = $item->itensEmpenho->sum('quantidade_empenhada');
+                                    $consumida = $item->itensEmpenho->flatMap->itensPedido->sum('quantidade');
+                                    $saldoDisponivel = $empenhada - $consumida;
+
+                                    $siglaUnidade = $item->unidade->sigla ?? 'un';
+                                @endphp
+                                @if($saldoDisponivel > 0)
+                                    <option value="{{ $item->id }}" data-saldo="{{ $saldoDisponivel }}" data-unidade="{{ $siglaUnidade }}">
+                                        {{ $item->nome }} (Saldo: {{ number_format($saldoDisponivel, 2, ',', '.') }} {{ $siglaUnidade }})
+                                    </option>
+                                @endif
+                            @endforeach
+
                         </select>
                     </div>
 

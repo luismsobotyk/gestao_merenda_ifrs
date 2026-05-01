@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class Fornecedor extends Model
+class ItemPedido extends Model
 {
     use HasUuids;
 
-    protected $table = 'fornecedor';
+    protected $table = 'item_pedido';
     protected $guarded = [];
 
-    public function responsaveis()
+    public function itemEmpenho()
     {
-        return $this->hasMany(FornecedorResponsavel::class, 'fornecedor_uuid');
+        return $this->belongsTo(ItemEmpenho::class, 'item_empenho_uuid');
     }
 }

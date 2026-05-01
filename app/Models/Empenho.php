@@ -11,4 +11,14 @@ class Empenho extends Model
 
     protected $table = 'empenho';
     protected $guarded = [];
+
+    public function itensEmpenho()
+    {
+        return $this->hasMany(ItemEmpenho::class, 'empenho_uuid');
+    }
+
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class, 'empenho_uuid');
+    }
 }
