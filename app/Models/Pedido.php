@@ -16,4 +16,8 @@ class Pedido extends Model
     {
         return $this->hasMany(ItemPedido::class, 'pedido_uuid');
     }
+    public function contrato()
+    {
+        return $this->belongsTo(Contrato::class, 'contrato_uuid');
+    }
 }

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('pedido', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('empenho_uuid')->constrained('empenho')->cascadeOnDelete();
+
+            $table->foreignUuid('contrato_uuid')->constrained('contrato')->cascadeOnDelete();
 
             $table->dateTime('data_pedido');
             $table->dateTime('data_prevista_entrega')->nullable();

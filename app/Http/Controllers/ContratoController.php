@@ -35,11 +35,12 @@ class ContratoController extends Controller
     public function visualizaContrato($id){
         $contrato = Contrato::with([
             'fornecedor.responsaveis.contatos',
-
             'itens.unidade',
             'itens.itensEmpenho.itensPedido',
 
-            'empenhos.pedidos.itensPedido.itemEmpenho.itemContrato'
+            // 👇 Mudou aqui: Busca pedidos direto do contrato, e traz tudo pendurado nele
+            'pedidos.itensPedido.itemEmpenho.itemContrato.unidade',
+            'empenhos.itensEmpenho'
         ])->findOrFail($id);
 
         return view('dashboard.contrato', compact('contrato'));
@@ -119,5 +120,116 @@ class ContratoController extends Controller
         }
 
         return redirect()->route('contratos')->with('success', 'Contrato e itens cadastrados com sucesso!');
+    }
+
+    public function salvaEmpenho(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'item_contrato_uuid' => 'required|uuid',
+            'numero_empenho' => 'required|string|max:255',
+            'quantidade_empenhada' => 'required|numeric|min:0.01',
+            'valor_total_real' => 'required|numeric|min:0.01',
+            'data_emissao' => 'nullable|date',
+        ]);
+
+        $contrato = Contrato::findOrFail($id);
+
+        $empenho = \App\Models\Empenho::create([
+            'contrato_uuid' => $contrato->id,
+            'numero_empenho' => $request->numero_empenho,
+            'valor_total' => $request->valor_total_real,
+            'valor_utilizado' => 0,
+        ]);
+
+        \App\Models\ItemEmpenho::create([
+            'empenho_uuid' => $empenho->id,
+            'item_contrato_uuid' => $request->item_contrato_uuid,
+            'quantidade_empenhada' => $request->quantidade_empenhada,
+        ]);
+
+        return redirect()->route('contrato.editar', $contrato->id)->with('success', 'Nota de Empenho registrada com sucesso!');
+    }
+    public function salvaPedido(Request $request, $id)
+    {
+        // 1. Validação (Adicionado o ja_recebido como booleano opcional)
+        $validated = $request->validate([
+            'data_pedido' => 'required|date',
+            'hora_pedido' => 'nullable|date_format:H:i',
+            'ja_recebido' => 'nullable|boolean',
+            'itens' => 'required|array|min:1',
+            'itens.*.item_contrato_id' => 'required|uuid',
+            'itens.*.quantidade_pedida' => 'required|numeric|min:0.01',
+        ]);
+
+        $contrato = Contrato::findOrFail($id);
+        $dataSelecionada = Carbon::parse($request->data_pedido);
+
+        // ========================================================
+        // NOVA REGRA DE NEGÓCIO: CÁLCULO INTELIGENTE DO STATUS
+        // ========================================================
+        if ($dataSelecionada->isFuture()) {
+            $statusCalculado = 'Programado';
+        } elseif ($dataSelecionada->isToday()) {
+            $statusCalculado = 'Solicitado';
+        } else {
+            // Se for passado (retroativo), verifica se marcou o switch liga/desliga
+            $statusCalculado = $request->boolean('ja_recebido') ? 'Recebido' : 'Solicitado';
+        }
+        // ========================================================
+
+        if ($dataSelecionada->isToday()) {
+            $dataHoraFinal = now();
+        } else {
+            $hora = $request->hora_pedido ?? '00:00';
+            $dataHoraFinal = Carbon::parse($request->data_pedido . ' ' . $hora);
+        }
+
+        // 2. CRIA O PEDIDO MESTRE COM O STATUS CALCULADO
+        $pedidoMaster = \App\Models\Pedido::create([
+            'contrato_uuid' => $contrato->id,
+            'data_pedido' => $dataHoraFinal,
+            'status' => $statusCalculado, // <-- Gravando a nossa regra aqui!
+        ]);
+
+        // 3. Loop pelos itens que o usuário preencheu na tela
+        foreach ($request->itens as $linhaPedido) {
+            $qtdRestanteParaAbater = $linhaPedido['quantidade_pedida'];
+
+            $itensEmpenho = \App\Models\ItemEmpenho::where('item_contrato_uuid', $linhaPedido['item_contrato_id'])
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            // 4. Abatimento Automático dos Empenhos
+            foreach ($itensEmpenho as $itemEmpenho) {
+                if ($qtdRestanteParaAbater <= 0) {
+                    break;
+                }
+
+                $empenhada = $itemEmpenho->quantidade_empenhada;
+                $consumida = $itemEmpenho->itensPedido()->sum('quantidade');
+                $saldoDesteEmpenho = $empenhada - $consumida;
+
+                if ($saldoDesteEmpenho > 0) {
+                    $qtdSendoAbatidaAgora = min($qtdRestanteParaAbater, $saldoDesteEmpenho);
+
+                    // Cria o Item do Pedido e amarra ao nosso Pedido Mestre Único!
+                    \App\Models\ItemPedido::create([
+                        'pedido_uuid' => $pedidoMaster->id,
+                        'item_empenho_uuid' => $itemEmpenho->id,
+                        'quantidade' => $qtdSendoAbatidaAgora,
+                    ]);
+
+                    // Atualiza o financeiro do Empenho
+                    $empenhoPai = $itemEmpenho->empenho;
+                    $valorFinanceiroConsumido = $qtdSendoAbatidaAgora * $itemEmpenho->itemContrato->valor_unitario;
+                    $empenhoPai->valor_utilizado += $valorFinanceiroConsumido;
+                    $empenhoPai->save();
+
+                    $qtdRestanteParaAbater -= $qtdSendoAbatidaAgora;
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Pedido registrado e abatido dos empenhos com sucesso!');
     }
 }

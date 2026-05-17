@@ -22,4 +22,10 @@ class ItemEmpenho extends Model
     {
         return $this->hasMany(ItemPedido::class, 'item_empenho_uuid');
     }
+
+    // 👇 A SOLUÇÃO ESTÁ AQUI: O Filho agora sabe quem é o Pai! 👇
+    public function empenho()
+    {
+        return $this->belongsTo(Empenho::class, 'empenho_uuid');
+    }
 }

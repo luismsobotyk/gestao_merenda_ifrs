@@ -73,9 +73,10 @@ class ContratoSeeder extends Seeder
         $pedido1Id = Str::uuid();
         $pedido2Id = Str::uuid();
 
+        // CORREÇÃO 1: 'empenho_uuid' substituído por 'contrato_uuid'
         DB::table('pedido')->insert([
-            ['id' => $pedido1Id, 'empenho_uuid' => $empenho1Id, 'data_pedido' => '2026-04-29 08:00:00', 'data_prevista_entrega' => '2026-05-08 12:00:00', 'status' => 'Aguardando', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => $pedido2Id, 'empenho_uuid' => $empenho2Id, 'data_pedido' => '2026-03-20 08:00:00', 'data_prevista_entrega' => '2026-04-02 12:00:00', 'status' => 'Atrasado', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => $pedido1Id, 'contrato_uuid' => $contratoId, 'data_pedido' => '2026-04-29 08:00:00', 'data_prevista_entrega' => '2026-05-08 12:00:00', 'status' => 'Aguardando', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => $pedido2Id, 'contrato_uuid' => $contratoId, 'data_pedido' => '2026-03-20 08:00:00', 'data_prevista_entrega' => '2026-04-02 12:00:00', 'status' => 'Atrasado', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         DB::table('item_pedido')->insert([
@@ -155,9 +156,11 @@ class ContratoSeeder extends Seeder
 
             // 7. Pedido Dinâmico
             $novoPedidoId = Str::uuid();
+
+            // CORREÇÃO 2: 'empenho_uuid' substituído por 'contrato_uuid' e usando $novoContratoId
             DB::table('pedido')->insert([
                 'id' => $novoPedidoId,
-                'empenho_uuid' => $novoEmpenhoId,
+                'contrato_uuid' => $novoContratoId,
                 'data_pedido' => now()->subDays($faker->numberBetween(2, 30)),
                 'data_prevista_entrega' => now()->addDays($faker->numberBetween(1, 10)),
                 'status' => $faker->randomElement(['Pendente', 'Aguardando', 'Atrasado', 'Recebido']),

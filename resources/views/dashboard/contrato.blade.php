@@ -207,7 +207,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white border-bottom-0 pt-3 d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">Últimos Pedidos</h5>
-                    <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalLancarConsumo" title="Solicitar nova entrega">
+                    <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalLancarPedido" title="Solicitar nova entrega">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16"><path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9z"/><path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>
                         Novo
                     </button>
@@ -215,7 +215,7 @@
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
                         @php
-                            $pedidos = $contrato->empenhos->flatMap->pedidos->sortByDesc('data_pedido')->take(5);
+                            $pedidos = $contrato->pedidos->sortByDesc('data_pedido')->take(5);
                         @endphp
 
                         @forelse($pedidos as $pedido)
@@ -233,10 +233,31 @@
                                     $badgeClass = 'bg-secondary';
                                 }
 
-                                $primeiroItem = $pedido->itensPedido->first();
-                                $nomeAlimento = $primeiroItem ? $primeiroItem->itemEmpenho->itemContrato->nome : 'Item não identificado';
-                                $quantidade = $primeiroItem ? $primeiroItem->quantidade : 0;
                                 $codigoPedido = strtoupper(substr($pedido->id, 0, 6));
+
+                                // =========================================================
+                                // NOVA LÓGICA: Lista de itens separados por vírgula
+                                // =========================================================
+                                $itensFormatados = [];
+                                foreach($pedido->itensPedido as $itemPedido) {
+                                    $nome = $itemPedido->itemEmpenho->itemContrato->nome ?? 'Item Excluído';
+
+                                    // Pega a quantidade (com 2 casas decimais) e tira o ",00" se for número inteiro
+                                    $qtd = number_format($itemPedido->quantidade, 2, ',', '.');
+                                    $qtd = preg_replace('/,00$/', '', $qtd);
+
+                                    $sigla = $itemPedido->itemEmpenho->itemContrato->unidade->sigla ?? '';
+
+                                    // Adiciona o item na lista no formato "Nome (10 kg)"
+                                    $itensFormatados[] = "{$nome} ({$qtd} {$sigla})";
+                                }
+
+                                // Junta toda a lista com vírgula e espaço
+                                $textoItensPedido = implode(', ', $itensFormatados);
+
+                                if (empty($textoItensPedido)) {
+                                    $textoItensPedido = 'Nenhum item registrado';
+                                }
                             @endphp
 
                             <li class="list-group-item d-flex justify-content-between align-items-start p-3 {{ $bgClass }}">
@@ -246,7 +267,7 @@
                                     </div>
                                     <span class="d-block small text-dark mb-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
-                                        {{ $nomeAlimento }} ({{ number_format($quantidade, 0, ',', '.') }})
+                                        {{ $textoItensPedido }}
                                     </span>
                                     <span class="d-block text-muted small" style="font-size: 0.75rem;">Solicitado: {{ \Carbon\Carbon::parse($pedido->data_pedido)->format('d/m/Y') }}</span>
 
@@ -352,112 +373,432 @@
         </div>
     </div>
 
-    {{-- Modal Lançar Consumo (Etapa 3 e 4) --}}
-    <div class="modal fade" id="modalLancarConsumo" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form class="modal-content" id="formLancarConsumo" method="POST" action="#">
+    {{-- Modal Cadastrar Empenho (Etapa 2) --}}
+    <div class="modal fade" id="modalCadastrarEmpenho" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            {{-- A action agora aponta para a rota real passando o ID do contrato --}}
+            <form class="modal-content" method="POST" action="{{ route('empenho.salvar', $contrato->id) }}">
                 @csrf
-                <div class="modal-header bg-primary text-white">
-                    <h1 class="modal-title h5">Lançar Consumo Diário Individualizado</h1>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header">
+                    <h1 class="modal-title h5">Inserir Nova Nota de Empenho (NE)</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-info small">
-                        Selecione o item e a quantidade. O sistema abaterá automaticamente dos empenhos ativos mais antigos deste item (Etapa 3).
-                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Selecione o Item do Contrato a Empenhar</label>
+                            <select class="form-select form-select-lg border-primary" name="item_contrato_uuid" id="selectItemEmpenho" required>
+                                <option value="" selected disabled>Escolha o item...</option>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Item Consumido</label>
-                        <select class="form-select form-select-lg border-primary" name="item_contrato_id" id="selectItemConsumo" required>
-                            <option value="" selected disabled>Escolha o item...</option>
+                                {{-- Loop Dinâmico para calcular o Saldo a Empenhar --}}
+                                @foreach($contrato->itens as $item)
+                                    @php
+                                        // Quanto o contrato permite comprar?
+                                        $qtdContratada = $item->quantidade;
+                                        // Quanto já foi empenhado (liberado pra comprar)?
+                                        $qtdJaEmpenhada = $item->itensEmpenho->sum('quantidade_empenhada');
+                                        // Quanto ainda falta empenhar?
+                                        $saldoAEmpenhar = $qtdContratada - $qtdJaEmpenhada;
 
-                            @foreach($contrato->itens as $item)
-                                @php
-                                    $empenhada = $item->itensEmpenho->sum('quantidade_empenhada');
-                                    $consumida = $item->itensEmpenho->flatMap->itensPedido->sum('quantidade');
-                                    $saldoDisponivel = $empenhada - $consumida;
+                                        $siglaUnidade = $item->unidade->sigla ?? 'un';
+                                    @endphp
 
-                                    $siglaUnidade = $item->unidade->sigla ?? 'un';
-                                @endphp
-                                @if($saldoDisponivel > 0)
-                                    <option value="{{ $item->id }}" data-saldo="{{ $saldoDisponivel }}" data-unidade="{{ $siglaUnidade }}">
-                                        {{ $item->nome }} (Saldo: {{ number_format($saldoDisponivel, 2, ',', '.') }} {{ $siglaUnidade }})
-                                    </option>
-                                @endif
-                            @endforeach
+                                    {{-- Só mostra na lista se ainda tiver saldo sobrando --}}
+                                    @if($saldoAEmpenhar > 0)
+                                        <option value="{{ $item->id }}" data-saldo-empenhar="{{ $saldoAEmpenhar }}" data-valor-unitario="{{ $item->valor_unitario }}">
+                                            {{ $item->nome }} (Saldo a Empenhar: {{ number_format($saldoAEmpenhar, 2, ',', '.') }} {{ $siglaUnidade }})
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
 
-                        </select>
-                    </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Número da NE</label>
+                            <input type="text" class="form-control" name="numero_empenho" required placeholder="Ex: 2026NE00123">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Emissão (Opcional)</label>
+                            <input type="date" class="form-control" name="data_emissao">
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-success">Saldo Atual Disponível</label>
-                        <div class="fs-4 fw-bold text-success" id="saldoVisual">Selecione um item...</div>
-                        <input type="hidden" id="valorSaldoNumerico" value="0">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Data do Consumo</label>
-                        <input type="date" class="form-control" name="data_consumo" required value="{{ date('Y-m-d') }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Quantidade Consumida (<span id="labelUnidade">...</span>)</label>
-                        <input type="number" step="0.01" class="form-control form-control-lg" name="quantidade_consumida" id="qtdConsumida" required placeholder="0,00" disabled>
-
-                        <div class="invalid-feedback" id="feedbackErroSaldo">
-                            <strong>Bloqueio de Segurança:</strong> A quantidade informada supera o saldo disponível para este item. O lançamento não é permitido.
+                        <div class="col-md-6">
+                            <label class="form-label">Quantidade a Empenhar</label>
+                            <input type="number" step="0.01" class="form-control" name="quantidade_empenhada" id="qtdEmpenharInput" required placeholder="0,00" disabled>
+                            <div class="invalid-feedback text-danger" id="feedbackErroEmpenho" style="display: none; font-size: 0.8rem;">
+                                Quantidade excede o limite contratado.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Valor Total Gerado (R$)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="text" class="form-control bg-light" name="valor_total" id="valorTotalEmpenhoVisual" readonly placeholder="0,00">
+                                {{-- O input hidden é o que realmente vai para o backend salvar no banco --}}
+                                <input type="hidden" name="valor_total_real" id="valorTotalEmpenhoReal">
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Calculado automaticamente (Qtd × Valor Unitário do Item).</small>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="btnEnviarConsumo" disabled>Confirmar Lançamento</button>
+                    <button type="submit" class="btn btn-primary" id="btnSalvarEmpenho" disabled>Salvar Empenho</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    {{-- Modal Lançar Pedido com Múltiplos Itens --}}
+    <div class="modal fade" id="modalLancarPedido" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg"> {{-- Deixei o modal mais largo (modal-lg) --}}
+            <form class="modal-content" id="formLancarPedido" method="POST" action="{{ route('pedido.salvar', $contrato->id) }}">
+                @csrf
+                <div class="modal-header bg-primary text-white">
+                    <h1 class="modal-title h5">Lançar Novo Pedido Múltiplo</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info small mb-4">
+                        Adicione os itens desejados. O sistema abaterá automaticamente dos empenhos ativos mais antigos de cada alimento.
+                    </div>
+
+                    {{-- Data e Hora no topo --}}
+                    <div class="row mb-4 bg-light p-3 rounded">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Data do Pedido</label>
+                            <input type="date" class="form-control" name="data_pedido" id="dataPedidoInput" required value="{{ date('Y-m-d') }}">
+
+                            {{-- Alertas e Pergunta Dinâmica --}}
+                            <div class="alert alert-warning d-none mt-2 mb-0 py-2 small" id="alertaRetroativo">
+                                <strong>Aviso:</strong> Lançamento retroativo.
+                            </div>
+
+                            <div class="form-check form-switch d-none mt-2" id="divJaRecebido">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switchJaRecebido" name="ja_recebido" value="1">
+                                <label class="form-check-label small fw-bold text-success" for="switchJaRecebido">
+                                    Este pedido já foi recebido/entregue?
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- AQUI ESTÁ O CAMPO QUE TINHA SUMIDO! --}}
+                        <div class="col-md-6 d-none" id="divHoraPedido">
+                            <label class="form-label fw-bold">Horário (HH:MM)</label>
+                            <input type="time" class="form-control" name="hora_pedido" id="horaPedidoInput">
+                            <small class="text-muted" style="font-size: 0.75rem;">Obrigatório para datas diferentes de hoje.</small>
+                        </div>
+                    </div>
+
+                    {{-- Tabela Dinâmica de Itens --}}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold mb-0">Itens da Solicitação</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-item-pedido">+ Adicionar Linha</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm align-middle" id="tabela-itens-pedido">
+                            <thead class="table-light small text-center text-uppercase">
+                            <tr>
+                                <th width="45%">Alimento</th>
+                                <th width="25%">Qtd. Desejada</th>
+                                <th width="25%">Saldo Disponível</th>
+                                <th width="5%"></th>
+                            </tr>
+                            </thead>
+                            <tbody id="tbody-itens-pedido">
+                            {{-- Linhas geradas via JavaScript --}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnEnviarPedido">Confirmar Pedido</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modal Bonitão de Confirmação de Pedido Futuro --}}
+    <div class="modal fade" id="modalConfirmacaoFutura" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16"><path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>
+                        Atenção: Agendamento Futuro
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body fs-6">
+                    Você está planejando um pedido para uma data no futuro: <br>
+                    <strong id="spanDataFutura" class="text-danger fs-4 d-block mt-2 text-center"></strong><br>
+                    Tem certeza de que deseja registrar este agendamento agora?
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning fw-bold" id="btnConfirmarPedidoFuturo">Sim, Agendar Pedido</button>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
 
 @section('custom_js')
     <script>
-        const selectItem = document.getElementById('selectItemConsumo');
-        const saldoVisual = document.getElementById('saldoVisual');
-        const valorSaldoNumerico = document.getElementById('valorSaldoNumerico');
-        const labelUnidade = document.getElementById('labelUnidade');
-        const qtdInput = document.getElementById('qtdConsumida');
-        const btnEnviar = document.getElementById('btnEnviarConsumo');
-        const feedbackErro = document.getElementById('feedbackErroSaldo');
+        // ==========================================
+        // LÓGICA DO MODAL DE CADASTRAR EMPENHO
+        // ==========================================
+        const selectItemEmpenho = document.getElementById('selectItemEmpenho');
+        const qtdEmpenharInput = document.getElementById('qtdEmpenharInput');
+        const valorTotalEmpenhoVisual = document.getElementById('valorTotalEmpenhoVisual');
+        const valorTotalEmpenhoReal = document.getElementById('valorTotalEmpenhoReal');
+        const btnSalvarEmpenho = document.getElementById('btnSalvarEmpenho');
+        const feedbackErroEmpenho = document.getElementById('feedbackErroEmpenho');
 
-        selectItem.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const saldo = parseFloat(selectedOption.getAttribute('data-saldo'));
-            const unidade = selectedOption.getAttribute('data-unidade');
+        let limiteEmpenho = 0;
+        let valorUnitarioItem = 0;
 
-            valorSaldoNumerico.value = saldo;
-            saldoVisual.innerText = saldo.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + ' ' + unidade;
-            labelUnidade.innerText = unidade;
+        if (selectItemEmpenho) {
+            selectItemEmpenho.addEventListener('change', function() {
+                const option = this.options[this.selectedIndex];
+                limiteEmpenho = parseFloat(option.getAttribute('data-saldo-empenhar'));
+                valorUnitarioItem = parseFloat(option.getAttribute('data-valor-unitario'));
 
-            qtdInput.disabled = false;
-            qtdInput.value = '';
-            qtdInput.classList.remove('is-invalid');
-            btnEnviar.disabled = true;
-            feedbackErro.style.display = 'none';
+                qtdEmpenharInput.disabled = false;
+                qtdEmpenharInput.value = '';
+                valorTotalEmpenhoVisual.value = '';
+                valorTotalEmpenhoReal.value = '';
+
+                qtdEmpenharInput.classList.remove('is-invalid');
+                btnSalvarEmpenho.disabled = true;
+                feedbackErroEmpenho.style.display = 'none';
+            });
+
+            qtdEmpenharInput.addEventListener('input', function() {
+                const qtdDigitada = parseFloat(this.value) || 0;
+
+                if (qtdDigitada > limiteEmpenho || qtdDigitada <= 0) {
+                    this.classList.add('is-invalid');
+                    btnSalvarEmpenho.disabled = true;
+                    valorTotalEmpenhoVisual.value = 'Erro';
+                    valorTotalEmpenhoReal.value = '';
+
+                    if(qtdDigitada > limiteEmpenho) {
+                        feedbackErroEmpenho.style.display = 'block';
+                    }
+                } else {
+                    this.classList.remove('is-invalid');
+                    btnSalvarEmpenho.disabled = false;
+                    feedbackErroEmpenho.style.display = 'none';
+
+                    const totalReais = qtdDigitada * valorUnitarioItem;
+                    valorTotalEmpenhoReal.value = totalReais.toFixed(2);
+                    valorTotalEmpenhoVisual.value = totalReais.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                }
+            });
+        }
+
+        // ==========================================
+        // LÓGICA DO MODAL DE LANÇAR PEDIDO (MÚLTIPLOS ITENS)
+        // ==========================================
+        const dataPedidoInput = document.getElementById('dataPedidoInput');
+        const divHoraPedido = document.getElementById('divHoraPedido');
+        const horaPedidoInput = document.getElementById('horaPedidoInput');
+        const alertaRetroativo = document.getElementById('alertaRetroativo');
+        const formLancarPedido = document.getElementById('formLancarPedido');
+        const btnEnviarPedido = document.getElementById('btnEnviarPedido');
+        const hojeString = "{{ date('Y-m-d') }}";
+        const divJaRecebido = document.getElementById('divJaRecebido');
+        const switchJaRecebido = document.getElementById('switchJaRecebido');
+
+        // 1. Controle da Data e Hora (Avisos e Switch)
+        if (dataPedidoInput) {
+            dataPedidoInput.addEventListener('change', function() {
+                const dataEscolhida = this.value;
+
+                if (dataEscolhida !== hojeString) {
+                    divHoraPedido.classList.remove('d-none');
+                    horaPedidoInput.setAttribute('required', 'required');
+                } else {
+                    divHoraPedido.classList.add('d-none');
+                    horaPedidoInput.removeAttribute('required');
+                    horaPedidoInput.value = '';
+                }
+
+                if (dataEscolhida < hojeString) {
+                    alertaRetroativo.classList.remove('d-none');
+                    divJaRecebido.classList.remove('d-none');
+                } else {
+                    alertaRetroativo.classList.add('d-none');
+                    divJaRecebido.classList.add('d-none');
+                    if (switchJaRecebido) switchJaRecebido.checked = false;
+                }
+            });
+        }
+
+        // ========================================================
+        // 2. INTERCEPTADOR DE ENVIO (Modal Amarelo para Data Futura)
+        // ========================================================
+        let agendamentoConfirmado = false;
+        const modalPedidoEl = document.getElementById('modalLancarPedido');
+        const modalConfirmacaoEl = document.getElementById('modalConfirmacaoFutura');
+
+        if (formLancarPedido) {
+            formLancarPedido.addEventListener('submit', function(e) {
+                const dataEscolhida = dataPedidoInput.value;
+
+                // Se a data for no futuro E o usuário ainda não confirmou no modal amarelo
+                if (dataEscolhida > hojeString && !agendamentoConfirmado) {
+                    e.preventDefault();
+
+                    const partes = dataEscolhida.split('-');
+                    const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    document.getElementById('spanDataFutura').innerText = dataFormatada;
+
+                    const modalPedidoInstancia = bootstrap.Modal.getInstance(modalPedidoEl);
+                    const modalConfirmacaoInstancia = bootstrap.Modal.getOrCreateInstance(modalConfirmacaoEl);
+
+                    btnEnviarPedido.disabled = false;
+                    modalPedidoInstancia.hide();
+
+                    modalPedidoEl.addEventListener('hidden.bs.modal', function showYellowModal() {
+                        modalConfirmacaoInstancia.show();
+                        modalPedidoEl.removeEventListener('hidden.bs.modal', showYellowModal);
+                    });
+                }
+            });
+        }
+
+        if (modalConfirmacaoEl) {
+            modalConfirmacaoEl.addEventListener('hidden.bs.modal', function() {
+                if (!agendamentoConfirmado) {
+                    const modalPedidoInstancia = bootstrap.Modal.getOrCreateInstance(modalPedidoEl);
+                    modalPedidoInstancia.show();
+                }
+            });
+        }
+
+        const btnConfirmarPedidoFuturo = document.getElementById('btnConfirmarPedidoFuturo');
+        if (btnConfirmarPedidoFuturo) {
+            btnConfirmarPedidoFuturo.addEventListener('click', function() {
+                agendamentoConfirmado = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Agendando...';
+                this.disabled = true;
+                formLancarPedido.submit();
+            });
+        }
+
+        // ========================================================
+        // 3. TABELA DINÂMICA DE MÚLTIPLOS ITENS
+        // ========================================================
+        const optionsItensPedidoHtml = `
+            <option value="" selected disabled>Escolha o item...</option>
+            @foreach($contrato->itens as $item)
+        @php
+            $empenhada = $item->itensEmpenho->sum('quantidade_empenhada');
+            $consumida = $item->itensEmpenho->flatMap->itensPedido->sum('quantidade');
+            $saldoDisponivel = $empenhada - $consumida;
+            $siglaUnidade = $item->unidade->sigla ?? 'un';
+        @endphp
+        @if($saldoDisponivel > 0)
+        <option value="{{ $item->id }}" data-saldo="{{ $saldoDisponivel }}" data-unidade="{{ $siglaUnidade }}">
+                        {{ $item->nome }}
+        </option>
+@endif
+        @endforeach
+        `;
+
+        let itemPedidoIndex = 0;
+
+        function adicionarLinhaPedido() {
+            const tbody = document.getElementById('tbody-itens-pedido');
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td>
+                    <select name="itens[${itemPedidoIndex}][item_contrato_id]" class="form-select form-select-sm select-alimento" required>
+                        ${optionsItensPedidoHtml}
+                    </select>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="number" step="0.01" class="form-control input-qtd-pedida" name="itens[${itemPedidoIndex}][quantidade_pedida]" placeholder="0,00" required disabled>
+                        <span class="input-group-text span-unidade">--</span>
+                    </div>
+                </td>
+                <td class="text-center align-middle">
+                    <span class="badge bg-success span-saldo-visual d-none"></span>
+                    <input type="hidden" class="input-saldo-oculto" value="0">
+                </td>
+                <td class="text-center align-middle">
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-linha-pedido" title="Remover">X</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            itemPedidoIndex++;
+        }
+
+        if(document.getElementById('tbody-itens-pedido')) {
+            adicionarLinhaPedido();
+        }
+
+        const btnAddItemPedido = document.getElementById('btn-add-item-pedido');
+        if(btnAddItemPedido) {
+            btnAddItemPedido.addEventListener('click', adicionarLinhaPedido);
+        }
+
+        document.getElementById('tbody-itens-pedido')?.addEventListener('change', function(e) {
+            if (e.target.classList.contains('select-alimento')) {
+                const tr = e.target.closest('tr');
+                const option = e.target.options[e.target.selectedIndex];
+                const saldo = parseFloat(option.getAttribute('data-saldo'));
+                const unidade = option.getAttribute('data-unidade');
+
+                tr.querySelector('.input-saldo-oculto').value = saldo;
+                tr.querySelector('.span-unidade').innerText = unidade;
+
+                const spanSaldo = tr.querySelector('.span-saldo-visual');
+                spanSaldo.innerText = saldo.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + ' ' + unidade;
+                spanSaldo.classList.remove('d-none');
+
+                const qtdInput = tr.querySelector('.input-qtd-pedida');
+                qtdInput.disabled = false;
+                qtdInput.value = '';
+                qtdInput.classList.remove('is-invalid');
+            }
         });
 
-        qtdInput.addEventListener('input', function() {
-            const qtdDigitada = parseFloat(this.value) || 0;
-            const saldoDisponivel = parseFloat(valorSaldoNumerico.value);
+        document.getElementById('tbody-itens-pedido')?.addEventListener('input', function(e) {
+            if (e.target.classList.contains('input-qtd-pedida')) {
+                const tr = e.target.closest('tr');
+                const qtdDigitada = parseFloat(e.target.value) || 0;
+                const saldoDisponivel = parseFloat(tr.querySelector('.input-saldo-oculto').value);
 
-            if (qtdDigitada > saldoDisponivel || qtdDigitada <= 0) {
-                this.classList.add('is-invalid');
-                btnEnviar.disabled = true;
-                if(qtdDigitada > saldoDisponivel) {
-                    feedbackErro.style.display = 'block';
+                if (qtdDigitada > saldoDisponivel || qtdDigitada <= 0) {
+                    e.target.classList.add('is-invalid');
+                    btnEnviarPedido.disabled = true;
+                } else {
+                    e.target.classList.remove('is-invalid');
+                    const temErro = document.querySelectorAll('.input-qtd-pedida.is-invalid').length > 0;
+                    btnEnviarPedido.disabled = temErro;
                 }
-            } else {
-                this.classList.remove('is-invalid');
-                btnEnviar.disabled = false;
-                feedbackErro.style.display = 'none';
+            }
+        });
+
+        document.getElementById('tbody-itens-pedido')?.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-remove-linha-pedido')) {
+                const totalLinhas = document.querySelectorAll('#tbody-itens-pedido tr').length;
+                if (totalLinhas > 1) {
+                    e.target.closest('tr').remove();
+                    const temErro = document.querySelectorAll('.input-qtd-pedida.is-invalid').length > 0;
+                    btnEnviarPedido.disabled = temErro;
+                } else {
+                    alert('O pedido precisa ter pelo menos um item!');
+                }
             }
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 @endsection
