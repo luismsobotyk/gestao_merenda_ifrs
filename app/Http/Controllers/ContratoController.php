@@ -32,15 +32,15 @@ class ContratoController extends Controller
         return view('dashboard.listaContratos', compact('contratos'));
     }
 
-    public function visualizaContrato($id){
+    public function visualizaContrato($id)
+    {
         $contrato = Contrato::with([
             'fornecedor.responsaveis.contatos',
             'itens.unidade',
             'itens.itensEmpenho.itensPedido',
-
-            // 👇 Mudou aqui: Busca pedidos direto do contrato, e traz tudo pendurado nele
             'pedidos.itensPedido.itemEmpenho.itemContrato.unidade',
-            'empenhos.itensEmpenho'
+
+            'empenhos.itensEmpenho.itensPedido.pedido'
         ])->findOrFail($id);
 
         return view('dashboard.contrato', compact('contrato'));
@@ -188,7 +188,9 @@ class ContratoController extends Controller
         $pedidoMaster = \App\Models\Pedido::create([
             'contrato_uuid' => $contrato->id,
             'data_pedido' => $dataHoraFinal,
-            'status' => $statusCalculado, // <-- Gravando a nossa regra aqui!
+            'status' => $statusCalculado,
+            // Se já entra como recebido, a "data de entrega" é a mesma data que ele informou no pedido
+            'data_prevista_entrega' => $statusCalculado === 'Recebido' ? $dataHoraFinal : null,
         ]);
 
         // 3. Loop pelos itens que o usuário preencheu na tela
@@ -231,5 +233,19 @@ class ContratoController extends Controller
         }
 
         return redirect()->back()->with('success', 'Pedido registrado e abatido dos empenhos com sucesso!');
+    }
+    public function receberPedido($id)
+    {
+        $pedido = \App\Models\Pedido::findOrFail($id);
+
+        // Atualiza o status
+        $pedido->status = 'Recebido';
+
+        // NOVA LINHA: Registra a data/hora exata do recebimento na coluna
+        $pedido->data_prevista_entrega = now();
+
+        $pedido->save();
+
+        return redirect()->back()->with('success', 'Pedido confirmado como recebido com sucesso!');
     }
 }

@@ -274,7 +274,7 @@
                                     @if($pedido->status === 'Atrasado')
                                         <span class="d-block text-danger fw-bold small" style="font-size: 0.75rem;">Atrasado desde: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
                                     @elseif($pedido->status === 'Recebido')
-                                        <span class="d-block text-muted small" style="font-size: 0.75rem;">Recebido em: {{ \Carbon\Carbon::parse($pedido->updated_at)->format('d/m/Y') }}</span>
+                                        <span class="d-block text-muted small" style="font-size: 0.75rem;">Recebido em: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
                                     @else
                                         <span class="d-block text-muted small" style="font-size: 0.75rem;">Previsto: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
                                     @endif
@@ -282,9 +282,14 @@
                                 <div class="text-end d-flex flex-column align-items-end gap-2">
                                     <span class="badge {{ $badgeClass }} text-uppercase shadow-sm">{{ $pedido->status }}</span>
                                     @if($pedido->status !== 'Recebido' && $pedido->status !== 'Concluído')
-                                        <button class="btn btn-sm {{ $btnClass }} py-0 px-2" style="font-size: 0.75rem;" title="Confirmar recebimento">
-                                            Receber
-                                        </button>
+                                        {{-- Transformamos o botão em um mini-form para enviar o POST seguro --}}
+                                        <form action="{{ route('pedido.receber', $pedido->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja confirmar o recebimento deste pedido?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm {{ $btnClass }} py-0 px-2" style="font-size: 0.75rem;" title="Confirmar recebimento">
+                                                Receber
+                                            </button>
+                                        </form>
                                     @else
                                         <a href="#" class="text-decoration-none small text-primary" style="font-size: 0.75rem;">Ver NF</a>
                                     @endif
@@ -296,7 +301,10 @@
                     </ul>
                 </div>
                 <div class="card-footer bg-white border-top-0">
-                    <button class="btn btn-sm btn-outline-secondary w-100">Ver Histórico Completo</button>
+                    <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="offcanvas" data-bs-target="#offcanvasHistoricoPedidos" aria-controls="offcanvasHistoricoPedidos">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-clock-history me-1" viewBox="0 0 16 16"><path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/><path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/><path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/></svg>
+                        Ver Histórico Completo
+                    </button>
                 </div>
             </div>
         </div>
@@ -357,7 +365,7 @@
                                     <td class="fw-bold">R$ {{ number_format($valorTotal, 2, ',', '.') }}</td>
                                     <td>{!! $statusBadge !!}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-secondary" title="Ver Detalhes">
+                                        <button class="btn btn-sm btn-outline-secondary" title="Ver Detalhes do Empenho" data-bs-toggle="modal" data-bs-target="#modalDetalhesEmpenho-{{ $empenho->id }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/></svg>
                                         </button>
                                     </td>
@@ -372,6 +380,132 @@
             </div>
         </div>
     </div>
+
+    {{-- ========================================================= --}}
+    {{-- MODAIS DE EXTRATO DE EMPENHO (Gerados dinamicamente) --}}
+    {{-- ========================================================= --}}
+    @foreach($contrato->empenhos as $empenho)
+        @php
+            // Cálculos Financeiros
+            $vlrTotal = $empenho->valor_total ?? 0;
+            $vlrUtilizado = $empenho->valor_utilizado ?? 0;
+            $saldoVlr = $vlrTotal - $vlrUtilizado;
+            $progVlr = $vlrTotal > 0 ? ($vlrUtilizado / $vlrTotal) * 100 : 0;
+            $corProgVlr = $progVlr > 85 ? 'danger' : ($progVlr > 60 ? 'warning' : 'success');
+
+            // Cálculos Quantitativos (Assumindo 1 item por Empenho, conforme sua estrutura atual)
+            $itemEmp = $empenho->itensEmpenho->first();
+            $nomeAlimento = $itemEmp ? $itemEmp->itemContrato->nome : 'Item não identificado';
+            $siglaUni = ($itemEmp && $itemEmp->itemContrato->unidade) ? $itemEmp->itemContrato->unidade->sigla : 'un';
+
+            $qtdEmpenhada = $itemEmp ? $itemEmp->quantidade_empenhada : 0;
+            $qtdConsumida = $itemEmp ? $itemEmp->itensPedido->sum('quantidade') : 0;
+            $saldoQtd = $qtdEmpenhada - $qtdConsumida;
+        @endphp
+
+        <div class="modal fade" id="modalDetalhesEmpenho-{{ $empenho->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h1 class="modal-title h5 fw-bold text-secondary">
+                            Extrato da NE: <span class="text-dark">{{ $empenho->numero_empenho ?? 'Sem Número' }}</span>
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        {{-- Resumo em Cards --}}
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-body-tertiary h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Resumo Financeiro</h6>
+                                        <div class="d-flex justify-content-between mb-1 small">
+                                            <span>Valor Original:</span>
+                                            <strong>R$ {{ number_format($vlrTotal, 2, ',', '.') }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1 small text-danger">
+                                            <span>Valor Consumido:</span>
+                                            <strong>- R$ {{ number_format($vlrUtilizado, 2, ',', '.') }}</strong>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="d-flex justify-content-between text-success">
+                                            <span>Saldo Disponível:</span>
+                                            <strong class="fs-5">R$ {{ number_format($saldoVlr, 2, ',', '.') }}</strong>
+                                        </div>
+
+                                        <div class="progress mt-3" style="height: 6px;">
+                                            <div class="progress-bar bg-{{ $corProgVlr }}" style="width: {{ $progVlr }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-body-tertiary h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Resumo Físico ({{ $nomeAlimento }})</h6>
+                                        <div class="d-flex justify-content-between mb-1 small">
+                                            <span>Qtd. Empenhada:</span>
+                                            <strong>{{ number_format($qtdEmpenhada, 2, ',', '.') }} {{ $siglaUni }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-1 small text-danger">
+                                            <span>Qtd. Pedida:</span>
+                                            <strong>- {{ number_format($qtdConsumida, 2, ',', '.') }} {{ $siglaUni }}</strong>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="d-flex justify-content-between text-success">
+                                            <span>Saldo Físico:</span>
+                                            <strong class="fs-5">{{ number_format($saldoQtd, 2, ',', '.') }} {{ $siglaUni }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Tabela de Histórico de Pedidos que consumiram esta NE --}}
+                        <h6 class="fw-bold mb-3 border-bottom pb-2">Pedidos Vinculados a esta NE</h6>
+                        @if($itemEmp && $itemEmp->itensPedido->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped table-hover small align-middle">
+                                    <thead class="table-light text-secondary">
+                                    <tr>
+                                        <th>ID Pedido</th>
+                                        <th>Data do Pedido</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Qtd. Abatida</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach($itemEmp->itensPedido->sortByDesc('created_at') as $itemPed)
+                                        <tr>
+                                            {{-- Usamos ?->id e um fallback caso seja null --}}
+                                            <td class="fw-bold">#{{ strtoupper(substr($itemPed->pedido?->id ?? '000000', 0, 6)) }}</td>
+
+                                            {{-- Verificamos se o pedido existe antes de formatar a data --}}
+                                            <td>{{ $itemPed->pedido ? \Carbon\Carbon::parse($itemPed->pedido->data_pedido)->format('d/m/Y') : '-' }}</td>
+
+                                            <td><span class="badge bg-secondary">{{ $itemPed->pedido?->status ?? 'Desconhecido' }}</span></td>
+
+                                            <td class="text-end fw-bold text-danger">- {{ number_format($itemPed->quantidade, 2, ',', '.') }} {{ $siglaUni }}</td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="alert alert-light text-center text-muted border border-dashed py-3">
+                                Nenhum pedido consumiu esta Nota de Empenho até o momento.
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     {{-- Modal Cadastrar Empenho (Etapa 2) --}}
     <div class="modal fade" id="modalCadastrarEmpenho" tabindex="-1" aria-hidden="true">
@@ -541,6 +675,86 @@
                     <button type="button" class="btn btn-warning fw-bold" id="btnConfirmarPedidoFuturo">Sim, Agendar Pedido</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Offcanvas de Histórico Completo de Pedidos --}}
+    <div class="offcanvas offcanvas-end shadow" tabindex="-1" id="offcanvasHistoricoPedidos" aria-labelledby="offcanvasHistoricoPedidosLabel">
+        <div class="offcanvas-header bg-light border-bottom">
+            <h5 class="offcanvas-title fw-bold text-uppercase small" id="offcanvasHistoricoPedidosLabel">Todos os Pedidos do Contrato</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <ul class="list-group list-group-flush">
+                {{-- Aqui nós NÃO usamos o take(5), pegamos TODOS ordenados por data --}}
+                @forelse($contrato->pedidos->sortByDesc('data_pedido') as $pedido)
+                    @php
+                        $bgClass = '';
+                        $badgeClass = 'bg-warning text-dark';
+                        $btnClass = 'btn-outline-success';
+
+                        if($pedido->status === 'Atrasado') {
+                            $bgClass = 'bg-danger bg-opacity-10 border-danger border-opacity-25';
+                            $badgeClass = 'bg-danger';
+                            $btnClass = 'btn-outline-danger';
+                        } elseif($pedido->status === 'Recebido' || $pedido->status === 'Concluído') {
+                            $bgClass = 'bg-light opacity-75';
+                            $badgeClass = 'bg-secondary';
+                        }
+
+                        $codigoPedido = strtoupper(substr($pedido->id, 0, 6));
+
+                        $itensFormatados = [];
+                        foreach($pedido->itensPedido as $itemPedido) {
+                            $nome = $itemPedido->itemEmpenho->itemContrato->nome ?? 'Item Excluído';
+                            $qtd = number_format($itemPedido->quantidade, 2, ',', '.');
+                            $qtd = preg_replace('/,00$/', '', $qtd);
+                            $sigla = $itemPedido->itemEmpenho->itemContrato->unidade->sigla ?? '';
+                            $itensFormatados[] = "{$nome} ({$qtd} {$sigla})";
+                        }
+                        $textoItensPedido = implode(', ', $itensFormatados) ?: 'Nenhum item registrado';
+                    @endphp
+
+                    <li class="list-group-item p-3 {{ $bgClass }}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="fw-bold {{ $pedido->status === 'Atrasado' ? 'text-danger' : ($pedido->status === 'Recebido' ? 'text-muted' : 'text-primary') }}">
+                                Pedido #{{ $codigoPedido }}
+                            </div>
+                            <span class="badge {{ $badgeClass }} text-uppercase shadow-sm">{{ $pedido->status }}</span>
+                        </div>
+
+                        <span class="d-block small text-dark mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
+                            {{ $textoItensPedido }}
+                        </span>
+
+                        <div class="d-flex justify-content-between align-items-end mt-2 pt-2 border-top">
+                            <div>
+                                <span class="d-block text-muted small" style="font-size: 0.70rem;">Solicitado: {{ \Carbon\Carbon::parse($pedido->data_pedido)->format('d/m/Y') }}</span>
+                                @if($pedido->status === 'Atrasado')
+                                    <span class="d-block text-danger fw-bold small" style="font-size: 0.70rem;">Atrasado desde: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
+                                @elseif($pedido->status === 'Recebido')
+                                    <span class="d-block text-muted small" style="font-size: 0.70rem;">Recebido em: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
+                                @else
+                                    <span class="d-block text-muted small" style="font-size: 0.70rem;">Previsto: {{ \Carbon\Carbon::parse($pedido->data_prevista_entrega)->format('d/m/Y') }}</span>
+                                @endif
+                            </div>
+
+                            @if($pedido->status !== 'Recebido' && $pedido->status !== 'Concluído')
+                                <form action="{{ route('pedido.receber', $pedido->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja confirmar o recebimento deste pedido?');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn btn-sm {{ $btnClass }} py-0 px-2" style="font-size: 0.70rem;" title="Confirmar recebimento">Receber</button>
+                                </form>
+                            @else
+                                <a href="#" class="text-decoration-none small text-primary" style="font-size: 0.70rem;">Ver NF</a>
+                            @endif
+                        </div>
+                    </li>
+                @empty
+                    <li class="list-group-item text-center text-muted p-5">Nenhum pedido registrado no histórico.</li>
+                @endforelse
+            </ul>
         </div>
     </div>
 @endsection
@@ -800,5 +1014,4 @@
             }
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 @endsection

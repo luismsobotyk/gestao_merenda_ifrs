@@ -19,6 +19,7 @@ Route::get('/contrato/{id}', [ContratoController::class, 'visualizaContrato'])->
 Route::get('/contrato/{id}/editar', [ContratoController::class, 'visualizaContrato'])->name('contrato.editar');
 Route::post('/contrato/{id}/empenho/salvar', [ContratoController::class, 'salvaEmpenho'])->name('empenho.salvar');
 Route::post('/contrato/{id}/pedido/salvar', [ContratoController::class, 'salvaPedido'])->name('pedido.salvar');
+Route::patch('/pedido/{id}/receber', [ContratoController::class, 'receberPedido'])->name('pedido.receber');
 
 // Rotas para gestão de fornecedores
 Route::get('/fornecedor/busca-cnpj', [FornecedorController::class, 'buscaPorCnpj'])->name('fornecedor.busca.cnpj');
