@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignUuid('cardapio_horario_id')->constrained('cardapio_horarios')->cascadeOnDelete();
 
             $table->date('data_exata');
-            $table->enum('tipo', ['inclusao', 'substituicao']);
+            $table->enum('tipo', ['inclusao', 'substituicao', 'supressao']);
 
             $table->timestamps();
         });
