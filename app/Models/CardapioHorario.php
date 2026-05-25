@@ -22,6 +22,11 @@ class CardapioHorario extends Model
         return $this->hasMany(CardapioItemPadrao::class, 'cardapio_horario_id');
     }
 
+    public function excecoes()
+    {
+        return $this->hasMany(CardapioExcecao::class, 'cardapio_horario_id');
+    }
+
     // 👇 ADICIONE ESTE BLOCO AQUI
     protected static function booted()
     {

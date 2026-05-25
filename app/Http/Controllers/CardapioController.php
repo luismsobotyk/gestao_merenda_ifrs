@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cardapio;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class CardapioController extends Controller
 {
@@ -34,150 +35,72 @@ class CardapioController extends Controller
         return view('dashboard.cardapio.cardapio_cadastro', compact('cardapio', 'itensDisponiveis'));
     }
 
-    // NOVOS MÉTODOS PARA A GRID E HORÁRIOS
-    public function destroyHorario($id)
-    {
-        $horario = \App\Models\CardapioHorario::findOrFail($id);
-        $horario->delete(); // O 'cascadeOnDelete' da migration vai apagar os itens da grid automaticamente!
-        return redirect()->back()->with('success', 'Horário removido com sucesso!');
-    }
-
-    public function storeItemPadrao(Request $request, $cardapio_id)
-    {
-        $request->validate([
-            'cardapio_horario_id' => 'required|uuid',
-            'item_contrato_uuid' => 'required|uuid',
-            'dia_semana' => 'required|integer|between:1,5',
-        ]);
-
-        \App\Models\CardapioItemPadrao::create([
-            'cardapio_horario_id' => $request->cardapio_horario_id,
-            'item_contrato_uuid' => $request->item_contrato_uuid,
-            'dia_semana' => $request->dia_semana,
-        ]);
-
-        return redirect()->back()->with('success', 'Alimento adicionado à grade!');
-    }
-
-    public function destroyItemPadrao($id)
-    {
-        $item = \App\Models\CardapioItemPadrao::findOrFail($id);
-        $item->delete();
-        return redirect()->back()->with('success', 'Alimento removido da grade!');
-    }
-
-    public function store(Request $request)
-    {
-        // 1. Validação dos dados base
-        $request->validate([
-            'nome_cardapio' => 'required|string|max:255',
-            'data_inicio' => 'required|date',
-            'data_fim' => 'required|date|after_or_equal:data_inicio',
-        ], [
-            'data_fim.after_or_equal' => 'A data de término não pode ser anterior à data de início.',
-        ]);
-
-        // 2. Criação do registro mestre
-        $cardapio = Cardapio::create([
-            'nome' => $request->nome_cardapio,
-            'data_inicio' => $request->data_inicio,
-            'data_fim' => $request->data_fim,
-        ]);
-
-        // Por enquanto, redirecionamos para ele mesmo para continuarmos a lógica depois
-        return redirect()->route('cardapio.editar', $cardapio->id)
-            ->with('success', 'Cardápio iniciado! Agora defina os horários e alimentos.');
-    }
-
-    public function storeHorario(Request $request, $id)
+    public function syncAll(Request $request, $id)
     {
         $cardapio = Cardapio::findOrFail($id);
 
-        // 1. Validação
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'hora_inicio' => 'required|date_format:H:i',
-            'hora_fim' => 'required|date_format:H:i|after:hora_inicio',
-            'descricao_publico' => 'nullable|string|max:255',
-        ], [
-            'hora_fim.after' => 'A hora final não pode ser anterior à hora de início.',
-        ]);
+        // Inicia a transação com o Banco de Dados
+        DB::beginTransaction();
 
-        // 2. Salva o Horário vinculado ao Cardápio
-        $cardapio->horarios()->create([
-            'nome' => $request->nome,
-            'hora_inicio' => $request->hora_inicio,
-            'hora_fim' => $request->hora_fim,
-            'descricao_publico' => $request->descricao_publico,
-        ]);
+        try {
+            // 1. Atualiza as Informações Básicas
+            $cardapio->update([
+                'nome' => $request->nome_cardapio,
+                'data_inicio' => $request->data_inicio,
+                'data_fim' => $request->data_fim,
+            ]);
 
-        return redirect()->back()->with('success', 'Horário adicionado com sucesso!');
-    }
-    public function update(Request $request, $id)
-    {
-        $cardapio = Cardapio::findOrFail($id);
+            // 2. Limpeza Cirúrgica (Apagamos os itens antigos para gravar o estado atual da tela)
+            // Isso evita termos que rastrear manualmente um por um o que o usuário deletou na tela
+            $cardapio->horarios()->delete();
+            $cardapio->excecoes()->delete();
 
-        // Valida se o usuário mudou as datas corretamente
-        $request->validate([
-            'nome_cardapio' => 'required|string|max:255',
-            'data_inicio' => 'required|date',
-            'data_fim' => 'required|date|after_or_equal:data_inicio',
-        ], [
-            'data_fim.after_or_equal' => 'A data de término não pode ser anterior à data de início.',
-        ]);
+            // 3. Reconstrói os Horários e Itens da Grid
+            foreach ($request->horarios ?? [] as $hIndex => $hData) {
+                $horario = $cardapio->horarios()->create([
+                    'nome' => $hData['nome'],
+                    'hora_inicio' => $hData['hora_inicio'],
+                    'hora_fim' => $hData['hora_fim'],
+                    'descricao_publico' => $hData['descricao_publico'] ?? null,
+                ]);
 
-        // Atualiza as informações do Card 1
-        $cardapio->update([
-            'nome' => $request->nome_cardapio,
-            'data_inicio' => $request->data_inicio,
-            'data_fim' => $request->data_fim,
-        ]);
+                // Grava o "ID Real" na memória para podermos associar as exceções depois
+                $mapaHorarios[$hIndex] = $horario->id;
 
-        return redirect()->back()->with('success', 'Informações gerais do cardápio atualizadas com sucesso!');
-    }
+                foreach ($hData['itens'] ?? [] as $itemData) {
+                    $horario->itensPadrao()->create([
+                        'dia_semana' => $itemData['dia_semana'],
+                        'item_contrato_uuid' => $itemData['item_contrato_uuid'],
+                    ]);
+                }
+            }
 
-    // ==========================================
-    // MÉTODOS DE EXCEÇÃO
-    // ==========================================
-    public function storeExcecao(Request $request, $cardapio_id)
-    {
-        $request->validate([
-            'data_exata' => 'required|date',
-            'tipo_excecao' => 'required|in:inclusao,substituicao,supressao',
-            'horario_id' => 'required|uuid',
-        ]);
+            // 4. Reconstrói as Exceções
+            foreach ($request->excecoes ?? [] as $excData) {
+                // Recupera o ID real do horário que criamos logo acima
+                $horarioRealId = $mapaHorarios[$excData['horario_index']];
 
-        \App\Models\CardapioExcecao::create([
-            'cardapio_id' => $cardapio_id,
-            'data_exata' => $request->data_exata,
-            'tipo' => $request->tipo_excecao,
-            'cardapio_horario_id' => $request->horario_id,
-        ]);
+                $excecao = $cardapio->excecoes()->create([
+                    'data_exata' => $excData['data_exata'],
+                    'tipo' => $excData['tipo'],
+                    'cardapio_horario_id' => $horarioRealId,
+                ]);
 
-        return redirect()->back()->with('success', 'Exceção adicionada! Agora adicione os alimentos a ela.');
-    }
+                foreach ($excData['itens'] ?? [] as $itemExcData) {
+                    $excecao->itens()->create([
+                        'item_contrato_uuid' => $itemExcData['item_contrato_uuid'],
+                    ]);
+                }
+            }
 
-    public function destroyExcecao($id)
-    {
-        \App\Models\CardapioExcecao::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Exceção removida!');
-    }
+            // Se tudo deu certo, efetiva no banco
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Cardápio salvo com sucesso!']);
 
-    public function storeItemExcecao(Request $request, $excecao_id)
-    {
-        $request->validate(['item_contrato_uuid' => 'required|uuid']);
-
-        \App\Models\CardapioExcecaoItem::create([
-            'cardapio_excecao_id' => $excecao_id,
-            'item_contrato_uuid' => $request->item_contrato_uuid,
-        ]);
-
-        return redirect()->back()->with('success', 'Alimento adicionado ao dia especial!');
-    }
-
-    public function destroyItemExcecao($id)
-    {
-        \App\Models\CardapioExcecaoItem::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Alimento removido do dia especial!');
+        } catch (\Exception $e) {
+            // Se algo falhou, desfaz todas as inserções
+            DB::rollBack();
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 }

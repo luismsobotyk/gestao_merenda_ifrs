@@ -17,4 +17,9 @@ class CardapioExcecaoItem extends Model
     {
         return $this->belongsTo(ItemContrato::class, 'item_contrato_uuid');
     }
+
+    public function excecao()
+    {
+        return $this->belongsTo(CardapioExcecao::class, 'cardapio_excecao_id');
+    }
 }

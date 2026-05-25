@@ -30,15 +30,7 @@ Route::get('/cardapio', [CardapioController::class, 'index'])->name('cardapio');
 Route::get('/cardapio/novo', [CardapioController::class, 'create'])->name('cardapio.novo');
 Route::post('/cardapio/salvar', [CardapioController::class, 'store'])->name('cardapio.salvar');
 Route::get('/cardapio/{id}/editar', [CardapioController::class, 'edit'])->name('cardapio.editar');
-Route::post('/cardapio/{id}/horario', [\App\Http\Controllers\CardapioController::class, 'storeHorario'])->name('cardapio.horario.salvar');
-Route::delete('/cardapio/horario/{id}/excluir', [CardapioController::class, 'destroyHorario'])->name('cardapio.horario.excluir');
-Route::post('/cardapio/{id}/item-padrao', [CardapioController::class, 'storeItemPadrao'])->name('cardapio.item.salvar');
-Route::delete('/cardapio/item-padrao/{id}/excluir', [CardapioController::class, 'destroyItemPadrao'])->name('cardapio.item.excluir');
-Route::put('/cardapio/{id}/atualizar', [\App\Http\Controllers\CardapioController::class, 'update'])->name('cardapio.atualizar');
-Route::post('/cardapio/{id}/excecao', [CardapioController::class, 'storeExcecao'])->name('cardapio.excecao.salvar');
-Route::delete('/cardapio/excecao/{id}/excluir', [CardapioController::class, 'destroyExcecao'])->name('cardapio.excecao.excluir');
-Route::post('/cardapio/excecao/{id}/item', [CardapioController::class, 'storeItemExcecao'])->name('cardapio.excecao.item.salvar');
-Route::delete('/cardapio/excecao/item/{id}/excluir', [CardapioController::class, 'destroyItemExcecao'])->name('cardapio.excecao.item.excluir');
+Route::post('/cardapio/{id}/sync', [CardapioController::class, 'syncAll'])->name('cardapio.sync');
 
 // Outras rotas
 Route::get('/', [MainController::class, 'index']);
