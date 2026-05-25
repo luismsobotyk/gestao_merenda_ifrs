@@ -32,9 +32,33 @@ class CardapioController extends Controller
             return ($empenhada - $consumida) > 0;
         });
 
-        return view('dashboard.cardapio.cardapio_cadastro', compact('cardapio', 'itensDisponiveis'));
-    }
+        // DEFINA A VARIÁVEL AQUI
+        $diasMapa = [1 => 'Segunda', 2 => 'Terça', 3 => 'Quarta', 4 => 'Quinta', 5 => 'Sexta'];
 
+        return view('dashboard.cardapio.cardapio_cadastro', compact('cardapio', 'itensDisponiveis', 'diasMapa'));
+    }
+    public function store(Request $request)
+    {
+        // 1. Validação dos dados base
+        $request->validate([
+            'nome_cardapio' => 'required|string|max:255',
+            'data_inicio' => 'required|date',
+            'data_fim' => 'required|date|after_or_equal:data_inicio',
+        ], [
+            'data_fim.after_or_equal' => 'A data de término não pode ser anterior à data de início.',
+        ]);
+
+        // 2. Criação do registro mestre
+        $cardapio = \App\Models\Cardapio::create([
+            'nome' => $request->nome_cardapio,
+            'data_inicio' => $request->data_inicio,
+            'data_fim' => $request->data_fim,
+        ]);
+
+        // 3. Redireciona para a tela de edição, onde o JavaScript vai carregar os dados
+        return redirect()->route('cardapio.editar', $cardapio->id)
+            ->with('success', 'Cardápio iniciado! Agora defina os horários e alimentos.');
+    }
     public function syncAll(Request $request, $id)
     {
         $cardapio = Cardapio::findOrFail($id);

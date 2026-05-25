@@ -7,6 +7,19 @@
         .h-row { border-left: 4px solid #0d6efd; }
         .add-food-btn { border-style: dashed; width: 100%; }
         .exception-card { border-left: 4px solid #ffc107; }
+
+        .cell-actions {
+            opacity: 0.3;
+            transition: opacity 0.2s;
+        }
+        td:hover .cell-actions {
+            opacity: 1;
+        }
+        .btn-cell-action {
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            line-height: 1;
+        }
     </style>
 @endsection
 
@@ -38,10 +51,8 @@
     <div class="row">
         {{-- COLUNA ESQUERDA --}}
         <div class="col-md-4 mb-4">
-            {{-- 1. O FORMULÁRIO MESTRE --}}
             <form id="formCardapio" method="POST" action="{{ isset($cardapio) ? '#' : route('cardapio.salvar') }}">
                 @csrf
-
                 <div class="card shadow-sm mb-4 border-primary">
                     <div class="card-header bg-primary bg-opacity-10 text-primary text-uppercase fw-bold small">
                         1. Informações Gerais e Vigência
@@ -72,7 +83,6 @@
                         </button>
                     </div>
                     <div class="card-body p-0">
-                        {{-- O JS vai desenhar os horários aqui --}}
                         <ul class="list-group list-group-flush" id="listaHorarios"></ul>
                     </div>
                 </div>
@@ -89,11 +99,10 @@
                     </svg>
                     <div>
                         <h5 class="alert-heading fw-bold">Quase lá!</h5>
-                        <p class="mb-0">Preencha o Nome e a Vigência ao lado e clique em <strong>"Salvar"</strong>. Após isso, a Grade Semanal e a ferramenta de Dias Especiais serão desbloqueadas para você organizar a rotina em tempo real.</p>
+                        <p class="mb-0">Preencha o Nome e a Vigência ao lado e clique em <strong>"Salvar"</strong>. Após isso, a Grade Semanal e os Dias Especiais serão liberados.</p>
                     </div>
                 </div>
             @else
-                {{-- Card 3: Grid Semanal Padrão --}}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white border-bottom-0 pt-3">
                         <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">3. Grid Semanal Padrão</h5>
@@ -111,14 +120,12 @@
                                     <th>Sex.</th>
                                 </tr>
                                 </thead>
-                                {{-- O JS vai desenhar a tabela aqui --}}
                                 <tbody id="tbodyGrid"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                {{-- Card 4: Exceções --}}
                 <div class="card shadow-sm exception-card">
                     <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3">
                         <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small text-warning">4. Exceções e Dias Especiais</h5>
@@ -138,7 +145,6 @@
                                     <th>Ações</th>
                                 </tr>
                                 </thead>
-                                {{-- O JS vai desenhar as exceções aqui --}}
                                 <tbody id="tbodyExcecoes"></tbody>
                             </table>
                         </div>
@@ -148,7 +154,7 @@
         </div>
     </div>
 
-    {{-- MODAIS (Sem actions e methods do Laravel) --}}
+    {{-- MODAIS --}}
     @if(isset($cardapio))
         <div class="modal fade" id="modalAdicionarHorario" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
@@ -216,6 +222,7 @@
             </div>
         </div>
 
+        {{-- MODAL ADICIONAR EXCEÇÃO (Reestruturado para Múltiplos Checkboxes) --}}
         <div class="modal fade" id="modalAdicionarExcecao" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <form class="modal-content" id="formAdicionarExcecao">
@@ -238,8 +245,16 @@
                             </select>
                         </div>
                         <div class="col-12 mt-4">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Qual horário será afetado?</label>
-                            <select class="form-select border-primary form-select-lg" id="selectHorarioExcecao" name="horario_index" required></select>
+                            <label class="form-label small text-uppercase fw-bold text-body-secondary d-block mb-2">Quais horários serão afetados neste dia?</label>
+                            <div class="alert alert-light border border-secondary border-opacity-25 p-3">
+                                <div class="mb-2">
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0" style="font-size: 0.75rem" onclick="toggleTodosHorariosExcecao(true)">Marcar Todos</button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0" style="font-size: 0.75rem" onclick="toggleTodosHorariosExcecao(false)">Desmarcar Todos</button>
+                                </div>
+                                <div id="containerCheckboxesHorarios" class="row row-cols-1 row-cols-md-2 g-2 pt-2">
+                                    {{-- Preenchido dinamicamente via JS --}}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -300,6 +315,8 @@
                 excecoes: {!! json_encode($excecoesIniciais) !!}
             };
 
+            let clipboard = null;
+
             const diasMapa = [ {nome: 'Segunda', num: 1}, {nome: 'Terça', num: 2}, {nome: 'Quarta', num: 3}, {nome: 'Quinta', num: 4}, {nome: 'Sexta', num: 5} ];
 
             let targetContexto = '';
@@ -308,13 +325,11 @@
             let targetExcIndex = null;
 
             function renderAll() {
-                state.horarios.sort((a, b) => {
-                    return a.hora_inicio.localeCompare(b.hora_inicio);
-                });
+                state.horarios.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
                 renderHorarios();
                 renderGrid();
                 renderExcecoes();
-                atualizarSelectExcecoes();
+                atualizarCheckboxesExcecoes();
             }
 
             function renderHorarios() {
@@ -366,16 +381,25 @@
                         `;
                         }).join('');
 
+                        let botaoColar = (clipboard !== null)
+                            ? `<button type="button" class="btn btn-cell-action btn-success me-1" onclick="colarCelula(${hIndex}, ${dia.num})" title="Colar alimentos copiados aqui">Colar</button>`
+                            : '';
+
                         tr += `
-                        <td class="align-top p-2" style="min-width: 140px;">
+                        <td class="align-top p-2" style="min-width: 150px;">
+                            <div class="d-flex justify-content-between align-items-center mb-1 cell-actions">
+                                <div class="d-flex">
+                                    <button type="button" class="btn btn-cell-action btn-outline-secondary me-1" onclick="copiarCelula(${hIndex}, ${dia.num})" title="Copiar alimentos deste quadrado">Copiar</button>
+                                    ${botaoColar}
+                                </div>
+                            </div>
                             <div class="d-flex flex-column mb-2">${itensHtml}</div>
 
-                            {{-- DEVOLVEMOS A RESPONSABILIDADE DE ABRIR O MODAL PARA O BOOTSTRAP --}}
-                        <button type="button" class="btn btn-sm btn-outline-success add-food-btn py-1 mt-auto w-100"
-                            data-bs-toggle="modal"
-                            data-bs-target="#modalAdicionarAlimento"
-                            data-contexto="padrao"
-                            data-horario-index="${hIndex}"
+                            <button type="button" class="btn btn-sm btn-outline-success add-food-btn py-1 mt-auto w-100"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalAdicionarAlimento"
+                                data-contexto="padrao"
+                                data-horario-index="${hIndex}"
                                 data-dia-num="${dia.num}"
                                 data-dia-nome="${dia.nome}"
                                 data-horario="${h.hora_inicio}">
@@ -416,7 +440,15 @@
                         </div>
                     `).join('');
 
+                        let botaoColarExc = (clipboard !== null)
+                            ? `<button type="button" class="btn btn-cell-action btn-success me-1 mb-2" onclick="colarCelulaExcecao(${eIndex})" title="Colar alimentos copiados aqui">Colar</button>`
+                            : '';
+
                         tdAlimentos = `
+                        <div class="mb-1 cell-actions">
+                            <button type="button" class="btn btn-cell-action btn-outline-secondary me-1" onclick="copiarCelulaExcecao(${eIndex})" title="Copiar alimentos desta exceção">Copiar</button>
+                            ${botaoColarExc}
+                        </div>
                         <div class="d-flex flex-column mb-2">${itensHtml}</div>
                         <button type="button" class="btn btn-sm btn-outline-success add-food-btn py-1"
                             data-bs-toggle="modal"
@@ -445,17 +477,90 @@
                 });
             }
 
-            function atualizarSelectExcecoes() {
-                const select = document.getElementById('selectHorarioExcecao');
-                select.innerHTML = '<option value="" selected disabled>Escolha o horário...</option>';
+            // Atualiza dinamicamente os Checkboxes do Modal de Exceção baseado nos horários existentes
+            function atualizarCheckboxesExcecoes() {
+                const container = document.getElementById('containerCheckboxesHorarios');
+                if(!container) return;
+
+                container.innerHTML = '';
+                if(state.horarios.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-muted small">Nenhum horário cadastrado no Passo 2 ainda.</div>';
+                    return;
+                }
+
                 state.horarios.forEach((h, index) => {
-                    select.innerHTML += `<option value="${index}">${h.nome} (${h.hora_inicio})</option>`;
+                    container.innerHTML += `
+                        <div class="col">
+                            <div class="form-check">
+                                <input class="form-check-input check-horario-excecao" type="checkbox" value="${index}" id="chkHorario_${index}">
+                                <label class="form-check-label small" for="chkHorario_${index}">
+                                    <strong>${h.nome}</strong> (${h.hora_inicio})
+                                </label>
+                            </div>
+                        </div>
+                    `;
                 });
             }
 
-            // 3. AÇÕES DE MANIPULAÇÃO
+            // Função auxiliar dos botões Marcar/Desmarcar todos do modal de exceções
+            function toggleTodosHorariosExcecao(status) {
+                const checkboxes = document.querySelectorAll('.check-horario-excecao');
+                checkboxes.forEach(cb => cb.checked = status);
+            }
+
+            // FUNÇÕES DE ÁREA DE TRANSFERÊNCIA DE CÉLULAS
+            function copiarCelula(hIndex, diaNum) {
+                const itensCopiados = state.horarios[hIndex].itens.filter(i => parseInt(i.dia_semana) === parseInt(diaNum));
+                if(itensCopiados.length === 0) {
+                    alert('Este quadrado está vazio. Nada para copiar!');
+                    return;
+                }
+                clipboard = itensCopiados.map(item => ({
+                    item_contrato_uuid: item.item_contrato_uuid,
+                    nome_visual: item.nome_visual
+                }));
+                renderAll();
+            }
+
+            function colarCelula(hIndex, diaNum) {
+                if(!clipboard) return;
+                clipboard.forEach(item => {
+                    state.horarios[hIndex].itens.push({
+                        dia_semana: diaNum,
+                        item_contrato_uuid: item.item_contrato_uuid,
+                        nome_visual: item.nome_visual
+                    });
+                });
+                renderAll();
+            }
+
+            function copiarCelulaExcecao(eIndex) {
+                const itensCopiados = state.excecoes[eIndex].itens;
+                if(itensCopiados.length === 0) {
+                    alert('Esta exceção está vazia. Nada para copiar!');
+                    return;
+                }
+                clipboard = itensCopiados.map(item => ({
+                    item_contrato_uuid: item.item_contrato_uuid,
+                    nome_visual: item.nome_visual
+                }));
+                renderAll();
+            }
+
+            function colarCelulaExcecao(eIndex) {
+                if(!clipboard) return;
+                clipboard.forEach(item => {
+                    state.excecoes[eIndex].itens.push({
+                        item_contrato_uuid: item.item_contrato_uuid,
+                        nome_visual: item.nome_visual
+                    });
+                });
+                renderAll();
+            }
+
+            // AÇÕES DE MANIPULAÇÃO PADRÃO
             function removeHorario(index) {
-                if(confirm('Excluir este horário apagará a linha inteira na Grid. Continuar?')) {
+                if(confirm('Excluir este horário apagará a linha inteira na Grid e suas exceções. Continuar?')) {
                     state.horarios.splice(index, 1);
                     state.excecoes = state.excecoes.filter(e => parseInt(e.horario_index) !== parseInt(index));
                     state.excecoes.forEach(e => { if(e.horario_index > index) e.horario_index--; });
@@ -466,11 +571,11 @@
             function removeExcecao(index) { state.excecoes.splice(index, 1); renderAll(); }
             function removeItemExcecao(excIndex, itemIndex) { state.excecoes[excIndex].itens.splice(itemIndex, 1); renderAll(); }
 
-            // 4. PREENCHE O MODAL DE ALIMENTOS QUANDO ELE É ABERTO PELO BOOTSTRAP
+            // PREENCHE O MODAL DE ALIMENTOS QUANDO ELE É ABERTO PELO BOOTSTRAP
             const modalAlimentoEl = document.getElementById('modalAdicionarAlimento');
             if (modalAlimentoEl) {
                 modalAlimentoEl.addEventListener('show.bs.modal', function (event) {
-                    const btn = event.relatedTarget; // O botão que disparou
+                    const btn = event.relatedTarget;
                     if (!btn) return;
 
                     targetContexto = btn.getAttribute('data-contexto');
@@ -491,20 +596,40 @@
                 });
             }
 
-            // 5. SALVANDO OS DADOS DOS MODAIS NO ESTADO E FECHANDO COM SEGURANÇA
+            // SALVANDO OS DADOS DOS MODAIS NO ESTADO LOCAL
             document.getElementById('formAdicionarHorario').addEventListener('submit', function(e) {
                 e.preventDefault();
                 state.horarios.push({ nome: this.nome.value, hora_inicio: this.hora_inicio.value, hora_fim: this.hora_fim.value, descricao_publico: this.descricao_publico.value, itens: [] });
                 this.reset();
-
-                // Simula um clique no botão "X" do modal para o Bootstrap fechá-lo de forma segura
                 this.closest('.modal').querySelector('.btn-close').click();
                 renderAll();
             });
 
+            // SALVA A EXCEÇÃO (Suporta múltiplos horários selecionados em loops)
             document.getElementById('formAdicionarExcecao').addEventListener('submit', function(e) {
                 e.preventDefault();
-                state.excecoes.push({ data_exata: this.data_exata.value, tipo: this.tipo_excecao.value, horario_index: this.horario_index.value, itens: [] });
+
+                const dataExata = this.data_exata.value;
+                const tipoExcecao = this.tipo_excecao.value;
+
+                // Pega todos os indexes de horários que foram marcados
+                const checkboxesMarcados = Array.from(document.querySelectorAll('.check-horario-excecao:checked'));
+
+                if(checkboxesMarcados.length === 0) {
+                    alert('Selecione pelo menos um horário para aplicar a exceção!');
+                    return;
+                }
+
+                // Cria uma linha independente na lista para cada horário selecionado
+                checkboxesMarcados.forEach(cb => {
+                    state.excecoes.push({
+                        data_exata: dataExata,
+                        tipo: tipoExcecao,
+                        horario_index: parseInt(cb.value),
+                        itens: []
+                    });
+                });
+
                 this.reset();
                 this.closest('.modal').querySelector('.btn-close').click();
                 renderAll();
@@ -527,14 +652,11 @@
                 renderAll();
             });
 
-            // 6. O SALVAMENTO FINAL NO BANCO DE DADOS (SYNC)
+            // O SALVAMENTO FINAL NO BANCO DE DADOS (SYNC)
             document.getElementById('formCardapio').addEventListener('submit', async function(e) {
                 e.preventDefault();
 
-                // CORREÇÃO: Busca o botão pelo atributo form, na página inteira
                 const btnSalvar = document.querySelector('button[form="formCardapio"]');
-
-                // Guarda o HTML original (com o ícone) para restaurar caso dê erro
                 const txtOriginal = btnSalvar.innerHTML;
 
                 btnSalvar.innerHTML = 'Salvando...';
@@ -575,7 +697,10 @@
                     btnSalvar.disabled = false;
                 }
             });
-            renderAll();
+
+            document.addEventListener('DOMContentLoaded', function() {
+                renderAll();
+            });
         </script>
     @endif
 @endsection
