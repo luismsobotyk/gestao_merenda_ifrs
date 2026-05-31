@@ -52,6 +52,7 @@ Route::prefix('controle-retirada')->group(function () {
 
 Route::prefix('graficos')->group(function () {
     Route::get('/tipos-merenda', [GraficoController::class, 'tiposMerenda'])->name('graficos.tipos_merenda');
+    Route::get('/por-dia-semana', [App\Http\Controllers\GraficoController::class, 'porDiaSemana'])->name('graficos.por_dia_semana');
 });
 
 // Outras rotas

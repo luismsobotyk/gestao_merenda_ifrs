@@ -3,13 +3,13 @@
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
         <div>
-            <h1 class="h2 mb-0">Consumo por Tipo de Merenda</h1>
-            <small class="text-muted">Cruzamento histórico de retiradas com o cardápio efetivamente servido no dia.</small>
+            <h1 class="h2 mb-0">Volume de Retiradas por Dia</h1>
+            <small class="text-muted">Proporção histórica de fluxo da cantina por dia da semana.</small>
         </div>
     </div>
 
     {{-- BARRA DE FILTRO COM SELEÇÃO DE GRÁFICO --}}
-    <form method="GET" action="{{ route('graficos.tipos_merenda') }}" class="card shadow-sm border-0 mb-4 bg-light">
+    <form method="GET" action="{{ route('graficos.por_dia_semana') }}" class="card shadow-sm border-0 mb-4 bg-light">
         <div class="card-body p-3 d-flex align-items-end gap-3 flex-wrap">
             <div>
                 <label for="data_inicial" class="form-label small text-muted fw-bold mb-1">Data Inicial</label>
@@ -22,12 +22,12 @@
                 <input type="date" id="data_final" name="data_final" class="form-control border-primary text-primary fw-bold" value="{{ $dataFinal }}">
             </div>
 
-            {{-- NOVO: CAMPO DE TIPO DE GRÁFICO --}}
+            {{-- CAMPO DE TIPO DE GRÁFICO --}}
             <div>
                 <label for="tipo_grafico" class="form-label small text-muted fw-bold mb-1">Visualização</label>
                 <select id="tipo_grafico" name="tipo_grafico" class="form-select border-primary text-primary fw-bold">
-                    <option value="bar" {{ $tipoGrafico == 'bar' ? 'selected' : '' }}>Gráfico de Barras</option>
                     <option value="pie" {{ $tipoGrafico == 'pie' ? 'selected' : '' }}>Gráfico de Rosca</option>
+                    <option value="bar" {{ $tipoGrafico == 'bar' ? 'selected' : '' }}>Gráfico de Barras</option>
                 </select>
             </div>
 
@@ -50,7 +50,7 @@
         <div class="col-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
-                    <div id="graficoMerenda" style="width: 100%; height: 500px;"></div>
+                    <div id="graficoDias" style="width: 100%; height: 500px;"></div>
                 </div>
             </div>
         </div>
@@ -73,7 +73,7 @@
                         <table class="table table-hover table-striped align-middle border">
                             <thead class="table-light text-secondary">
                             <tr>
-                                <th scope="col">Composição do Lanche</th>
+                                <th scope="col">Dia da Semana</th>
                                 <th scope="col" class="text-end">Quantidade de Retiradas</th>
                                 <th scope="col" class="text-end">Representatividade (%)</th>
                             </tr>
@@ -83,13 +83,13 @@
                                 $totalGeral = array_sum($valores);
                             @endphp
 
-                            @foreach($labels as $index => $lanche)
+                            @foreach($labels as $index => $dia)
                                 @php
                                     $quantidade = $valores[$index];
                                     $porcentagem = $totalGeral > 0 ? round(($quantidade / $totalGeral) * 100, 1) : 0;
                                 @endphp
                                 <tr>
-                                    <td class="fw-bold text-dark">{{ $lanche }}</td>
+                                    <td class="fw-bold text-dark">{{ $dia }}</td>
                                     <td class="text-end fw-bold text-primary fs-5">{{ $quantidade }}</td>
                                     <td class="text-end text-muted">{{ number_format($porcentagem, 1, ',', '.') }}%</td>
                                 </tr>
@@ -116,103 +116,81 @@
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            var myChart = echarts.init(document.getElementById('graficoMerenda'));
+            var chartDom = document.getElementById('graficoDias');
+            var myChart = echarts.init(chartDom);
 
-            var labelsCardapio = {!! json_encode($labels) !!};
-            var dadosSaida = {!! json_encode($valores) !!};
-            var tipoSelecionado = '{{ $tipoGrafico }}'; // Recebe a escolha do Controller
+            var labelsDias = {!! json_encode($labels) !!};
+            var dadosValores = {!! json_encode($valores) !!};
+            var tipoSelecionado = '{{ $tipoGrafico }}';
 
+            // Calcula o total para as percentagens
+            var totalGeral = dadosValores.reduce(function(soma, val) { return soma + val; }, 0);
             var option;
 
-            // Se o utilizador escolheu ROSCA (Pie)
-            // Se o utilizador escolheu ROSCA (Pie)
             if (tipoSelecionado === 'pie') {
-                var pieData = labelsCardapio.map(function(label, index) {
-                    return { name: label, value: dadosSaida[index] };
+                var pieData = labelsDias.map(function(label, index) {
+                    return { name: label, value: dadosValores[index] };
                 });
 
                 option = {
-                    title: { text: 'Ranking de Aceitação', left: 'center' },
+                    title: [
+                        { text: 'Pico de Atendimento Semanal', left: 'center', top: 0, textStyle: { color: '#495057', fontWeight: 'bold' } },
+                        { text: '', left: 'center', top: '45%', textStyle: { fontSize: 22, fontWeight: 'bold', color: '#333' } }
+                    ],
                     tooltip: {
                         trigger: 'item',
-                        formatter: '<strong>{b}</strong> <br/> {c} retiradas registradas ({d}%)'
+                        formatter: '<strong>{b}</strong> <br/> {c} retiradas registadas ({d}%)'
                     },
                     legend: {
                         bottom: 0,
-                        type: 'scroll',
-                        padding: [15, 0, 0, 0]
+                        left: 'center'
                     },
                     series: [
                         {
                             name: 'Retiradas',
                             type: 'pie',
-                            radius: ['40%', '70%'],
-                            avoidLabelOverlap: true, // Garante que as porcentagens não fiquem umas sobre as outras
+                            radius: ['45%', '70%'],
+                            avoidLabelOverlap: true,
                             itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-
-                            // --- MUDANÇA AQUI: Mostra a porcentagem visível nas fatias ---
                             label: {
                                 show: true,
-                                formatter: '{d}%', // O {d} é o código interno do ECharts para Porcentagem
+                                formatter: '{d}%',
                                 fontSize: 14,
                                 fontWeight: 'bold',
                                 color: '#495057'
                             },
-                            labelLine: {
-                                show: true, // Desenha a linhazinha elegante ligando o número à fatia
-                                length: 15,
-                                length2: 10
-                            },
-                            // -------------------------------------------------------------
-
+                            labelLine: { show: true, length: 15, length2: 10 },
                             emphasis: {
-                                itemStyle: {
-                                    shadowBlur: 10,
-                                    shadowOffsetX: 0,
-                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                                }
+                                itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' }
                             },
                             data: pieData
                         }
                     ]
                 };
-
-                // Se escolheu BARRAS (Bar) - Comportamento Padrão
             } else {
-                // 1. Calcula a soma de todas as retiradas para basear a nossa porcentagem
-                var totalGeral = dadosSaida.reduce(function(soma, valorAtual) {
-                    return soma + valorAtual;
-                }, 0);
-
-                var seriesDinamicas = labelsCardapio.map(function(nome, index) {
+                // GRÁFICO DE BARRAS MULTICOLORIDO (Igual ao Tipos de Merenda)
+                var seriesDinamicas = labelsDias.map(function(nome, index) {
                     return {
                         name: nome,
                         type: 'bar',
-                        data: [dadosSaida[index]],
+                        data: [dadosValores[index]],
                         label: {
                             show: true,
                             position: 'top',
                             fontWeight: 'bold',
-                            color: '#495057',
-                            // 2. Customiza o texto que vai no topo da barra
                             formatter: function(params) {
                                 if (totalGeral === 0) return '0';
-
-                                // Calcula a porcentagem com 1 casa decimal
-                                var porcentagem = ((params.value / totalGeral) * 100).toFixed(1);
-
-                                // Retorna o valor e a % no formato brasileiro (trocando ponto por vírgula)
-                                return params.value + ' (' + porcentagem.replace('.', ',') + '%)';
+                                var pct = ((params.value / totalGeral) * 100).toFixed(1).replace('.', ',');
+                                return params.value + ' (' + pct + '%)';
                             }
                         }
                     };
                 });
 
                 option = {
-                    title: { text: 'Ranking de Aceitação', left: 'center' },
+                    title: { text: 'Pico de Atendimento Semanal', left: 'center', top: 0, textStyle: { color: '#495057', fontWeight: 'bold' } },
                     tooltip: {
                         trigger: 'item',
-                        // 3. Atualizamos a caixinha flutuante para mostrar a % igual ao gráfico de rosca
                         formatter: function(params) {
                             var pct = totalGeral > 0 ? ((params.value / totalGeral) * 100).toFixed(1).replace('.', ',') : '0';
                             return '<strong>' + params.seriesName + '</strong> <br/> ' + params.value + ' retiradas (' + pct + '%)';
@@ -224,13 +202,35 @@
                         padding: [15, 0, 0, 0]
                     },
                     grid: { left: '5%', right: '5%', bottom: '15%', containLabel: true },
-                    xAxis: { type: 'category', data: ['Comparativo Total'], axisTick: { show: false }, axisLabel: { show: false } },
-                    yAxis: { type: 'value', name: 'Qtd. Retiradas' },
+                    xAxis: {
+                        type: 'category',
+                        data: ['Comparativo Semanal'], // Agrupa todas as barras no mesmo eixo
+                        axisTick: { show: false },
+                        axisLabel: { show: false }
+                    },
+                    yAxis: { type: 'value', name: 'Total Acumulado' },
                     series: seriesDinamicas
                 };
             }
 
             myChart.setOption(option);
+
+            // Mágica do texto no centro (Apenas para o gráfico de Rosca)
+            if (tipoSelecionado === 'pie') {
+                myChart.on('mouseover', function(params) {
+                    if (params.componentType === 'series') {
+                        myChart.setOption({
+                            title: [ {}, { text: params.name } ]
+                        });
+                    }
+                });
+
+                myChart.on('mouseout', function(params) {
+                    myChart.setOption({
+                        title: [ {}, { text: '' } ]
+                    });
+                });
+            }
 
             window.addEventListener('resize', function() {
                 myChart.resize();
