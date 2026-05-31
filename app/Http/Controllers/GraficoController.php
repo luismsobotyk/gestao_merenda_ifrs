@@ -161,4 +161,56 @@ class GraficoController extends Controller
         // Passamos o $tipoGrafico para a view
         return view('dashboard.graficos.por-dia-semana', compact('labels', 'valores', 'dataInicial', 'dataFinal', 'tipoGrafico'));
     }
+
+    public function porTurma(\Illuminate\Http\Request $request)
+    {
+        // 1. Lógica de "Cache" na Sessão
+        if ($request->has('limpar')) {
+            session()->forget(['filtro_turma_data_inicial', 'filtro_turma_data_final', 'filtro_turma_grafico']);
+            return redirect()->route('graficos.por_turma');
+        }
+
+        if ($request->has('tipo_grafico')) {
+            session(['filtro_turma_grafico' => $request->tipo_grafico]);
+
+            if ($request->filled('data_inicial') && $request->filled('data_final')) {
+                session(['filtro_turma_data_inicial' => $request->data_inicial]);
+                session(['filtro_turma_data_final' => $request->data_final]);
+            } else {
+                session()->forget(['filtro_turma_data_inicial', 'filtro_turma_data_final']);
+            }
+        }
+
+        $dataInicial = session('filtro_turma_data_inicial');
+        $dataFinal = session('filtro_turma_data_final');
+
+        // Mantemos 'bar' como padrão pois costumam existir muitas turmas
+        $tipoGrafico = session('filtro_turma_grafico', 'bar');
+
+        // 2. Constrói a consulta cruzando Retiradas -> Alunos -> Cursos
+        $query = \Illuminate\Support\Facades\DB::table('retiradas')
+            ->join('alunos', 'retiradas.aluno_id', '=', 'alunos.id')
+            ->join('cursos', 'alunos.curso_id', '=', 'cursos.id')
+            ->select('cursos.nome as curso_nome', \Illuminate\Support\Facades\DB::raw('COUNT(retiradas.id) as total'));
+
+        if ($dataInicial && $dataFinal) {
+            $query->whereBetween('retiradas.data_retirada', [$dataInicial, $dataFinal]);
+        }
+
+        // Agrupa pelo nome do curso e já ordena do maior para o menor
+        $retiradas = $query->groupBy('cursos.nome')
+            ->orderByDesc('total')
+            ->get();
+
+        $labels = $retiradas->pluck('curso_nome')->toArray();
+        $valores = $retiradas->pluck('total')->toArray();
+
+        // Mock de dados caso o banco esteja vazio
+        if (empty($labels) && !$dataInicial) {
+            $labels = ['Técnico em Informática', 'Técnico em Administração', 'Técnico em Mecânica', 'Engenharia Civil', 'Licenciatura em Matemática'];
+            $valores = [450, 380, 210, 150, 90];
+        }
+
+        return view('dashboard.graficos.por-turma', compact('labels', 'valores', 'dataInicial', 'dataFinal', 'tipoGrafico'));
+    }
 }
