@@ -12,115 +12,129 @@ class RetiradaController extends Controller
 {
     public function index()
     {
-        // Agora passamos a 'descricao' para evitar erro de campo nulo no banco
-        $totemAtivo = ConfiguracaoRetirada::firstOrCreate(
-                ['chave' => 'modo_totem_ativo'],
-                [
-                    'valor' => '1',
-                    'descricao' => 'Habilita o uso do modo Autoatendimento (Totem) pelos discentes'
-                ]
-            )->valor === '1';
+        $totemAtivo = ConfiguracaoRetirada::firstOrCreate(['chave' => 'modo_totem_ativo'], ['valor' => '1', 'descricao' => 'Habilita o uso do modo Autoatendimento'])->valor === '1';
+        $manualAtivo = ConfiguracaoRetirada::firstOrCreate(['chave' => 'modo_manual_ativo'], ['valor' => '1', 'descricao' => 'Habilita o uso do modo Lançamento Manual'])->valor === '1';
 
-        $manualAtivo = ConfiguracaoRetirada::firstOrCreate(
-                ['chave' => 'modo_manual_ativo'],
-                [
-                    'valor' => '1',
-                    'descricao' => 'Habilita o uso do modo Lançamento Manual pelo servidor/bolsista'
-                ]
-            )->valor === '1';
+        $hoje = Carbon::today()->toDateString();
+        $diaSemana = Carbon::today()->dayOfWeekIso;
 
-        return view('dashboard.retirada.index', compact('totemAtivo', 'manualAtivo'));
+        $cardapioAtivo = \DB::table('cardapios')
+            ->where('data_inicio', '<=', $hoje)
+            ->where('data_fim', '>=', $hoje)
+            ->first();
+
+        $temCardapioHoje = false;
+        $horarios = collect();
+
+        if ($cardapioAtivo) {
+            $horarios = \DB::table('cardapio_horarios')
+                ->where('cardapio_id', $cardapioAtivo->id)
+                ->orderBy('hora_inicio')
+                ->get();
+
+            $temPadrao = \DB::table('cardapio_itens_padrao')
+                ->join('cardapio_horarios', 'cardapio_itens_padrao.cardapio_horario_id', '=', 'cardapio_horarios.id')
+                ->where('cardapio_horarios.cardapio_id', $cardapioAtivo->id)
+                ->where('cardapio_itens_padrao.dia_semana', $diaSemana)
+                ->exists();
+
+            $temExcecao = \DB::table('cardapio_excecoes')
+                ->where('cardapio_id', $cardapioAtivo->id)
+                ->where('data_exata', $hoje)
+                ->exists();
+
+            if ($temPadrao || $temExcecao) {
+                $temCardapioHoje = true;
+            }
+        }
+
+        if ($horarios->isEmpty()) {
+            $ultimoCardapio = \DB::table('cardapios')->orderBy('data_fim', 'desc')->first();
+            if ($ultimoCardapio) {
+                $horarios = \DB::table('cardapio_horarios')->where('cardapio_id', $ultimoCardapio->id)->orderBy('hora_inicio')->get();
+            } else {
+                $horarios = \DB::table('cardapio_horarios')->orderBy('hora_inicio')->get();
+            }
+        }
+
+        return view('dashboard.retirada.index', compact('totemAtivo', 'manualAtivo', 'horarios', 'temCardapioHoje'));
     }
 
-    public function modoTotem()
+    public function modoTotem(Request $request)
     {
-        // Trava de segurança no backend
         if (ConfiguracaoRetirada::where('chave', 'modo_totem_ativo')->value('valor') !== '1') {
             return redirect()->route('retirada.index')->withErrors('O modo Totem está desativado no momento.');
         }
-        return view('dashboard.retirada.totem');
+
+        $horarioId = $request->get('horario_id');
+        if (!$horarioId) {
+            return redirect()->route('retirada.index')->withErrors('Selecione o turno antes de iniciar o Totem.');
+        }
+
+        $horarioSelecionado = \DB::table('cardapio_horarios')->where('id', $horarioId)->first();
+        if (!$horarioSelecionado) {
+            return redirect()->route('retirada.index')->withErrors('Turno inválido.');
+        }
+
+        return view('dashboard.retirada.totem', compact('horarioSelecionado'));
     }
+
     public function registrarTotem(Request $request)
     {
         $request->validate([
-            'matricula' => 'required|string'
+            'matricula' => 'required|string',
+            'horario_id' => 'required|uuid' // <-- VALIDAÇÃO REINSERIDA AQUI
         ]);
 
-        // 1. Busca o aluno e traz o curso junto
-        $aluno = \App\Models\Aluno::with('curso')->where('matricula', $request->matricula)->first();
+        $aluno = Aluno::with('curso')->where('matricula', $request->matricula)->first();
 
-        // 2. Validação: Aluno existe?
         if (!$aluno) {
             return response()->json(['success' => false, 'tipo' => 'nao_encontrado', 'message' => 'Matrícula não encontrada na base de dados.'], 404);
         }
 
-        // Dados do aluno para retornar para a tela (ID visual)
         $dadosAluno = [
             'nome' => $aluno->nome,
             'matricula' => $aluno->matricula,
             'curso' => $aluno->curso->nome ?? 'Curso Desconhecido'
         ];
 
-        // 3. Validação: O curso tem direito à merenda?
         if (!$aluno->curso || !$aluno->curso->direito_merenda) {
-            return response()->json([
-                'success' => false,
-                'tipo' => 'sem_direito',
-                'message' => 'O seu curso não possui direito à merenda.',
-                'aluno' => $dadosAluno
-            ], 403);
+            return response()->json(['success' => false, 'tipo' => 'sem_direito', 'message' => 'O seu curso não possui direito à merenda.', 'aluno' => $dadosAluno], 403);
         }
 
-        // 4. Validação: Já retirou hoje?
-        $hoje = \Carbon\Carbon::today()->toDateString();
+        $hoje = Carbon::today()->toDateString();
 
-        // MUDANÇA AQUI: Trocamos o exists() pelo first() para pegar os dados reais do registro
-        $retiradaAnterior = \App\Models\Retirada::where('aluno_id', $aluno->id)
+        $retiradaAnterior = Retirada::where('aluno_id', $aluno->id)
             ->where('data_retirada', $hoje)
             ->first();
 
         if ($retiradaAnterior) {
-            // Pegamos o horário de criação do registro no banco e formatamos para Hora:Minuto
             $horaRegistro = $retiradaAnterior->created_at->format('H:i');
-
-            return response()->json([
-                'success' => false,
-                'tipo' => 'duplicado',
-                // Embutimos a hora exata diretamente na mensagem!
-                'message' => "Merenda já retirada hoje às {$horaRegistro}.",
-                'aluno' => $dadosAluno
-            ], 422);
+            return response()->json(['success' => false, 'tipo' => 'duplicado', 'message' => "Merenda já retirada hoje às {$horaRegistro}.", 'aluno' => $dadosAluno], 422);
         }
 
-        // 5. Sucesso! Grava a retirada no banco
-        \App\Models\Retirada::create([
+        // GRAVAÇÃO COM O HORÁRIO REINSERIDA AQUI
+        Retirada::create([
             'aluno_id' => $aluno->id,
-            'data_retirada' => $hoje
+            'data_retirada' => $hoje,
+            'cardapio_horario_id' => $request->horario_id
         ]);
 
-        return response()->json([
-            'success' => true,
-            'tipo' => 'sucesso',
-            'message' => 'Retirada autorizada e registrada!',
-            'aluno' => $dadosAluno
-        ]);
+        return response()->json(['success' => true, 'tipo' => 'sucesso', 'message' => 'Retirada autorizada e registrada!', 'aluno' => $dadosAluno]);
     }
 
     public function modoManual()
     {
-        // Trava de segurança no backend
         if (ConfiguracaoRetirada::where('chave', 'modo_manual_ativo')->value('valor') !== '1') {
             return redirect()->route('retirada.index')->withErrors('O modo Manual está desativado no momento.');
         }
         return view('dashboard.retirada.manual');
     }
 
-    // Método AJAX para ligar/desligar
     public function toggleModo(Request $request)
     {
         $chave = $request->modo === 'totem' ? 'modo_totem_ativo' : 'modo_manual_ativo';
 
-        // Define a descrição com base na chave que está sendo alterada
         $descricao = $request->modo === 'totem'
             ? 'Habilita o uso do modo Autoatendimento (Totem) pelos discentes'
             : 'Habilita o uso do modo Lançamento Manual pelo servidor/bolsista';

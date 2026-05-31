@@ -227,11 +227,11 @@
                                 </h6>
                                 <ul class="nav flex-column mb-auto">
                                     <li class="nav-item">
-                                        <a class="nav-link d-flex align-items-center gap-2" href="#">
+                                        <a class="nav-link d-flex align-items-center gap-2" href="{{ route('graficos.tipos_merenda') }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
                                                 <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1z"/>
                                             </svg>
-                                            Gráfico 1
+                                            Tipos de Merenda
                                         </a>
                                     </li>
                                 <h6

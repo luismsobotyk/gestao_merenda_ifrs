@@ -51,7 +51,11 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
             <h1 class="h2 mb-0">Modo Autoatendimento (Totem)</h1>
-            <small class="text-muted">Aguardando a digitação da matrícula.</small>
+            {{-- Mostra o turno travado na tela --}}
+            <small class="text-muted">
+                Turno Operacional: <strong class="text-primary text-uppercase">{{ $horarioSelecionado->nome }}</strong>
+                ({{ \Carbon\Carbon::parse($horarioSelecionado->hora_inicio)->format('H:i') }} às {{ \Carbon\Carbon::parse($horarioSelecionado->hora_fim)->format('H:i') }})
+            </small>
         </div>
         <a href="{{ route('retirada.index') }}" class="btn btn-sm btn-outline-secondary">Voltar ao Painel</a>
     </div>
@@ -61,11 +65,11 @@
         <div class="card shadow-sm border-primary border-opacity-50 mb-4">
             <div class="card-body p-5">
                 <form id="formTotem">
+                    {{-- Campo Invisível com o ID do Turno --}}
+                    <input type="hidden" id="horarioId" value="{{ $horarioSelecionado->id }}">
+
                     <label class="form-label text-uppercase fw-bold text-primary w-100 text-center mb-3">Informe sua Matrícula</label>
-                    <input type="text" class="form-control input-totem" id="inputMatricula" name="matricula"
-                           autocomplete="off" autofocus required
-                           maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric"
-                           placeholder="Ex: 2026123456">
+                    <input type="text" class="form-control input-totem" id="inputMatricula" name="matricula" autocomplete="off" autofocus required maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric" placeholder="Ex: 2026123456">
                 </form>
                 <div class="text-center mt-3 text-muted small">
                     <span class="spinner-border spinner-border-sm d-none me-1" id="loading-spinner"></span>
@@ -162,6 +166,9 @@
                 e.preventDefault();
 
                 const matricula = inputMatricula.value.trim();
+                // Pega o ID que está guardado silenciosamente no HTML
+                const horarioId = document.getElementById('horarioId').value;
+
                 if (!matricula) return;
 
                 // 1. Limpa o campo NA HORA e mantém o foco para o próximo da fila!
@@ -183,7 +190,8 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ matricula: matricula })
+                        // Envia os dois para a base de dados
+                        body: JSON.stringify({ matricula: matricula, horario_id: horarioId })
                     });
 
                     const data = await response.json();

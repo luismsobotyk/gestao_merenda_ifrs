@@ -10,6 +10,7 @@ use App\Services\IfrsApiService;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\RetiradaController;
+use App\Http\Controllers\GraficoController;
 
 // Rotas de autenticação
 Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -47,6 +48,10 @@ Route::prefix('controle-retirada')->group(function () {
     Route::get('/manual', [RetiradaController::class, 'modoManual'])->name('retirada.manual');
     Route::patch('/toggle', [RetiradaController::class, 'toggleModo'])->name('retirada.toggle');
     Route::post('/totem/registrar', [RetiradaController::class, 'registrarTotem'])->name('retirada.totem.registrar');
+});
+
+Route::prefix('graficos')->group(function () {
+    Route::get('/tipos-merenda', [GraficoController::class, 'tiposMerenda'])->name('graficos.tipos_merenda');
 });
 
 // Outras rotas

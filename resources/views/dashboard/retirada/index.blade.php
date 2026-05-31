@@ -66,10 +66,10 @@
                         Ideal para terminais ou tablets onde o próprio aluno digita a matrícula. O sistema valida automaticamente o curso e bloqueia retiradas duplicadas.
                     </p>
 
-                    {{-- O botão agora é o link. Se desabilitado, adicionamos a classe 'disabled' --}}
-                    <a href="{{ route('retirada.totem') }}" id="btn-totem" class="btn btn-primary mt-2 rounded-pill px-5 fw-bold {{ $totemAtivo ? '' : 'disabled' }}">
+                    {{-- O botão agora abre um Modal em vez de ir direto para o link --}}
+                    <button type="button" id="btn-totem" class="btn btn-primary mt-2 rounded-pill px-5 fw-bold {{ $totemAtivo ? '' : 'disabled' }}" data-bs-toggle="modal" data-bs-target="#modalConfiguraTotem">
                         Acessar Totem
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -103,6 +103,51 @@
                         Acessar Painel
                     </a>
                 </div>
+            </div>
+        </div>
+    </div>
+    {{-- MODAL DE CONFIGURAÇÃO DO TOTEM --}}
+    <div class="modal fade" id="modalConfiguraTotem" tabindex="-1" aria-labelledby="modalConfiguraTotemLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold" id="modalConfiguraTotemLabel">⚙️ Configurar Totem</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('retirada.totem') }}" method="GET">
+                    <div class="modal-body p-4">
+                        <label class="form-label fw-bold text-secondary mb-3">Qual turno será servido agora?</label>
+                        <select class="form-select form-select-lg border-primary text-primary fw-bold shadow-sm" name="horario_id" required>
+                            <option value="">-- Escolha o Turno --</option>
+                            @foreach($horarios as $h)
+                                <option value="{{ $h->id }}">
+                                    {{ $h->nome }} ({{ \Carbon\Carbon::parse($h->hora_inicio)->format('H:i') }} às {{ \Carbon\Carbon::parse($h->hora_fim)->format('H:i') }})
+                                </option>
+                            @endforeach
+                        </select>
+
+                        {{-- ALERTA DE SEM CARDÁPIO (Aparece apenas se a variável for falsa) --}}
+                        @if(!$temCardapioHoje)
+                            <div class="alert alert-warning mt-4 mb-0 small border-warning border-opacity-50">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="checkCienteSemCardapio" required style="cursor: pointer;">
+                                    <label class="form-check-label text-dark fw-bold" for="checkCienteSemCardapio" style="cursor: pointer;">
+                                        Estou ciente de que não existe cardápio padrão ou exceção cadastrada para a data de hoje ({{ \Carbon\Carbon::today()->format('d/m/Y') }}).
+                                    </label>
+                                </div>
+                            </div>
+                        @endif
+
+                        <div class="form-text mt-3 text-muted small">
+                            <i class="bi bi-info-circle"></i> O Totem será bloqueado neste turno. Para alterar, você precisará sair do Totem e configurá-lo novamente.
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        {{-- O botão começa bloqueado se não tiver cardápio --}}
+                        <button type="submit" class="btn btn-primary px-4 fw-bold" id="btnSubmitTotem" {{ !$temCardapioHoje ? 'disabled' : '' }}>Iniciar Totem</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -170,6 +215,14 @@
                     }
                 });
             });
+            const checkboxCiente = document.getElementById('checkCienteSemCardapio');
+            const btnSubmitTotem = document.getElementById('btnSubmitTotem');
+
+            if (checkboxCiente) {
+                checkboxCiente.addEventListener('change', function() {
+                    btnSubmitTotem.disabled = !this.checked;
+                });
+            }
         });
     </script>
 @endsection
