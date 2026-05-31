@@ -8,6 +8,8 @@ use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\CardapioController;
 use App\Services\IfrsApiService;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\AlunoController;
+use App\Http\Controllers\RetiradaController;
 
 // Rotas de autenticação
 Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -36,6 +38,15 @@ Route::post('/cardapio/{id}/sync', [CardapioController::class, 'syncAll'])->name
 Route::get('/cursos-retirada', [CursoController::class, 'index'])->name('cursos.index');
 Route::post('/cursos-retirada/sync', [CursoController::class, 'sync'])->name('cursos.sync');
 Route::patch('/cursos-retirada/{id}/toggle', [CursoController::class, 'toggleMerenda'])->name('cursos.toggle');
+Route::post('/cursos-retirada/sync-pagina-alunos', [CursoController::class, 'syncAlunosPorPagina'])->name('cursos.sync.alunos');
+Route::get('/alunos', [AlunoController::class, 'index'])->name('alunos.index');
+
+Route::prefix('controle-retirada')->group(function () {
+    Route::get('/', [RetiradaController::class, 'index'])->name('retirada.index');
+    Route::get('/totem', [RetiradaController::class, 'modoTotem'])->name('retirada.totem');
+    Route::get('/manual', [RetiradaController::class, 'modoManual'])->name('retirada.manual');
+    Route::patch('/toggle', [RetiradaController::class, 'toggleModo'])->name('retirada.toggle');
+});
 
 // Outras rotas
 Route::get('/', [MainController::class, 'index']);

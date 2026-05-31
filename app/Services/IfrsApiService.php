@@ -28,6 +28,20 @@ class IfrsApiService
     }
 
     /**
+     * Busca alunos matriculados de um curso específico (Paginado)
+     */
+    public function buscarAlunosPorCurso($idCursoApi, $pagina = 1)
+    {
+        return $this->client()->get('/matriculados', [
+            'matriculado' => 'sim',
+            'unidade' => 31,
+            'curso' => $idCursoApi,
+            'per_page' => 25,
+            'page' => $pagina
+        ]);
+    }
+
+    /**
      * Método para testar a conexão inicial
      */
     public function testarConexao()

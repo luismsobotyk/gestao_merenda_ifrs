@@ -6,14 +6,19 @@ use App\Models\Curso;
 use App\Services\IfrsApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Aluno;
 
 class CursoController extends Controller
 {
     public function index()
     {
-        // Ordena por nível e depois pelo nome do curso
         $cursos = Curso::orderBy('nivel')->orderBy('nome')->get();
-        return view('dashboard.cursos.index', compact('cursos'));
+
+        // Captura a data do último curso atualizado no banco
+        $ultimaSync = Curso::max('updated_at');
+        $ultimaSync = $ultimaSync ? \Carbon\Carbon::parse($ultimaSync)->format('d/m/Y H:i') : 'Nunca';
+
+        return view('dashboard.cursos.index', compact('cursos', 'ultimaSync'));
     }
 
     // 2. Bate na API, puxa os dados e atualiza o Banco Local (Upsert)
@@ -68,5 +73,59 @@ class CursoController extends Controller
         ]);
 
         return response()->json(['success' => true, 'message' => 'Status atualizado!']);
+    }
+
+    public function syncAlunosPorPagina(Request $request, IfrsApiService $api)
+    {
+        $cursoIdLocal = $request->curso_id;
+        $cursoIdApi = $request->curso_id_api;
+        $pagina = $request->pagina;
+
+        $response = $api->buscarAlunosPorCurso($cursoIdApi, $pagina);
+
+        if ($response->failed()) {
+            return response()->json(['success' => false, 'error' => 'Falha de comunicação com a API do IFRS'], 500);
+        }
+
+        $respostaApi = $response->json();
+
+        $alunosLote = isset($respostaApi['data']) ? $respostaApi['data'] : $respostaApi;
+
+        if (!is_array($alunosLote) || empty($alunosLote)) {
+            return response()->json(['success' => true, 'salvos' => 0, 'tem_mais' => false]);
+        }
+
+        $salvos = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($alunosLote as $item) {
+                if (!is_array($item) || empty($item['matricula'])) continue;
+
+                // CORREÇÃO: O operador ?: trata strings vazias "" como falso,
+                // pulando para a próxima alternativa até achar um nome preenchido.
+                $nomeAluno = $item['nome_social'] ?: ($item['nome_civil'] ?: ($item['nome_completo'] ?: 'Sem Nome'));
+
+                \App\Models\Aluno::updateOrCreate(
+                    ['matricula' => $item['matricula']],
+                    [
+                        'nome' => $nomeAluno,
+                        'login' => $item['login'] ?? null,
+                        'curso_id' => $cursoIdLocal
+                    ]
+                );
+                $salvos++;
+            }
+
+            DB::commit();
+
+            $temMais = count($alunosLote) >= 25;
+
+            return response()->json(['success' => true, 'salvos' => $salvos, 'tem_mais' => $temMais]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 }
