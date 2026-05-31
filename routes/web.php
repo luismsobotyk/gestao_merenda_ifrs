@@ -46,6 +46,7 @@ Route::prefix('controle-retirada')->group(function () {
     Route::get('/totem', [RetiradaController::class, 'modoTotem'])->name('retirada.totem');
     Route::get('/manual', [RetiradaController::class, 'modoManual'])->name('retirada.manual');
     Route::patch('/toggle', [RetiradaController::class, 'toggleModo'])->name('retirada.toggle');
+    Route::post('/totem/registrar', [RetiradaController::class, 'registrarTotem'])->name('retirada.totem.registrar');
 });
 
 // Outras rotas
