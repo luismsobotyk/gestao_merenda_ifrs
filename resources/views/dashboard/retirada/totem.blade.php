@@ -51,7 +51,7 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
             <h1 class="h2 mb-0">Modo Autoatendimento (Totem)</h1>
-            <small class="text-muted">Aguardando leitura de carteirinha ou digitação da matrícula.</small>
+            <small class="text-muted">Aguardando a digitação da matrícula.</small>
         </div>
         <a href="{{ route('retirada.index') }}" class="btn btn-sm btn-outline-secondary">Voltar ao Painel</a>
     </div>
