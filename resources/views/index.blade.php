@@ -12,7 +12,7 @@
 <nav class="navbar navbar-light bg-white shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-semibold" href="{{ url('/') }}">
-            Cardápio de Merenda
+            {{ env('APP_NAME', 'IFRS') }}
         </a>
 
         <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm">
@@ -26,7 +26,7 @@
     <div class="text-center mb-4">
         <h1 class="fw-bold mb-2">Cardápio de Merenda</h1>
         <p class="text-muted mb-0">
-            Instituto Federal do Rio Grande do Sul
+            Instituto Federal do Rio Grande do Sul · {{ env('IFRS_CAMPUS', 'IFRS') }}
         </p>
     </div>
 
@@ -147,13 +147,13 @@
 
         </div>
 
-        <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+        <div class="d-flex flex-wrap justify-content-center gap-2 mt-4" id="botoesNavegacaoDias">
             @foreach($dias as $index => $dia)
                 <button
                     type="button"
                     data-bs-target="#cardapioCarousel"
                     data-bs-slide-to="{{ $index }}"
-                    class="btn btn-sm {{ $index === $indiceAtivo ? 'btn-success' : 'btn-outline-secondary' }}"
+                    class="btn btn-sm btn-dia {{ $index === $indiceAtivo ? 'btn-success' : 'btn-outline-secondary' }}"
                     aria-current="{{ $index === $indiceAtivo ? 'true' : 'false' }}"
                     aria-label="Ver cardápio de {{ $dia['data']->format('d/m/Y') }}"
                 >
@@ -171,8 +171,35 @@
 </main>
 
 <footer class="py-4 text-center text-muted small">
-    IFRS · Cardápio de Merenda
+    IFRS · {{ env('APP_NAME', 'IFRS') }}
 </footer>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const carouselEl = document.getElementById('cardapioCarousel');
+        const botoesDias = document.querySelectorAll('.btn-dia');
 
+        // Escuta o evento nativo do Bootstrap disparado quando o slide muda
+        carouselEl.addEventListener('slide.bs.carousel', function (event) {
+            const indiceDestino = event.to; // Descobre para qual slide (índice) estamos indo
+
+            // Atualiza o visual de todos os botões de navegação
+            botoesDias.forEach((btn, index) => {
+                if (index === indiceDestino) {
+                    // Destaca o botão selecionado no momento
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-success');
+                    btn.setAttribute('aria-current', 'true');
+                } else {
+                    // Tira o destaque dos outros
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-secondary');
+                    btn.setAttribute('aria-current', 'false');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
 </body>
 </html>

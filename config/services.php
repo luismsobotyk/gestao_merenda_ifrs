@@ -38,6 +38,7 @@ return [
     'ifrs_api' => [
         'url' => env('API_URL'),
         'token' => env('API_TOKEN'),
+        'campus_id' => env('API_CAMPUS_ID'),
     ],
 
 ];

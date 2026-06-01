@@ -9,11 +9,13 @@ class IfrsApiService
 {
     protected string $baseUrl;
     protected string $token;
+    protected string $campusId;
 
     public function __construct()
     {
         $this->baseUrl = config('services.ifrs_api.url');
         $this->token = config('services.ifrs_api.token');
+        $this->campusId = config('services.ifrs_api.campus_id');
     }
 
     /**
@@ -34,28 +36,17 @@ class IfrsApiService
     {
         return $this->client()->get('/matriculados', [
             'matriculado' => 'sim',
-            'unidade' => 31,
+            'unidade' => $this->campusId, // Correção aqui
             'curso' => $idCursoApi,
             'per_page' => 25,
             'page' => $pagina
         ]);
     }
 
-    /**
-     * Método para testar a conexão inicial
-     */
-    public function testarConexao()
-    {
-        // Substitua '/endpoint-de-teste' por uma rota GET real e leve da API (ex: '/status', '/ping', ou '/alunos/1')
-        $response = $this->client()->get('/cursos?campus=31&situacao_turma=1');
-
-        return $response;
-    }
-
     public function buscarCursos()
     {
         return $this->client()->get('/cursos', [
-            'campus' => 31,
+            'campus' => $this->campusId, // Correção aqui
             'situacao_turma' => 1
         ]);
     }

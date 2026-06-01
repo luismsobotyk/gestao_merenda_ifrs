@@ -15,24 +15,12 @@ class MainController extends Controller
 
         /*
          * Janela exibida no carrossel:
-         * - 3 dias anteriores
          * - hoje
-         * - 7 dias seguintes
+         * - 9 dias seguintes
          */
-        $dataInicial = $hoje->copy()->subDays(3);
-        $dataFinal = $hoje->copy()->addDays(7);
+        $dataInicial = $hoje->copy();
+        $dataFinal = $hoje->copy()->addDays(9);
 
-        /*
-         * Ajuste este ponto conforme sua regra.
-         * Por exemplo:
-         *
-         * Cardapio::where('ativo', true)
-         * Cardapio::where('unidade_uuid', ...)
-         * Cardapio::where('contrato_uuid', ...)
-         *
-         * Como você não mostrou a migration de cardapios,
-         * deixei a busca ampla.
-         */
         $cardapios = Cardapio::with([
             'horarios.itensPadrao.itemContrato',
             'horarios.excecoes.itens.itemContrato',
@@ -45,24 +33,10 @@ class MainController extends Controller
         }
 
         /*
-         * Define qual slide ficará ativo:
-         * 1. Se hoje tiver cardápio, destaca hoje.
-         * 2. Senão, destaca o próximo dia com cardápio.
-         * 3. Se não houver nenhum próximo, destaca o primeiro item da lista.
+         * Define qual slide ficará ativo ao carregar a página:
+         * Como solicitado, carrega sempre o dia atual (índice 0 da lista)
          */
-        $indiceAtivo = $dias->search(function ($dia) use ($hoje) {
-            return $dia['data']->isSameDay($hoje) && $dia['possui_cardapio'];
-        });
-
-        if ($indiceAtivo === false) {
-            $indiceAtivo = $dias->search(function ($dia) use ($hoje) {
-                return $dia['data']->greaterThan($hoje) && $dia['possui_cardapio'];
-            });
-        }
-
-        if ($indiceAtivo === false) {
-            $indiceAtivo = 0;
-        }
+        $indiceAtivo = 0;
 
         return view('index', [
             'dias' => $dias,
@@ -78,39 +52,48 @@ class MainController extends Controller
         $horariosDoDia = collect();
 
         foreach ($cardapios as $cardapio) {
-            foreach ($cardapio->horarios as $horario) {
-                $itensPadrao = collect(
-                    $horario->itensPadrao
-                        ->where('dia_semana', $diaSemana)
-                        ->map(function ($itemPadrao) {
-                            return [
-                                'id' => $itemPadrao->item_contrato_uuid,
-                                'nome' => $itemPadrao->itemContrato->nome ?? 'Item não identificado',
-                                'quantidade_estimada_porcao' => $itemPadrao->quantidade_estimada_porcao,
-                                'origem' => 'padrao',
-                            ];
-                        })
-                        ->values()
-                        ->all()
-                );
+            // Verifica se a data consultada está dentro do período de vigência deste cardápio
+            $inicioVigencia = Carbon::parse($cardapio->data_inicio)->startOfDay();
+            $fimVigencia = Carbon::parse($cardapio->data_fim)->endOfDay();
 
-                $excecoesDoDia = $horario->excecoes
-                    ->where('data_exata', $data->toDateString())
-                    ->values();
+            if ($data->between($inicioVigencia, $fimVigencia)) {
+                foreach ($cardapio->horarios as $horario) {
+                    $itensPadrao = collect(
+                        $horario->itensPadrao
+                            ->where('dia_semana', $diaSemana)
+                            ->map(function ($itemPadrao) {
+                                return [
+                                    'id' => $itemPadrao->item_contrato_uuid,
+                                    'nome' => $itemPadrao->itemContrato->nome ?? 'Item não identificado',
+                                    'quantidade_estimada_porcao' => $itemPadrao->quantidade_estimada_porcao,
+                                    'origem' => 'padrao',
+                                ];
+                            })
+                            ->values()
+                            ->all()
+                    );
 
-                $itensFinais = $this->aplicarExcecoes($itensPadrao, $excecoesDoDia);
+                    $excecoesDoDia = $horario->excecoes
+                        ->where('data_exata', $data->toDateString())
+                        ->values();
 
-                if ($itensFinais->isNotEmpty()) {
-                    $horariosDoDia->push([
-                        'nome' => $horario->nome,
-                        'hora_inicio' => $horario->hora_inicio,
-                        'hora_fim' => $horario->hora_fim,
-                        'descricao_publico' => $horario->descricao_publico,
-                        'itens' => $itensFinais,
-                    ]);
+                    $itensFinais = $this->aplicarExcecoes($itensPadrao, $excecoesDoDia);
+
+                    if ($itensFinais->isNotEmpty()) {
+                        $horariosDoDia->push([
+                            'nome' => $horario->nome,
+                            'hora_inicio' => $horario->hora_inicio,
+                            'hora_fim' => $horario->hora_fim,
+                            'descricao_publico' => $horario->descricao_publico,
+                            'itens' => $itensFinais,
+                        ]);
+                    }
                 }
             }
         }
+
+        // Ordena os horários do dia pelo horário de início para exibição correta na tela
+        $horariosDoDia = $horariosDoDia->sortBy('hora_inicio')->values();
 
         return [
             'data' => $data,
@@ -138,27 +121,14 @@ class MainController extends Controller
                 ->values();
 
             if ($excecao->tipo === 'substituicao') {
-                /*
-                 * Substituição:
-                 * Remove os itens normais e usa somente os itens da exceção.
-                 */
                 $itens = $itensExcecao;
             }
 
             if ($excecao->tipo === 'inclusao') {
-                /*
-                 * Inclusão:
-                 * Mantém os itens normais e adiciona os itens da exceção.
-                 */
                 $itens = $itens->merge($itensExcecao)->unique('id')->values();
             }
 
             if ($excecao->tipo === 'supressao') {
-                /*
-                 * Supressão:
-                 * Se houver itens vinculados à exceção, remove somente esses itens.
-                 * Se não houver itens vinculados, remove todo o cardápio daquele horário.
-                 */
                 if ($itensExcecao->isEmpty()) {
                     $itens = collect();
                 } else {
