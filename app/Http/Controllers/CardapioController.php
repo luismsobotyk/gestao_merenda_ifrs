@@ -48,38 +48,68 @@ class CardapioController extends Controller
             'data_fim.after_or_equal' => 'A data de término não pode ser anterior à data de início.',
         ]);
 
-        // 2. Criação do registro mestre
+        // 2. VERIFICAÇÃO DE SOBREPOSIÇÃO DE DATAS
+        $conflito = \App\Models\Cardapio::where('data_inicio', '<=', $request->data_fim)
+            ->where('data_fim', '>=', $request->data_inicio)
+            ->first();
+
+        if ($conflito) {
+            $inicioConflito = Carbon::parse($conflito->data_inicio)->format('d/m/Y');
+            $fimConflito = Carbon::parse($conflito->data_fim)->format('d/m/Y');
+
+            return back()->withErrors([
+                'datas' => "Já existe um cardápio cadastrado neste período: '{$conflito->nome}' ({$inicioConflito} a {$fimConflito})."
+            ])->withInput();
+        }
+
+        // 3. Criação do registro mestre se não houver conflitos
         $cardapio = \App\Models\Cardapio::create([
             'nome' => $request->nome_cardapio,
             'data_inicio' => $request->data_inicio,
             'data_fim' => $request->data_fim,
         ]);
 
-        // 3. Redireciona para a tela de edição, onde o JavaScript vai carregar os dados
+        // 4. Redireciona para a tela de edição
         return redirect()->route('cardapio.editar', $cardapio->id)
             ->with('success', 'Cardápio iniciado! Agora defina os horários e alimentos.');
     }
+
     public function syncAll(Request $request, $id)
     {
         $cardapio = Cardapio::findOrFail($id);
+
+        // 1. VERIFICAÇÃO DE SOBREPOSIÇÃO NA EDIÇÃO (Ignorando o cardápio atual)
+        $conflito = \App\Models\Cardapio::where('id', '!=', $id)
+            ->where('data_inicio', '<=', $request->data_fim)
+            ->where('data_fim', '>=', $request->data_inicio)
+            ->first();
+
+        if ($conflito) {
+            $inicioConflito = Carbon::parse($conflito->data_inicio)->format('d/m/Y');
+            $fimConflito = Carbon::parse($conflito->data_fim)->format('d/m/Y');
+            return response()->json([
+                'success' => false,
+                'error' => "Choque de datas com o cardápio '{$conflito->nome}' ({$inicioConflito} a {$fimConflito})."
+            ]);
+        }
 
         // Inicia a transação com o Banco de Dados
         DB::beginTransaction();
 
         try {
-            // 1. Atualiza as Informações Básicas
+            // 2. Atualiza as Informações Básicas
             $cardapio->update([
                 'nome' => $request->nome_cardapio,
                 'data_inicio' => $request->data_inicio,
                 'data_fim' => $request->data_fim,
             ]);
 
-            // 2. Limpeza Cirúrgica (Apagamos os itens antigos para gravar o estado atual da tela)
-            // Isso evita termos que rastrear manualmente um por um o que o usuário deletou na tela
+            // 3. Limpeza Cirúrgica
             $cardapio->horarios()->delete();
             $cardapio->excecoes()->delete();
 
-            // 3. Reconstrói os Horários e Itens da Grid
+            // 4. Reconstrói os Horários e Itens da Grid
+            $mapaHorarios = [];
             foreach ($request->horarios ?? [] as $hIndex => $hData) {
                 $horario = $cardapio->horarios()->create([
                     'nome' => $hData['nome'],
@@ -88,7 +118,6 @@ class CardapioController extends Controller
                     'descricao_publico' => $hData['descricao_publico'] ?? null,
                 ]);
 
-                // Grava o "ID Real" na memória para podermos associar as exceções depois
                 $mapaHorarios[$hIndex] = $horario->id;
 
                 foreach ($hData['itens'] ?? [] as $itemData) {
@@ -99,9 +128,8 @@ class CardapioController extends Controller
                 }
             }
 
-            // 4. Reconstrói as Exceções
+            // 5. Reconstrói as Exceções
             foreach ($request->excecoes ?? [] as $excData) {
-                // Recupera o ID real do horário que criamos logo acima
                 $horarioRealId = $mapaHorarios[$excData['horario_index']];
 
                 $excecao = $cardapio->excecoes()->create([
@@ -117,12 +145,10 @@ class CardapioController extends Controller
                 }
             }
 
-            // Se tudo deu certo, efetiva no banco
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Cardápio salvo com sucesso!']);
 
         } catch (\Exception $e) {
-            // Se algo falhou, desfaz todas as inserções
             DB::rollBack();
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
