@@ -88,13 +88,35 @@
 @endsection
 
 @section('custom_js')
-    <script>
-        function confirmarExclusao(id) {
-            if(confirm('Tem certeza que deseja excluir este cardápio? Todo o histórico de agendamentos dele será perdido.')) {
-                // Aqui você pode criar um form via JS ou redirecionar para uma rota de delete
-                // window.location.href = '/cardapio/' + id + '/excluir';
-                alert('Rota de exclusão será implementada em breve.');
+    @section('custom_js')
+        <script>
+            function confirmarExclusao(id) {
+                if(confirm('Tem certeza que deseja excluir este cardápio? Todo o histórico de planejamento será apagado permanentemente.')) {
+
+                    // Cria um formulário dinâmico
+                    let form = document.createElement('form');
+                    form.action = '/cardapio/' + id;
+                    form.method = 'POST';
+
+                    // Adiciona o Token CSRF de segurança
+                    let csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    form.appendChild(csrfToken);
+
+                    // Adiciona a falsificação do método DELETE exigida pelo Laravel
+                    let methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
+                    form.appendChild(methodInput);
+
+                    // Adiciona o formulário ao corpo da página e envia
+                    document.body.appendChild(form);
+                    form.submit();
+                }
             }
-        }
-    </script>
+        </script>
+    @endsection
 @endsection

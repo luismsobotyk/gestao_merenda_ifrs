@@ -153,4 +153,10 @@ class CardapioController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
+    public function destroy($id)
+    {
+        $cardapio = Cardapio::findOrFail($id);
+        $cardapio->delete();
+        return redirect()->route('cardapio')->with('success', 'Cardápio excluído permanentemente.');
+    }
 }

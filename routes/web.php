@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/salvar', [CardapioController::class, 'store'])->name('cardapio.salvar');
         Route::get('/{id}/editar', [CardapioController::class, 'edit'])->name('cardapio.editar');
         Route::post('/{id}/sync', [CardapioController::class, 'syncAll'])->name('cardapio.sync');
+        Route::delete('/{id}', [CardapioController::class, 'destroy'])->name('cardapio.excluir');
     });
 
     // Gestão de Cursos e Alunos
