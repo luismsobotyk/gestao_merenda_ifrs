@@ -74,4 +74,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/por-dia-semana', [GraficoController::class, 'porDiaSemana'])->name('graficos.por_dia_semana');
         Route::get('/por-turma', [GraficoController::class, 'porTurma'])->name('graficos.por_turma');
     });
+
+    // Gerencia de usuários
+    Route::prefix('usuarios')->group(function () {
+        Route::get('/', [\App\Http\Controllers\UserController::class, 'index'])->name('usuarios.index');
+        Route::get('/busca-ldap', [\App\Http\Controllers\UserController::class, 'searchLdap'])->name('usuarios.busca_ldap');
+        Route::post('/salvar', [\App\Http\Controllers\UserController::class, 'store'])->name('usuarios.salvar');
+        Route::delete('/{id}', [\App\Http\Controllers\UserController::class, 'destroy'])->name('usuarios.excluir');
+        Route::get('/{id}/historico', [\App\Http\Controllers\UserController::class, 'history'])->name('usuarios.historico');
+    });
 });
