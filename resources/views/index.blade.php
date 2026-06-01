@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cardápio de Merenda - IFRS</title>
+    <title>{{ env('APP_NAME', 'IFRS') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

@@ -34,12 +34,12 @@ class GraficoController extends Controller
         $tipoGrafico = session('filtro_tipos_grafico', 'bar');
 
         // 2. Constrói a consulta baseada no filtro
-        $query = DB::table('retiradas')
+        $query = \Illuminate\Support\Facades\DB::table('retiradas')
             ->join('cardapio_horarios', 'retiradas.cardapio_horario_id', '=', 'cardapio_horarios.id')
             ->select(
                 'retiradas.data_retirada',
                 'cardapio_horarios.id as horario_id',
-                DB::raw('COUNT(retiradas.id) as total')
+                \Illuminate\Support\Facades\DB::raw('COUNT(retiradas.id) as total')
             )
             ->whereNotNull('retiradas.cardapio_horario_id');
 
@@ -54,9 +54,9 @@ class GraficoController extends Controller
         foreach ($retiradas as $retirada) {
             $data = $retirada->data_retirada;
             $horarioId = $retirada->horario_id;
-            $diaSemana = Carbon::parse($data)->dayOfWeekIso;
+            $diaSemana = \Carbon\Carbon::parse($data)->dayOfWeekIso;
 
-            $itensExcecao = DB::table('cardapio_excecoes')
+            $itensExcecao = \Illuminate\Support\Facades\DB::table('cardapio_excecoes')
                 ->join('cardapio_excecao_itens', 'cardapio_excecoes.id', '=', 'cardapio_excecao_itens.cardapio_excecao_id')
                 ->join('item_contrato', 'cardapio_excecao_itens.item_contrato_uuid', '=', 'item_contrato.id')
                 ->where('cardapio_excecoes.data_exata', $data)
@@ -64,9 +64,10 @@ class GraficoController extends Controller
                 ->pluck('item_contrato.nome');
 
             if ($itensExcecao->isNotEmpty()) {
-                $nomeLanche = $itensExcecao->unique()->implode(' + ') . " (Exceção)";
+                // MUDANÇA AQUI: Removido o . " (Exceção)" para agrupar junto com os itens padrão
+                $nomeLanche = $itensExcecao->unique()->implode(' + ');
             } else {
-                $itensPadrao = DB::table('cardapio_itens_padrao')
+                $itensPadrao = \Illuminate\Support\Facades\DB::table('cardapio_itens_padrao')
                     ->join('item_contrato', 'cardapio_itens_padrao.item_contrato_uuid', '=', 'item_contrato.id')
                     ->where('cardapio_itens_padrao.cardapio_horario_id', $horarioId)
                     ->where('cardapio_itens_padrao.dia_semana', $diaSemana)
@@ -88,14 +89,14 @@ class GraficoController extends Controller
         $valores = array_values($consumoPorLanche);
 
         if (empty($labels) && !$dataInicial) {
-            $labels = ['Iogurte e Banana (Exceção)', 'Pão de Batata e Suco', 'Cachorro Quente', 'Pão de Queijo e Chá', 'Frutas Variadas'];
+            // Ajustado o mock de dados também para remover o "(Exceção)"
+            $labels = ['Iogurte e Banana', 'Pão de Batata e Suco', 'Cachorro Quente', 'Pão de Queijo e Chá', 'Frutas Variadas'];
             $valores = [420, 310, 290, 150, 80];
         }
 
         // Passamos também o $tipoGrafico para a view
         return view('dashboard.graficos.tipos-merenda', compact('labels', 'valores', 'dataInicial', 'dataFinal', 'tipoGrafico'));
     }
-
     public function porDiaSemana(\Illuminate\Http\Request $request)
     {
         // 1. Lógica de "Cache" na Sessão
