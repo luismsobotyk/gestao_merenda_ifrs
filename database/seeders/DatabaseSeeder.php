@@ -15,5 +15,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ContratoSeeder::class,
         ]);
+        $this->call([
+            CardapioSeeder::class,
+        ]);
     }
 }

@@ -88,12 +88,6 @@ class GraficoController extends Controller
         $labels = array_keys($consumoPorLanche);
         $valores = array_values($consumoPorLanche);
 
-        if (empty($labels) && !$dataInicial) {
-            // Ajustado o mock de dados também para remover o "(Exceção)"
-            $labels = ['Iogurte e Banana', 'Pão de Batata e Suco', 'Cachorro Quente', 'Pão de Queijo e Chá', 'Frutas Variadas'];
-            $valores = [420, 310, 290, 150, 80];
-        }
-
         // Passamos também o $tipoGrafico para a view
         return view('dashboard.graficos.tipos-merenda', compact('labels', 'valores', 'dataInicial', 'dataFinal', 'tipoGrafico'));
     }
@@ -205,12 +199,6 @@ class GraficoController extends Controller
 
         $labels = $retiradas->pluck('curso_nome')->toArray();
         $valores = $retiradas->pluck('total')->toArray();
-
-        // Mock de dados caso o banco esteja vazio
-        if (empty($labels) && !$dataInicial) {
-            $labels = ['Técnico em Informática', 'Técnico em Administração', 'Técnico em Mecânica', 'Engenharia Civil', 'Licenciatura em Matemática'];
-            $valores = [450, 380, 210, 150, 90];
-        }
 
         return view('dashboard.graficos.por-turma', compact('labels', 'valores', 'dataInicial', 'dataFinal', 'tipoGrafico'));
     }
