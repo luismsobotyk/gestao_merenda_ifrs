@@ -74,6 +74,11 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        if ($user->username === env('ADMIN_LDAP_USERNAME')) {
+            return back()->withErrors('Operação negada: Não é possível revogar o acesso do Administrador Principal do sistema.');
+        }
+
+        // Bloqueia a auto-exclusão para utilizadores normais
         if (auth()->id() === $user->id) {
             return back()->withErrors('Não é possível remover a sua própria conta.');
         }

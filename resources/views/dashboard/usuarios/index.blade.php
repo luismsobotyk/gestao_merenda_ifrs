@@ -48,6 +48,13 @@
                             <td class="ps-4 fw-bold text-dark">
                                 <i class="bi bi-person-circle text-muted me-2 fs-5"></i>
                                 {{ $user->name }}
+
+                                {{-- Selo visual para o Super Admin --}}
+                                @if($user->username === env('ADMIN_LDAP_USERNAME'))
+                                    <span class="badge bg-danger ms-2" title="Conta gerida pelo ficheiro .env">
+                                        <i class="bi bi-star-fill me-1"></i>Super Admin
+                                    </span>
+                                @endif
                             </td>
                             <td><span class="badge bg-secondary">{{ $user->username }}</span></td>
                             <td><a href="mailto:{{ $user->email }}" class="text-decoration-none">{{ $user->email }}</a></td>
@@ -56,13 +63,23 @@
                                     <a href="{{ route('usuarios.historico', $user->id) }}" class="btn btn-sm btn-outline-primary" title="Histórico de Acesso">
                                         <i class="bi bi-clock-history"></i>
                                     </a>
-                                    <form action="{{ route('usuarios.excluir', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem a certeza que deseja revogar o acesso deste utilizador?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" {{ auth()->id() === $user->id ? 'disabled' : '' }} title="Revogar Acesso">
-                                            <i class="bi bi-trash"></i>
+
+                                    {{-- 2ª Camada de Proteção: Controla a exibição do botão de excluir --}}
+                                    @if($user->username === env('ADMIN_LDAP_USERNAME'))
+                                        {{-- Botão desativado visualmente para o Super Admin --}}
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Acesso protegido pelo sistema">
+                                            <i class="bi bi-shield-lock-fill"></i>
                                         </button>
-                                    </form>
+                                    @else
+                                        {{-- Botão de excluir normal para os restantes utilizadores --}}
+                                        <form action="{{ route('usuarios.excluir', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem a certeza que deseja revogar o acesso deste utilizador?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" {{ auth()->id() === $user->id ? 'disabled' : '' }} title="Revogar Acesso">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
