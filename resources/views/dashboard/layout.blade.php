@@ -317,8 +317,6 @@
     </div>
 </div>
 
-<script src="{{ asset('assets/js/dashboard.js') }}" class="astro-vvvwv3sm"></script>
-
 @yield('custom_js')
 
 </body>

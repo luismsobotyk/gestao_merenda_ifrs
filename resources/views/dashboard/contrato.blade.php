@@ -291,7 +291,15 @@
                                             </button>
                                         </form>
                                     @else
-                                        <a href="#" class="text-decoration-none small text-primary" style="font-size: 0.75rem;">Ver NF</a>
+                                        <a href="#"
+                                           onclick="return false;"
+                                           class="text-decoration-none small text-primary"
+                                           style="font-size: 0.70rem;"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top"
+                                           data-bs-title="Funcionalidade em desenvolvimento">
+                                            Ver NF
+                                        </a>
                                     @endif
                                 </div>
                             </li>
@@ -747,7 +755,15 @@
                                     <button type="submit" class="btn btn-sm {{ $btnClass }} py-0 px-2" style="font-size: 0.70rem;" title="Confirmar recebimento">Receber</button>
                                 </form>
                             @else
-                                <a href="#" class="text-decoration-none small text-primary" style="font-size: 0.70rem;">Ver NF</a>
+                                <a href="#"
+                                   onclick="return false;"
+                                   class="text-decoration-none small text-primary"
+                                   style="font-size: 0.70rem;"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   data-bs-title="Funcionalidade em desenvolvimento">
+                                    Ver NF
+                                </a>
                             @endif
                         </div>
                     </li>

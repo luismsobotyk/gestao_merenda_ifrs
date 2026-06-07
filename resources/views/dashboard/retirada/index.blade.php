@@ -75,33 +75,66 @@
         </div>
 
         {{-- CARD 2: MODO LANÇAMENTO MANUAL --}}
+        {{-- CARD 2: MODO LANÇAMENTO MANUAL --}}
         <div class="col-md-6">
             <div class="card h-100 shadow-sm border-secondary border-opacity-25 hover-card">
                 {{-- Cabeçalho com Badge e Toggle --}}
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-4">
-                    <span id="badge-manual" class="badge {{ $manualAtivo ? 'bg-success' : 'bg-danger' }} px-3 py-2">
-                        {{ $manualAtivo ? 'Habilitado' : 'Desabilitado' }}
-                    </span>
-                    <div class="form-check form-switch mb-0">
-                        <input class="form-check-input toggle-modo" type="checkbox" role="switch" data-modo="manual" {{ $manualAtivo ? 'checked' : '' }}>
-                    </div>
+            <span id="badge-manual" class="badge bg-danger px-3 py-2">
+                Desabilitado
+            </span>
+
+                    <span
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-title="Funcionalidade em desenvolvimento"
+                    >
+                <div class="form-check form-switch mb-0">
+                    <input
+                        class="form-check-input toggle-modo"
+                        type="checkbox"
+                        role="switch"
+                        data-modo="manual"
+                        disabled
+                        aria-disabled="true"
+                        style="cursor: not-allowed;"
+                    >
+                </div>
+            </span>
                 </div>
 
                 <div class="card-body p-4 text-center">
-                    <div class="icon-circle bg-success bg-opacity-10 text-success mx-auto mb-4">
+                    <div class="icon-circle bg-success bg-opacity-10 text-success mx-auto mb-4 opacity-50">
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-person-lines-fill" viewBox="0 0 16 16">
                             <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"/>
                         </svg>
                     </div>
-                    <h4 class="fw-bold mb-3">Modo Lançamento Manual</h4>
+
+                    <h4 class="fw-bold mb-3 text-muted">Modo Lançamento Manual</h4>
+
                     <p class="text-muted">
                         Acesso para o servidor ou bolsista responsável. Permite pesquisar alunos por nome ou matrícula e fazer o registro da entrega individualmente.
                     </p>
 
-                    {{-- O botão agora é o link. --}}
-                    <a href="{{ route('retirada.manual') }}" id="btn-manual" class="btn btn-success mt-2 rounded-pill px-5 fw-bold {{ $manualAtivo ? '' : 'disabled' }}">
-                        Acessar Painel
-                    </a>
+                    <span
+                        class="d-inline-block"
+                        tabindex="0"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-title="Funcionalidade em desenvolvimento"
+                    >
+                <a
+                    href="#"
+                    id="btn-manual"
+                    class="btn btn-success mt-2 rounded-pill px-5 fw-bold disabled"
+                    onclick="return false;"
+                    tabindex="-1"
+                    aria-disabled="true"
+                    style="pointer-events: none;"
+                >
+                    Acessar Painel
+                </a>
+            </span>
                 </div>
             </div>
         </div>
@@ -156,7 +189,7 @@
 @section('custom_js')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.toggle-modo').forEach(toggle => {
+            document.querySelectorAll('.toggle-modo:not(:disabled)').forEach(toggle => {
                 toggle.addEventListener('change', async function() {
                     const modo = this.getAttribute('data-modo'); // 'totem' ou 'manual'
                     const isChecked = this.checked;
