@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/editar', [ContratoController::class, 'visualizaContrato'])->name('contrato.editar'); // Ajuste futuro: método edit
         Route::post('/{id}/empenho/salvar', [ContratoController::class, 'salvaEmpenho'])->name('empenho.salvar');
         Route::post('/{id}/pedido/salvar', [ContratoController::class, 'salvaPedido'])->name('pedido.salvar');
+        Route::get('/{id}/editar', [ContratoController::class, 'editar'])->name('contrato.editar');
+        Route::put('/{id}/atualizar', [ContratoController::class, 'atualizar'])->name('contrato.atualizar');
     });
     Route::patch('/pedido/{id}/receber', [ContratoController::class, 'receberPedido'])->name('pedido.receber');
     Route::get('/fornecedor/busca-cnpj', [FornecedorController::class, 'buscaPorCnpj'])->name('fornecedor.busca.cnpj');

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Contrato;
 use App\Models\Fornecedor;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ContratoController extends Controller
 {
@@ -121,6 +122,92 @@ class ContratoController extends Controller
 
         return redirect()->route('contratos')->with('success', 'Contrato e itens cadastrados com sucesso!');
     }
+
+    public function editar($id)
+    {
+        // Busca o contrato com os seus relacionamentos necessários
+        $contrato = Contrato::with(['fornecedor.responsaveis.contatos', 'itens'])->findOrFail($id);
+
+        // Busca as unidades para preencher o select de alimentos
+        $unidades = DB::table('unidade')->orderBy('descricao')->get();
+
+        // CORREÇÃO: Aponta exatamente para o ficheiro criaContrato dentro de dashboard
+        return view('dashboard.criaContrato', compact('contrato', 'unidades'));
+    }
+
+    public function atualizar(Request $request, $id)
+    {
+        $contrato = Contrato::findOrFail($id);
+
+        // 1. Atualiza os dados básicos do Contrato
+        $contrato->update([
+            'processo' => $request->processo,
+            'pregao' => $request->pregao,
+            'inicio_vigencia' => $request->inicio_vigencia,
+            'fim_vigencia' => $request->fim_vigencia,
+            // Converte a string "R$ 1.500,00" para float "1500.00"
+            'valor_global' => $this->converterMoeda($request->valor_global),
+        ]);
+
+        // 2. Atualização do E-mail do Contato Principal do Fornecedor
+        if ($request->filled('email_contato') && $contrato->fornecedor) {
+            // Busca o responsável principal ou cria um genérico caso o fornecedor não tenha nenhum
+            $responsavelPrincipal = $contrato->fornecedor->responsaveis()->firstOrCreate(
+                ['is_principal' => true],
+                ['nome' => 'Responsável Legal']
+            );
+
+            // Atualiza o contato do tipo 'Email' se existir, ou cria um novo se não existir
+            $responsavelPrincipal->contatos()->updateOrCreate(
+                ['tipo' => 'Email'],
+                ['valor' => $request->email_contato]
+            );
+        }
+
+        // 3. Sincronização Dinâmica dos Itens (Alimentos)
+        $itensRecebidos = $request->input('itens', []);
+
+        // Recolhe apenas os IDs dos itens que vieram no formulário
+        $idsRecebidos = collect($itensRecebidos)->pluck('id')->filter()->toArray();
+
+        try {
+            // Remove do banco os itens que foram apagados na tela pelo utilizador
+            // (O Laravel só exclui se não houver restrição de chave estrangeira, ex: se já tiver empenho gerado)
+            $contrato->itens()->whereNotIn('id', $idsRecebidos)->delete();
+        } catch (\Exception $e) {
+            return back()->withErrors('Não é possível remover um alimento que já possui Notas de Empenho vinculadas.')->withInput();
+        }
+
+        // Atualiza os itens existentes ou cria os novos adicionados na tela
+        foreach ($itensRecebidos as $itemData) {
+            $contrato->itens()->updateOrCreate(
+                ['id' => $itemData['id'] ?? null], // Critério de busca (se tiver ID, atualiza; se não, cria)
+                [
+                    'nome' => $itemData['nome'],
+                    'unidade_uuid' => $itemData['unidade_uuid'],
+                    'quantidade' => $this->converterMoeda($itemData['quantidade']),
+                    'valor_unitario' => $this->converterMoeda($itemData['valor_unitario']),
+                ]
+            );
+        }
+
+        return redirect()->route('contrato.visualizar', $contrato->id)
+            ->with('success', 'Contrato atualizado com sucesso!');
+    }
+
+    /**
+     * Função auxiliar para converter o formato brasileiro em decimal de banco de dados.
+     */
+    private function converterMoeda($valor)
+    {
+        if (!$valor) return 0;
+        // Remove os pontos de milhar
+        $valor = str_replace('.', '', $valor);
+        // Troca a vírgula decimal por ponto
+        $valor = str_replace(',', '.', $valor);
+        return (float) $valor;
+    }
+
 
     public function salvaEmpenho(Request $request, $id)
     {
