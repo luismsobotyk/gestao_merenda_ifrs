@@ -74,7 +74,7 @@
                     <h5 class="card-title fw-bold">Totem de Retirada</h5>
 
                     <p class="card-text text-muted small">
-                        Inicie o modo Totem de autoatendimento para leitura das carteirinhas dos alunos.
+                        Inicie o modo Totem de autoatendimento para leitura das matrículas dos alunos.
                     </p>
                 </div>
 
@@ -140,7 +140,7 @@
                     <h5 class="card-title fw-bold">Cursos</h5>
 
                     <p class="card-text text-muted small">
-                        Sincronize a base de dados com a API acadêmica e gerencie as permissões de merenda por curso.
+                        Sincronize a base de dados com a API do SIGAA e gerencie as permissões de merenda por curso.
                     </p>
                 </div>
 
