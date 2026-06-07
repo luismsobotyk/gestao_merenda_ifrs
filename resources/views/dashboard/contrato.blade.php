@@ -593,14 +593,25 @@
 
     {{-- Modal Lançar Pedido com Múltiplos Itens --}}
     <div class="modal fade" id="modalLancarPedido" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg"> {{-- Deixei o modal mais largo (modal-lg) --}}
+        <div class="modal-dialog modal-lg">
             <form class="modal-content" id="formLancarPedido" method="POST" action="{{ route('pedido.salvar', $contrato->id) }}">
                 @csrf
                 <div class="modal-header bg-primary text-white">
-                    <h1 class="modal-title h5">Lançar Novo Pedido Múltiplo</h1>
+                    <h1 class="modal-title h5">Lançar Novo Pedido</h1>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+
+                    {{-- AVISO DE MODO DE TESTE --}}
+                    <div class="alert alert-warning d-flex align-items-center mb-3 small shadow-sm" role="alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 text-warning-emphasis" viewBox="0 0 16 16">
+                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                        </svg>
+                        <div>
+                            <strong>Atenção (Modo de Teste):</strong> Este módulo encontra-se em fase de validação. Ao confirmar esta operação, <u>nenhum pedido será enviado ao fornecedor</u>.
+                        </div>
+                    </div>
+
                     <div class="alert alert-info small mb-4">
                         Adicione os itens desejados. O sistema abaterá automaticamente dos empenhos ativos mais antigos de cada alimento.
                     </div>
