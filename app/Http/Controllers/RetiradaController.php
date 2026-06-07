@@ -7,6 +7,7 @@ use App\Models\ConfiguracaoRetirada;
 use App\Models\Aluno;
 use App\Models\Retirada;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RetiradaController extends Controller
 {
@@ -62,23 +63,25 @@ class RetiradaController extends Controller
 
     public function modoTotem(Request $request)
     {
-        if (ConfiguracaoRetirada::where('chave', 'modo_totem_ativo')->value('valor') !== '1') {
-            return redirect()->route('retirada.index')->withErrors('O modo Totem está desativado no momento.');
+        // Se o ID do turno não foi passado na URL (?horario_id=...), mostra a tela de seleção
+        if (!$request->has('horario_id')) {
+            $horarios = DB::table('cardapio_horarios')->orderBy('hora_inicio')->get();
+            return view('dashboard.retirada.selecionar_turno', compact('horarios'));
         }
 
-        $horarioId = $request->get('horario_id');
-        if (!$horarioId) {
-            return redirect()->route('retirada.index')->withErrors('Selecione o turno antes de iniciar o Totem.');
-        }
+        // Se foi passado, busca o turno específico
+        $horarioSelecionado = DB::table('cardapio_horarios')
+            ->where('id', $request->horario_id)
+            ->first();
 
-        $horarioSelecionado = \DB::table('cardapio_horarios')->where('id', $horarioId)->first();
+        // Proteção: Se o usuário manipular a URL e colocar um ID que não existe
         if (!$horarioSelecionado) {
-            return redirect()->route('retirada.index')->withErrors('Turno inválido.');
+            return redirect()->route('retirada.totem')->withErrors(['Turno não encontrado.']);
         }
 
+        // Retorna a view do Totem (que você já criou) passando o turno validado
         return view('dashboard.retirada.totem', compact('horarioSelecionado'));
     }
-
     public function registrarTotem(Request $request)
     {
         $request->validate([
