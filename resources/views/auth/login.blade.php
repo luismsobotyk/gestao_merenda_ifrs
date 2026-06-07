@@ -13,15 +13,16 @@
 </head>
 <body class="d-flex align-items-center py-4 bg-body-tertiary">
 
-<main class="form-signin w-100 m-auto">
+<main class="form-signin w-100 m-auto text-center">
     <form method="POST" action="{{ route('loginSubmit') }}">
         @csrf
-        <img class="mb-4" src="https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
 
-        <h1 class="h3 mb-3 fw-normal">Por favor, faça login</h1>
+        <img class="mb-2 img-fluid" src="{{ asset('assets/img/logo-sisgem.png') }}" alt="Logo SISGEM" style="max-width: 260px; height: auto;">
+
+        <h1 class="h4 mb-4 fw-normal text-secondary">Por favor, faça login</h1>
 
         @if ($errors->any())
-            <div class="alert alert-danger p-2 small">
+            <div class="alert alert-danger p-2 small text-start">
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -30,7 +31,7 @@
             </div>
         @endif
 
-        <div class="form-floating">
+        <div class="form-floating text-start">
             <input
                 type="text"
                 name="username" class="form-control @error('username') is-invalid @enderror"
@@ -43,7 +44,7 @@
             <label for="floatingInput">Nome de usuário</label>
         </div>
 
-        <div class="form-floating">
+        <div class="form-floating text-start">
             <input
                 type="password"
                 name="password" class="form-control @error('password') is-invalid @enderror"
@@ -61,16 +62,16 @@
                 name="remember"
                 id="checkDefault"
             >
-            <label class="form-check-label" for="checkDefault">
+            <label class="form-check-label text-secondary" for="checkDefault">
                 Lembrar-me
             </label>
         </div>
 
-        <button class="btn btn-primary w-100 py-2" type="submit">
+        <button class="btn btn-primary w-100 py-2 fw-bold" type="submit">
             Entrar
         </button>
 
-        <p class="mt-5 mb-3 text-body-secondary">&copy; {{ date('Y') }} SISGEM - IFRS PoA</p>
+        <p class="mt-5 mb-3 text-body-secondary small">&copy; {{ date('Y') }} SISGEM - IFRS PoA</p>
     </form>
 </main>
 
