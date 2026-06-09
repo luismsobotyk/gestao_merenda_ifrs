@@ -157,7 +157,8 @@ class MainController extends Controller
         };
     }
 
-    public function teste(Request $request){
-        dd($request);
+    public function avaliacao(){
+        return view('avaliacao');
     }
+
 }
