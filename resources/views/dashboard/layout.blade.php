@@ -159,6 +159,62 @@
 
                 <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
 
+                    @php
+                        $usuarioLogado = auth()->user();
+
+                        $normalizarValorLdap = function ($valor) {
+                            if ($valor instanceof \Illuminate\Support\Collection) {
+                                $valor = $valor->first();
+                            }
+
+                            if (is_array($valor)) {
+                                $valor = $valor[0] ?? null;
+                            }
+
+                            if (is_object($valor) && method_exists($valor, '__toString')) {
+                                $valor = (string) $valor;
+                            }
+
+                            if (! is_string($valor) || trim($valor) === '') {
+                                return null;
+                            }
+
+                            $valor = strtolower(trim($valor));
+
+                            if (str_contains($valor, '@')) {
+                                $valor = \Illuminate\Support\Str::before($valor, '@');
+                            }
+
+                            return $valor;
+                        };
+
+                        $ldapUsername = null;
+
+                        if ($usuarioLogado) {
+                            $possiveisCampos = [
+                                $usuarioLogado->username ?? null,
+                                $usuarioLogado->login ?? null,
+                                $usuarioLogado->samaccountname ?? null,
+                                $usuarioLogado->samAccountName ?? null,
+                                $usuarioLogado->uid ?? null,
+                                $usuarioLogado->email ?? null,
+                            ];
+
+                            foreach ($possiveisCampos as $campo) {
+                                $ldapUsername = $normalizarValorLdap($campo);
+
+                                if ($ldapUsername) {
+                                    break;
+                                }
+                            }
+                        }
+
+                        $adminLdapUsername = config('sisgem.admin_ldap_username') ?: env('ADMIN_LDAP_USERNAME');
+                        $adminLdapUsername = $normalizarValorLdap($adminLdapUsername);
+
+                        $isAdminAvaliacao = $ldapUsername && $adminLdapUsername && $ldapUsername === $adminLdapUsername;
+                    @endphp
+
                     <ul class="nav flex-column">
 
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
@@ -167,7 +223,7 @@
 
                         <li class="nav-item">
                             <a
-                                class="nav-link d-flex align-items-center gap-2 active"
+                                class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('home') ? 'active' : '' }}"
                                 aria-current="page"
                                 href="{{ route('home') }}"
                             >
@@ -184,7 +240,7 @@
 
                         <li class="nav-item">
                             <a
-                                class="nav-link d-flex align-items-center gap-2"
+                                class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('contratos') ? 'active' : '' }}"
                                 href="{{ route('contratos') }}"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
@@ -200,7 +256,7 @@
                         </h6>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('cardapio') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('cardapio') ? 'active' : '' }}" href="{{ route('cardapio') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cup-straw" viewBox="0 0 16 16">
                                     <path d="M13.902.334a.5.5 0 0 1-.28.65l-2.254.902-.4 1.927c.376.095.715.215.972.367.228.135.56.396.56.82q0 .069-.011.132l-.962 9.068a1.28 1.28 0 0 1-.524.93c-.488.34-1.494.87-3.01.87s-2.522-.53-3.01-.87a1.28 1.28 0 0 1-.524-.93L3.51 5.132A1 1 0 0 1 3.5 5c0-.424.332-.685.56-.82.262-.154.607-.276.99-.372C5.824 3.614 6.867 3.5 8 3.5c.712 0 1.389.045 1.985.127l.464-2.215a.5.5 0 0 1 .303-.356l2.5-1a.5.5 0 0 1 .65.278M9.768 4.607A14 14 0 0 0 8 4.5c-1.076 0-2.033.11-2.707.278A3.3 3.3 0 0 0 4.645 5c.146.073.362.15.648.222C5.967 5.39 6.924 5.5 8 5.5c.571 0 1.109-.03 1.588-.085zm.292 1.756C9.445 6.45 8.742 6.5 8 6.5c-1.133 0-2.176-.114-2.95-.308a6 6 0 0 1-.435-.127l.838 8.03c.013.121.06.186.102.215.357.249 1.168.69 2.438.69s2.081-.441 2.438-.69c.042-.029.09-.094.102-.215l.852-8.03a6 6 0 0 1-.435.127 9 9 0 0 1-.89.17zM4.467 4.884s.003.002.005.006zm7.066 0-.005.006zM11.354 5a3 3 0 0 0-.604-.21l-.099.445.055-.013c.286-.072.502-.149.648-.222"/>
                                 </svg>
@@ -209,7 +265,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('cursos.index') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('cursos.*') ? 'active' : '' }}" href="{{ route('cursos.index') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journal-bookmark" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd" d="M6 8V1h1v6.117L8.743 6.07a.5.5 0 0 1 .514 0L11 7.117V1h1v7a.5.5 0 0 1-.757.429L9 7.083 6.757 8.43A.5.5 0 0 1 6 8"/>
                                     <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
@@ -220,7 +276,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('alunos.index') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('alunos.*') ? 'active' : '' }}" href="{{ route('alunos.index') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
                                     <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8Zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022ZM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
                                 </svg>
@@ -229,7 +285,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('retirada.index') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('retirada.*') ? 'active' : '' }}" href="{{ route('retirada.index') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-basket3" viewBox="0 0 16 16">
                                     <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5v-1A.5.5 0 0 1 .5 6h1.717L5.07 1.243a.5.5 0 0 1 .686-.172zM3.394 15l-1.48-6h-.97l1.525 6.426a.75.75 0 0 0 .729.574h9.606a.75.75 0 0 0 .73-.574L15.056 9h-.972l-1.479 6z"/>
                                 </svg>
@@ -242,7 +298,7 @@
                         </h6>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('graficos.tipos_merenda') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('graficos.tipos_merenda') ? 'active' : '' }}" href="{{ route('graficos.tipos_merenda') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line-fill" viewBox="0 0 16 16">
                                     <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1z"/>
                                 </svg>
@@ -251,7 +307,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('graficos.por_dia_semana') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('graficos.por_dia_semana') ? 'active' : '' }}" href="{{ route('graficos.por_dia_semana') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pie-chart" viewBox="0 0 16 16">
                                     <path d="M7.5 1.018a7 7 0 0 0-4.79 11.566L7.5 7.793zm1 0V7.5h6.482A7 7 0 0 0 8.5 1.018M14.982 8.5H8.207l-4.79 4.79A7 7 0 0 0 14.982 8.5M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8"/>
                                 </svg>
@@ -260,7 +316,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('graficos.por_turma') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('graficos.por_turma') ? 'active' : '' }}" href="{{ route('graficos.por_turma') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16">
                                     <path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z"/>
                                 </svg>
@@ -272,8 +328,34 @@
                             <span>Administração</span>
                         </h6>
 
+                        @if($isAdminAvaliacao)
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('avaliacao.index') ? 'active' : '' }}"
+                                    href="{{ route('avaliacao.index') }}"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-ui-checks" viewBox="0 0 16 16">
+                                        <path d="M7 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 7 2.5m0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 7 7.5m0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5M1.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m0 5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m0 5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
+                                    </svg>
+                                    Formulário SUS
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('avaliacao.respostas') || request()->routeIs('avaliacao.moderacao') ? 'active' : '' }}"
+                                    href="{{ route('avaliacao.respostas') }}"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart-line" viewBox="0 0 16 16">
+                                        <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1zm1 12h2V2h-2zm-5 0h2V7H7zm-5 0h2v-3H2z"/>
+                                    </svg>
+                                    Respostas SUS
+                                </a>
+                            </li>
+                        @endif
+
                         <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-2" href="{{ route('usuarios.index') }}">
+                            <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('usuarios.*') ? 'active' : '' }}" href="{{ route('usuarios.index') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
                                     <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
                                     <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>

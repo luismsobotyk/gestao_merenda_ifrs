@@ -10,6 +10,7 @@ use App\Http\Controllers\CursoController;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\RetiradaController;
 use App\Http\Controllers\GraficoController;
+use App\Http\Controllers\AvaliacaoSusController;
 
 Route::get('/', [MainController::class, 'index']);
 
@@ -19,7 +20,27 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/avaliacao', [MainController::class, 'avaliacao'])->name('avaliacao');
+    Route::get('/avaliacao', [AvaliacaoSusController::class, 'index'])
+        ->name('avaliacao.index');
+
+    Route::post('/avaliacao/salvar', [AvaliacaoSusController::class, 'salvar'])
+        ->name('avaliacao.salvar');
+
+    Route::post('/avaliacao/submeter', [AvaliacaoSusController::class, 'submeter'])
+        ->name('avaliacao.submeter');
+
+    // IMPORTANTE: esta rota precisa vir antes de /avaliacao/{avaliacao}/moderacao.
+    Route::get('/avaliacao/respostas', [AvaliacaoSusController::class, 'respostas'])
+        ->name('avaliacao.respostas');
+
+    Route::get('/avaliacao/{avaliacao}/moderacao', [AvaliacaoSusController::class, 'moderacao'])
+        ->name('avaliacao.moderacao');
+
+    Route::post('/avaliacao/{avaliacao}/moderacao', [AvaliacaoSusController::class, 'salvarModeracao'])
+        ->name('avaliacao.moderacao.salvar');
+
+
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Dashboard
