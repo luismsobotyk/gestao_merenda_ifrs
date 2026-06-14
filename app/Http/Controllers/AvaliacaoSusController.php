@@ -26,7 +26,7 @@ class AvaliacaoSusController extends Controller
 
         $avaliacao->payload = $this->normalizarPayload($avaliacao->payload);
 
-        return view('avaliacao.index', [
+        return view('avaliacao.avaliacao', [
             'avaliacao' => $avaliacao,
             'isAdmin' => $this->isAdmin($user),
         ]);
