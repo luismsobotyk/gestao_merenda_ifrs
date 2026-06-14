@@ -323,7 +323,7 @@
                                 Retirada por turma
                             </a>
                         </li>
-                        @if($isAdminAvaliacao)
+                        @if(auth()->check() && \App\Models\User::isSuperAdmin(auth()->user()))
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
                             <span>Administração</span>
                         </h6>

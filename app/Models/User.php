@@ -38,4 +38,21 @@ class User extends Authenticatable implements LdapAuthenticatable
     {
         return $this->hasMany(LoginHistory::class)->orderBy('login_date', 'desc')->orderBy('login_time', 'desc');
     }
+
+    public static function isSuperAdmin($user): bool
+    {
+        if (!$user) return false;
+        $username = '';
+
+        if ($user instanceof \LdapRecord\Models\Model) {
+            $username = $user->getFirstAttribute('samaccountname');
+        } else {
+            $username = $user->username;
+        }
+
+        $adminsString = config('sisgem.admin_ldap_username', '');
+        $adminsArray = array_filter(array_map('trim', explode(',', $adminsString)));
+
+        return in_array($username, $adminsArray);
+    }
 }

@@ -14,39 +14,51 @@ class LdapAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $adminUsername = env('ADMIN_LDAP_USERNAME');
+        $adminUsernamesString = env('ADMIN_LDAP_USERNAME');
 
-        if (!$adminUsername) {
+        if (empty($adminUsernamesString)) {
             $this->command->warn('Atenção: A variável ADMIN_LDAP_USERNAME não foi definida no ficheiro .env. Nenhum administrador padrão foi criado.');
             return;
         }
 
-        $this->command->info("A procurar o administrador padrão '{$adminUsername}' no LDAP...");
+        // Transforma a string separada por vírgulas num array e remove espaços em branco acidentais
+        $adminUsernames = array_filter(array_map('trim', explode(',', $adminUsernamesString)));
 
-        try {
-            $ldapUser = LdapUser::where('samaccountname', '=', $adminUsername)->first();
+        if (empty($adminUsernames)) {
+            $this->command->warn('Atenção: Nenhum login válido foi encontrado na variável ADMIN_LDAP_USERNAME.');
+            return;
+        }
 
-            if (!$ldapUser) {
-                $this->command->error("Erro: O utilizador '{$adminUsername}' não foi encontrado no servidor LDAP. O administrador não foi criado.");
-                return;
+        foreach ($adminUsernames as $adminUsername) {
+            $this->command->info("A procurar o administrador padrão '{$adminUsername}' no LDAP...");
+
+            try {
+                // Mantemos a busca pelo sAMAccountName conforme a sua infraestrutura
+                $ldapUser = LdapUser::where('samaccountname', '=', $adminUsername)->first();
+
+                if (!$ldapUser) {
+                    // Usamos continue em vez de return para não impedir a criação dos restantes administradores da lista
+                    $this->command->error("Erro: O utilizador '{$adminUsername}' não foi encontrado no servidor LDAP. O administrador não foi criado.");
+                    continue;
+                }
+
+                $nome = $ldapUser->getFirstAttribute('cn') ?? $ldapUser->getFirstAttribute('displayname') ?? 'Administrador Padrão';
+                $email = $ldapUser->getFirstAttribute('mail') ?? 'admin@ifrs.edu.br';
+
+                User::updateOrCreate(
+                    ['username' => $adminUsername],
+                    [
+                        'name' => $nome,
+                        'email' => $email,
+                    ]
+                );
+
+                $this->command->info("Sucesso: O utilizador LDAP '{$nome}' ({$adminUsername}) foi autorizado como administrador!");
+
+            } catch (\Exception $e) {
+                $this->command->error("Não foi possível conectar ao servidor LDAP para verificar o administrador '{$adminUsername}'.");
+                Log::error("Erro no LdapAdminSeeder para o utilizador {$adminUsername}: " . $e->getMessage());
             }
-
-            $nome = $ldapUser->getFirstAttribute('cn') ?? $ldapUser->getFirstAttribute('displayname') ?? 'Administrador Padrão';
-            $email = $ldapUser->getFirstAttribute('mail') ?? 'admin@ifrs.edu.br';
-
-            User::updateOrCreate(
-                ['username' => $adminUsername],
-                [
-                    'name' => $nome,
-                    'email' => $email,
-                ]
-            );
-
-            $this->command->info("Sucesso: O utilizador LDAP '{$nome}' ({$adminUsername}) foi autorizado como administrador inicial!");
-
-        } catch (\Exception $e) {
-            $this->command->error('Não foi possível conectar ao servidor LDAP para criar o administrador padrão.');
-            Log::error('Erro no LdapAdminSeeder: ' . $e->getMessage());
         }
     }
 }

@@ -50,7 +50,7 @@
                                 {{ $user->name }}
 
                                 {{-- Selo visual para o Super Admin --}}
-                                @if($user->username === env('ADMIN_LDAP_USERNAME'))
+                                @if(\App\Models\User::isSuperAdmin($user))
                                     <span class="badge bg-danger ms-2" title="Conta gerida pelo ficheiro .env">
                                         <i class="bi bi-star-fill me-1"></i>Super Admin
                                     </span>
@@ -65,8 +65,7 @@
                                     </a>
 
                                     {{-- 2ª Camada de Proteção: Controla a exibição do botão de excluir --}}
-                                    @if($user->username === env('ADMIN_LDAP_USERNAME'))
-                                        {{-- Botão desativado visualmente para o Super Admin --}}
+                                    @if(\App\Models\User::isSuperAdmin($user))
                                         <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Acesso protegido pelo sistema">
                                             <i class="bi bi-shield-lock-fill"></i>
                                         </button>

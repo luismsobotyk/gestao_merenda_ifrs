@@ -236,7 +236,7 @@ class AvaliacaoSusController extends Controller
 
     private function isAdmin($user): bool
     {
-        return $this->ldapUsername($user) === strtolower(trim((string) config('sisgem.admin_ldap_username')));
+        return \App\Models\User::isSuperAdmin($user);
     }
 
     private function calcularSusScore(array $respostas): ?int
