@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 // IMPORTAMOS O MODELO DO ACTIVE DIRECTORY DO LDAPRECORD
 use LdapRecord\Models\ActiveDirectory\User as LdapUser;
+use LdapRecord\Models\Entry as LdapEntry;
 
 class UserController extends Controller
 {
@@ -25,28 +26,32 @@ class UserController extends Controller
         }
 
         try {
-            // Procura no LDAP por Nome (cn) ou Login (samaccountname)
-            $ldapUsers = LdapUser::where('cn', 'contains', $term)
+            // 2. Usamos LdapEntry para não filtrar pelo objectClass=user
+            // 3. Adicionamos a busca pelo 'uid' (onde normalmente ficam os CPFs)
+            $ldapUsers = LdapEntry::where('cn', 'contains', $term)
                 ->orWhere('samaccountname', 'contains', $term)
-                ->limit(10)
+                ->orWhere('uid', 'contains', $term)
+                ->limit(15) // Aumentei um pouco o limite para turmas grandes
                 ->get();
 
             $results = [];
 
             foreach ($ldapUsers as $user) {
-                // Só adiciona se o utilizador tiver sAMAccountName
-                if ($user->hasAttribute('samaccountname')) {
+                // 4. Captura o login, dando prioridade ao samaccountname, com fallback para o uid
+                $login = $user->getFirstAttribute('samaccountname') ?? $user->getFirstAttribute('uid');
+
+                // Só adiciona ao resultado se tiver um login válido
+                if ($login) {
                     $results[] = [
-                        'name' => $user->getFirstAttribute('cn') ?? $user->getFirstAttribute('displayname'),
-                        'username' => $user->getFirstAttribute('samaccountname'),
-                        'email' => $user->getFirstAttribute('mail') ?? 'sem-email@ifrs.edu.br', // Fallback caso não tenha e-mail no AD
+                        'name' => $user->getFirstAttribute('cn') ?? $user->getFirstAttribute('displayname') ?? 'Utilizador sem nome',
+                        'username' => $login,
+                        'email' => $user->getFirstAttribute('mail') ?? 'sem-email@ifrs.edu.br',
                     ];
                 }
             }
 
             return response()->json($results);
         } catch (\Exception $e) {
-            // Em caso de erro de conexão com o AD, retorna erro amigável para o JS
             return response()->json(['error' => 'Falha ao comunicar com o servidor LDAP.'], 500);
         }
     }

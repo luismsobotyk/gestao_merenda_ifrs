@@ -323,12 +323,10 @@
                                 Retirada por turma
                             </a>
                         </li>
-
+                        @if($isAdminAvaliacao)
                         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-body-secondary text-uppercase">
                             <span>Administração</span>
                         </h6>
-
-                        @if($isAdminAvaliacao)
                             <li class="nav-item">
                                 <a
                                     class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('avaliacao.index') ? 'active' : '' }}"
@@ -352,8 +350,6 @@
                                     Respostas SUS
                                 </a>
                             </li>
-                        @endif
-
                         <li class="nav-item">
                             <a class="nav-link d-flex align-items-center gap-2 {{ request()->routeIs('usuarios.*') ? 'active' : '' }}" href="{{ route('usuarios.index') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
@@ -363,7 +359,7 @@
                                 Gerenciar Usuários
                             </a>
                         </li>
-
+                        @endif
                     </ul>
 
                     <hr class="my-3" />
