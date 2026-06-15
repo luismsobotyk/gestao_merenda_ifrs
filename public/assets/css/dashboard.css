@@ -1,12 +1,16 @@
+:root {
+    --bs-font-sans-serif: 'Rawline', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bs-body-font-family: var(--bs-font-sans-serif);
+}
+body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'Rawline', sans-serif !important;
+}
+
 .bi {
     display: inline-block;
     width: 1rem;
     height: 1rem;
 }
-
-/*
- * Sidebar
- */
 
 @media (min-width: 768px) {
     .sidebar .offcanvas-lg {

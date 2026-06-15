@@ -8,10 +8,35 @@
     <title>Dashboard · {{ env('APP_NAME', 'IFRS') }}</title>
 
     <link href="{{ asset('assets/css/dashboard.css') }}" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/rawline" rel="stylesheet">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 
     <style>
+        @font-face {
+            font-family: 'Rawline';
+            src: url('{{ asset('fonts/rawline/rawline-regular.woff2') }}') format('woff2'),
+            url('{{ asset('fonts/rawline/rawline-regular.ttf') }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rawline';
+            src: url('{{ asset('fonts/rawline/rawline-bold.woff2') }}') format('woff2'),
+            url('{{ asset('fonts/rawline/rawline-bold.ttf') }}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        :root {
+            --bs-font-sans-serif: 'Rawline', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --bs-body-font-family: var(--bs-font-sans-serif);
+        }
+        body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+            font-family: 'Rawline', sans-serif !important;
+        }
+
         .bd-placeholder-img {
             font-size: 1.125rem;
             text-anchor: middle;
@@ -106,7 +131,7 @@
             }
         }
     </style>
-
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('custom_css')
 </head>
 

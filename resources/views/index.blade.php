@@ -5,7 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ env('APP_NAME', 'IFRS') }}</title>
 
+    <style>
+        @font-face {
+            font-family: 'Rawline';
+            src: url('{{ asset('fonts/rawline/rawline-regular.woff2') }}') format('woff2'),
+            url('{{ asset('fonts/rawline/rawline-regular.ttf') }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Rawline';
+            src: url('{{ asset('fonts/rawline/rawline-bold.woff2') }}') format('woff2'),
+            url('{{ asset('fonts/rawline/rawline-bold.ttf') }}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        :root {
+            --bs-font-sans-serif: 'Rawline', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --bs-body-font-family: var(--bs-font-sans-serif);
+        }
+        body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+            font-family: 'Rawline', sans-serif !important;
+        }
+    </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.cdnfonts.com/css/rawline" rel="stylesheet">
+
+
+
 </head>
 <body class="bg-light">
 
