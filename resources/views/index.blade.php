@@ -195,14 +195,18 @@
             position: relative;
             display: flex;
             justify-content: center;
+            width: 100%; /* Força o limite de largura no iOS */
         }
+
         .row {
-            display: inline-flex;
+            display: flex; /* Mudado de inline-flex para flex */
+            flex-direction: row; /* Força a direção horizontal no Safari */
+            flex-wrap: nowrap; /* Proíbe expressamente o Safari de empilhar (quebrar linha) */
             gap: 16px;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
+            -webkit-overflow-scrolling: touch; /* Essencial para a rolagem fluida no iOS */
             scrollbar-width: none;
             padding: 4px 4px 12px;
             max-width: 100%;
@@ -210,7 +214,10 @@
         .row::-webkit-scrollbar { display: none; }
 
         .item {
-            flex: 0 0 150px; scroll-snap-align: start;
+            flex: 0 0 150px;
+            width: 150px; /* Ajuda o Safari a entender o tamanho exato */
+            min-width: 150px; /* Impede o Safari de tentar esmagar o item */
+            scroll-snap-align: start;
             background: var(--card); border: 1px solid var(--hairline); border-radius: 22px;
             padding: 20px 12px; text-align: center; cursor: pointer;
             box-shadow: 0 8px 24px -16px rgba(0,0,0,.15);
@@ -218,6 +225,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .item:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -16px rgba(0,0,0,.25); }
 
         .item-badge-excecao {
