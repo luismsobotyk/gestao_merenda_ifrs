@@ -21,7 +21,9 @@
 
             <div class="card border-0 shadow-sm card-dash">
                 <div class="card-body p-4 text-center">
-                    <i class="bi bi-clock-history text-success mb-3 d-inline-block bg-success bg-opacity-10 rounded-4" style="font-size: 3rem; padding: 1rem; line-height: 1;"></i>
+
+                    <i class="bi bi-upc-scan text-success mb-4 bg-success bg-opacity-10 rounded-circle"
+                       style="width: 6rem; height: 6rem; font-size: 3rem; display: inline-flex; justify-content: center; align-items: center;"></i>
 
                     <h4 class="fw-bold mb-4">Escolha o Turno</h4>
 
