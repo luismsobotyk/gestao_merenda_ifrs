@@ -58,8 +58,10 @@ class DatabaseSeeder extends Seeder
                 ['nome' => 'Banana', 'unidade' => $unidadeKgId, 'qtd' => 300, 'preco' => 4.00]
             ],
             2 => [
-                ['nome' => 'Ovos', 'unidade' => $unidadeUnId, 'qtd' => 6000, 'preco' => 0.80],
-                ['nome' => 'Feijão Preto', 'unidade' => $unidadeKgId, 'qtd' => 500, 'preco' => 8.00]
+                // Trocado Ovos por Suco de Caju
+                ['nome' => 'Suco de Caju', 'unidade' => $unidadeUnId, 'qtd' => 6000, 'preco' => 0.80],
+                // Trocado Feijão Preto por Pastel Assado (e unidade alterada de KG para UN)
+                ['nome' => 'Pastel Assado', 'unidade' => $unidadeUnId, 'qtd' => 5000, 'preco' => 3.50]
             ]
         ];
 
@@ -68,13 +70,22 @@ class DatabaseSeeder extends Seeder
         foreach ($fornecedores as $index => $forn) {
             $contratoId = Str::uuid()->toString();
 
+            // Calcula os valores reais antes de inserir o contrato
+            $valorGlobalContrato = 0;
+            $valorTotalEmpenho = 0;
+
+            foreach ($alimentos[$index] as $ali) {
+                $valorGlobalContrato += ($ali['qtd'] * $ali['preco']);
+                $valorTotalEmpenho += (($ali['qtd'] / 2) * $ali['preco']); // O empenho é metade da qtd contratada
+            }
+
             DB::table('contrato')->insert([
                 'id' => $contratoId,
                 'fornecedor_id' => $forn['id'],
                 'processo' => '23354.' . rand(1000,9999) . '/2025-01',
                 'inicio_vigencia' => '2025-12-01',
                 'fim_vigencia' => '2026-12-01',
-                'valor_global' => 50000.00,
+                'valor_global' => $valorGlobalContrato,
                 'status' => 'Vigente',
                 'pregao' => 'PE 0' . ($index + 1) . '/2025',
                 'created_at' => $agora,
@@ -85,7 +96,7 @@ class DatabaseSeeder extends Seeder
                 'id' => $empenhoId,
                 'contrato_uuid' => $contratoId,
                 'numero_empenho' => '2025NE00' . rand(100, 999),
-                'valor_total' => 20000.00,
+                'valor_total' => $valorTotalEmpenho,
                 'created_at' => $agora,
             ]);
 
@@ -150,12 +161,13 @@ class DatabaseSeeder extends Seeder
             ['nome' => 'NOITE', 'inicio' => '20:30:00', 'fim' => '20:40:00'],
         ];
 
+        // Atualizado para refletir os novos alimentos
         $gridSemanal = [
             1 => ['Iogurte', 'Maçã'],
-            2 => ['Ovos', 'Banana'],
-            3 => ['Pão de Batata', 'Feijão Preto'],
+            2 => ['Suco de Caju', 'Banana'],
+            3 => ['Pão de Batata', 'Pastel Assado'],
             4 => ['Iogurte', 'Maçã'],
-            5 => ['Ovos', 'Banana'],
+            5 => ['Suco de Caju', 'Banana'],
         ];
 
         $horarioIds = [];
@@ -190,7 +202,6 @@ class DatabaseSeeder extends Seeder
         // =====================================================================
         // 6. BUSCAR ALUNOS EXISTENTES NO BANCO (Sincronizados da API)
         // =====================================================================
-        // Recupera todos os IDs de alunos que já existem na base de dados
         $alunoIds = DB::table('alunos')->pluck('id')->toArray();
 
         if (empty($alunoIds)) {
@@ -206,36 +217,28 @@ class DatabaseSeeder extends Seeder
 
             $insertBuffer = [];
 
-            // Loop dia a dia de março até hoje
             for ($data = $dataInicial->copy(); $data->lte($dataFinal); $data->addDay()) {
-
-                // Ignora finais de semana
                 if ($data->isWeekend()) {
                     continue;
                 }
 
-                // Define uma taxa de presença randômica para o dia (ex: entre 30% e 75% dos alunos comeram)
                 $porcentagemPresenca = rand(30, 75);
                 $quantidadeAlunosNoDia = intval(($porcentagemPresenca / 100) * count($alunoIds));
 
-                // Se o cálculo der 0, salta para o próximo dia
                 if ($quantidadeAlunosNoDia <= 0) {
                     continue;
                 }
 
-                // Embaralha os alunos reais e pega apenas a quantidade definida para este dia
                 $alunosSorteados = collect($alunoIds)->shuffle()->take($quantidadeAlunosNoDia);
 
                 foreach ($alunosSorteados as $alunoId) {
-
-                    // Distribui o aluno de forma randômica entre os turnos disponíveis
                     $pesoTurno = rand(1, 10);
                     if ($pesoTurno <= 5) {
-                        $horarioSorteadoId = $horarioIds[0]; // 50% de chance de ser MANHÃ
+                        $horarioSorteadoId = $horarioIds[0];
                     } elseif ($pesoTurno <= 8) {
-                        $horarioSorteadoId = $horarioIds[1]; // 30% de chance de ser TARDE
+                        $horarioSorteadoId = $horarioIds[1];
                     } else {
-                        $horarioSorteadoId = $horarioIds[2]; // 20% de chance de ser NOITE
+                        $horarioSorteadoId = $horarioIds[2];
                     }
 
                     $insertBuffer[] = [
@@ -246,7 +249,6 @@ class DatabaseSeeder extends Seeder
                         'updated_at' => $agora,
                     ];
 
-                    // Envia para o banco em lotes de 200 registros
                     if (count($insertBuffer) >= 200) {
                         DB::table('retiradas')->insert($insertBuffer);
                         $insertBuffer = [];
@@ -254,7 +256,6 @@ class DatabaseSeeder extends Seeder
                 }
             }
 
-            // Insere o restante que sobrou no buffer
             if (count($insertBuffer) > 0) {
                 DB::table('retiradas')->insert($insertBuffer);
             }

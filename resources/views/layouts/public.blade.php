@@ -9,16 +9,14 @@
     <style>
         @font-face {
             font-family: 'Rawline';
-            src: url('{{ asset('fonts/rawline/rawline-regular.woff2') }}') format('woff2'),
-            url('{{ asset('fonts/rawline/rawline-regular.ttf') }}') format('truetype');
+            src: url('{{ asset('fonts/rawline/rawline-400.ttf') }}') format('truetype');
             font-weight: 400;
             font-style: normal;
             font-display: swap;
         }
         @font-face {
             font-family: 'Rawline';
-            src: url('{{ asset('fonts/rawline/rawline-bold.woff2') }}') format('woff2'),
-            url('{{ asset('fonts/rawline/rawline-bold.ttf') }}') format('truetype');
+            src: url('{{ asset('fonts/rawline/rawline-700.ttf') }}') format('truetype');
             font-weight: 700;
             font-style: normal;
             font-display: swap;
