@@ -388,7 +388,6 @@
                                         </span>
                                     <div class="period-meta">
                                         <h2>{{ $horario['nome'] }}</h2>
-                                        <p>{{ $horario['descricao_publico'] ?: 'Geral' }}</p>
                                     </div>
                                     <span class="period-time">{{ substr($horario['hora_inicio'], 0, 5) }}–{{ substr($horario['hora_fim'], 0, 5) }}</span>
                                 </div>
