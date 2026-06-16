@@ -57,7 +57,7 @@
                                 @endif
                             </td>
                             <td><span class="badge bg-secondary">{{ $user->username }}</span></td>
-                            <td><a href="mailto:{{ $user->email }}" class="text-decoration-none">{{ $user->email }}</a></td>
+                            <td><a href="mailto:{{ $user->email }}" class="text-decoration-none text-dark">{{ $user->email }}</a></td>
                             <td class="text-end pe-4">
                                 <div class="btn-group">
                                     <a href="{{ route('usuarios.historico', $user->id) }}" class="btn btn-sm btn-outline-primary" title="Histórico de Acesso">
@@ -97,7 +97,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header border-bottom-0">
-                    <h5 class="modal-title fw-bold text-primary" id="modalAdicionarLabel">Procurar Utilizador no Domínio</h5>
+                    <h5 class="modal-title fw-bold" id="modalAdicionarLabel">Procurar Usuário no Domínio</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -109,9 +109,9 @@
 
                     <div id="ldap_loading" class="text-center my-4" style="display: none;">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">A procurar...</span>
+                            <span class="visually-hidden">Procurando...</span>
                         </div>
-                        <p class="text-muted mt-2 small">A consultar o servidor LDAP...</p>
+                        <p class="text-muted mt-2 small">Consultando o servidor LDAP...</p>
                     </div>
 
                     <div id="ldap_results" class="list-group mb-3 shadow-sm" style="display: none; max-height: 250px; overflow-y: auto;">

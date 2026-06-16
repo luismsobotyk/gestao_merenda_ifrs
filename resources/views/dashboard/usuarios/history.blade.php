@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
         <div>
             <h1 class="h2 mb-0">Histórico de Acesso</h1>
-            <small class="text-muted">A analisar registos de: <strong class="text-primary">{{ $user->name }}</strong> ({{ $user->username }})</small>
+            <small class="text-muted">Analisando registos de: <strong>{{ $user->name }}</strong> ({{ $user->username }})</small>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary fw-bold">
@@ -30,7 +30,7 @@
                         <tr>
                             <td class="ps-4 fw-bold">{{ \Carbon\Carbon::parse($historico->login_date)->format('d/m/Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($historico->login_time)->format('H:i:s') }}</td>
-                            <td><span class="badge bg-info text-dark">{{ $historico->ip_address }}</span></td>
+                            <td>{{ $historico->ip_address }}</td>
                             <td class="pe-4 text-muted small" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $historico->user_agent }}">
                                 {{ $historico->user_agent ?? 'Desconhecido' }}
                             </td>
