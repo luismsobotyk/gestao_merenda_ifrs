@@ -60,6 +60,28 @@
         .card-dash .card-text {
             margin-bottom: 0;
         }
+
+        /* ==========================================
+           Classes Personalizadas: Lilás
+           ========================================== */
+        .text-lilas {
+            color: #9b59b6 !important; /* Tom de lilás/roxo com bom contraste */
+        }
+
+        .bg-lilas {
+            background-color: rgba(155, 89, 182, 0.12) !important; /* Fundo com opacidade imitando o Bootstrap */
+        }
+
+        .btn-outline-lilas {
+            color: #9b59b6;
+            border-color: #9b59b6;
+        }
+
+        .btn-outline-lilas:hover {
+            color: #fff;
+            background-color: #9b59b6;
+            border-color: #9b59b6;
+        }
     </style>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
@@ -156,7 +178,7 @@
             <div class="card h-100 border-0 shadow-sm text-center p-3 card-dash">
                 <div class="card-body">
                     <div class="dash-icon-wrapper">
-                        <i class="bi bi-person-badge dash-icon text-danger bg-danger bg-opacity-10 rounded-4"></i>
+                        <i class="bi bi-person-badge dash-icon text-lilas bg-lilas rounded-4"></i>
                     </div>
 
                     <h5 class="card-title fw-bold">Alunos</h5>
@@ -167,7 +189,7 @@
                 </div>
 
                 <div class="card-footer bg-white border-0 pb-3 pt-0">
-                    <a href="{{ route('alunos.index') }}" class="btn btn-outline-danger w-100 fw-medium">
+                    <a href="{{ route('alunos.index') }}" class="btn btn-outline-lilas w-100 fw-medium">
                         Acessar Alunos
                     </a>
                 </div>
