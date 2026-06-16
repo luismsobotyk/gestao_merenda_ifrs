@@ -51,7 +51,7 @@
                 </div>
 
                 <div class="card-body">
-                    <h5 class="card-title text-primary">Fornecedor: {{ $contrato->fornecedor->nome }}</h5>
+                    <h5 class="card-title text-dark fw-bold">Fornecedor: {{ $contrato->fornecedor->nome }}</h5>
                     <p class="card-text mb-1"><strong>Nº Pregão/Chamada:</strong> {{ $contrato->pregao }}</p>
                     <p class="card-text mb-1"><strong>Processo SIPAC:</strong> {{ $contrato->processo }}</p>
                     <p class="card-text mb-2"><strong>Vigência:</strong> {{ \Carbon\Carbon::parse($contrato->inicio_vigencia)->format('d/m/Y') }} a {{ \Carbon\Carbon::parse($contrato->fim_vigencia)->format('d/m/Y') }}</p>
@@ -262,13 +262,13 @@
 
                             <li class="list-group-item d-flex justify-content-between align-items-start p-3 {{ $bgClass }}">
                                 <div class="ms-2 me-auto">
-                                    <div class="fw-bold {{ $pedido->status === 'Atrasado' ? 'text-danger' : ($pedido->status === 'Recebido' ? 'text-muted text-decoration-line-through' : 'text-primary') }} mb-1">
+                                    <div class="fw-bold {{ $pedido->status === 'Atrasado' ? 'text-danger' : ($pedido->status === 'Recebido' ? 'text-muted text-decoration-line-through' : 'text-dark') }} mb-1">
                                         Pedido #{{ $codigoPedido }}
                                     </div>
                                     <span class="d-block small text-dark mb-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
-                                        {{ $textoItensPedido }}
-                                    </span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
+                {{ $textoItensPedido }}
+            </span>
                                     <span class="d-block text-muted small" style="font-size: 0.75rem;">Solicitado: {{ \Carbon\Carbon::parse($pedido->data_pedido)->format('d/m/Y') }}</span>
 
                                     @if($pedido->status === 'Atrasado')
@@ -291,15 +291,15 @@
                                             </button>
                                         </form>
                                     @else
-                                        <a href="#"
-                                           onclick="return false;"
-                                           class="text-decoration-none small text-primary"
-                                           style="font-size: 0.70rem;"
-                                           data-bs-toggle="tooltip"
-                                           data-bs-placement="top"
-                                           data-bs-title="Funcionalidade em desenvolvimento">
-                                            Ver NF
-                                        </a>
+{{--                                        <a href="#"--}}
+{{--                                           onclick="return false;"--}}
+{{--                                           class="text-decoration-none small text-primary"--}}
+{{--                                           style="font-size: 0.70rem;"--}}
+{{--                                           data-bs-toggle="tooltip"--}}
+{{--                                           data-bs-placement="top"--}}
+{{--                                           data-bs-title="Funcionalidade em desenvolvimento">--}}
+{{--                                            Ver NF--}}
+{{--                                        </a>--}}
                                     @endif
                                 </div>
                             </li>
@@ -705,8 +705,7 @@
         </div>
         <div class="offcanvas-body p-0">
             <ul class="list-group list-group-flush">
-                {{-- Aqui nós NÃO usamos o take(5), pegamos TODOS ordenados por data --}}
-                @forelse($contrato->pedidos->sortByDesc('data_pedido') as $pedido)
+                {{-- Aqui nós NÃO usamos o take(5), pegamos TODOS ordenados por data --}}@forelse($contrato->pedidos->sortByDesc('data_pedido') as $pedido)
                     @php
                         $bgClass = '';
                         $badgeClass = 'bg-warning text-dark';
@@ -736,16 +735,16 @@
 
                     <li class="list-group-item p-3 {{ $bgClass }}">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="fw-bold {{ $pedido->status === 'Atrasado' ? 'text-danger' : ($pedido->status === 'Recebido' ? 'text-muted' : 'text-primary') }}">
+                            <div class="fw-bold {{ $pedido->status === 'Atrasado' ? 'text-danger' : ($pedido->status === 'Recebido' ? 'text-muted' : 'text-dark') }}">
                                 Pedido #{{ $codigoPedido }}
                             </div>
                             <span class="badge {{ $badgeClass }} text-uppercase shadow-sm">{{ $pedido->status }}</span>
                         </div>
 
                         <span class="d-block small text-dark mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
-                            {{ $textoItensPedido }}
-                        </span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-box me-1" viewBox="0 0 16 16"><path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/></svg>
+            {{ $textoItensPedido }}
+        </span>
 
                         <div class="d-flex justify-content-between align-items-end mt-2 pt-2 border-top">
                             <div>
@@ -766,15 +765,15 @@
                                     <button type="submit" class="btn btn-sm {{ $btnClass }} py-0 px-2" style="font-size: 0.70rem;" title="Confirmar recebimento">Receber</button>
                                 </form>
                             @else
-                                <a href="#"
-                                   onclick="return false;"
-                                   class="text-decoration-none small text-primary"
-                                   style="font-size: 0.70rem;"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="top"
-                                   data-bs-title="Funcionalidade em desenvolvimento">
-                                    Ver NF
-                                </a>
+{{--                                <a href="#"--}}
+{{--                                   onclick="return false;"--}}
+{{--                                   class="text-decoration-none small text-secondary"--}}
+{{--                                   style="font-size: 0.70rem;"--}}
+{{--                                   data-bs-toggle="tooltip"--}}
+{{--                                   data-bs-placement="top"--}}
+{{--                                   data-bs-title="Funcionalidade em desenvolvimento">--}}
+{{--                                    Ver NF--}}
+{{--                                </a>--}}
                             @endif
                         </div>
                     </li>

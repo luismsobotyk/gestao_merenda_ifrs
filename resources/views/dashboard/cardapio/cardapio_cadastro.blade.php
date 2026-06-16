@@ -65,7 +65,7 @@
             <form id="formCardapio" method="POST" action="{{ isset($cardapio) ? '#' : route('cardapio.salvar') }}">
                 @csrf
                 <div class="card shadow-sm mb-4 border-primary">
-                    <div class="card-header bg-primary bg-opacity-10 text-primary fw-bold small">
+                    <div class="card-header bg-primary bg-opacity-10 fw-bold small">
                         1. Informações Gerais e Vigência
                     </div>
                     <div class="card-body row g-3">
@@ -355,7 +355,7 @@
                     ul.innerHTML += `
                     <li class="list-group-item d-flex justify-content-between align-items-center p-3 h-row">
                         <div>
-                            <strong class="text-uppercase text-primary">${h.nome} - ${h.hora_inicio} às ${h.hora_fim}</strong><br>
+                            <strong>${h.nome} - ${h.hora_inicio} às ${h.hora_fim}</strong><br>
                             <span class="text-muted small">${h.descricao_publico || 'Geral'}</span>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeHorario(${index})" title="Excluir Horário">
@@ -376,7 +376,7 @@
 
                 state.horarios.forEach((h, hIndex) => {
                     let tr = `<tr><td class="meal-time-column text-center align-middle p-2">
-                            <span class="text-primary fw-bold d-block">${h.nome}</span>
+                            <span class="fw-bold d-block">${h.nome}</span>
                             <span class="small text-muted">${h.hora_inicio}</span>
                           </td>`;
 

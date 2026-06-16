@@ -56,7 +56,7 @@
                         @endphp
 
                         <tr class="{{ $linhaClass }}">
-                            <td class="ps-4 text-primary">
+                            <td class="ps-4">
                                 {{ $cardapio->nome }}
                             </td>
                             <td>{{ $inicio->format('d/m/Y') }}</td>

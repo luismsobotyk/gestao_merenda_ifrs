@@ -110,13 +110,17 @@
                                 {{ \Carbon\Carbon::parse($contrato->inicio_vigencia)->format('d/m/Y') }}<br>
                                 <span class="text-muted small">até {{ \Carbon\Carbon::parse($contrato->fim_vigencia)->format('d/m/Y') }}</span>
                             </td>
-                            <td class="fw-bold text-primary">R$ {{ number_format($contrato->valor_global, 2, ',', '.') }}</td>
+
+                            <td class="fw-bold text-dark">R$ {{ number_format($contrato->valor_global, 2, ',', '.') }}</td>
+
                             <td>
-                                @if(strtolower($contrato->status)==='vigente')
-                                    <span class="badge bg-success">Vigente</span></td>
+                                @if(strtolower($contrato->status) === 'vigente')
+                                    <span class="badge bg-success">Vigente</span>
                                 @else
-                                    <span class="badge bg-secondary">Encerrado</span></td>
+                                    <span class="badge bg-secondary">Encerrado</span>
                                 @endif
+                            </td>
+
                             <td>
                                 <div class="btn-group">
                                     <a href="{{ route('contrato.visualizar', $contrato->id) }}" class="btn btn-sm btn-outline-primary" title="Visualizar Detalhes e Gerenciar Empenhos">
@@ -133,10 +137,10 @@
                                 </div>
                             </td>
                         </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">Nenhum contrato encontrado.</td>
-                            </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Nenhum contrato encontrado.</td>
+                        </tr>
                     @endforelse
                     </tbody>
                 </table>

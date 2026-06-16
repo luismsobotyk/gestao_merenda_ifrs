@@ -86,11 +86,11 @@
                         @foreach($alunos as $aluno)
                             <tr>
                                 <td class="ps-4 text-muted fw-bold">{{ $aluno->matricula }}</td>
-                                <td><div class="fw-bold text-dark">{{ Str::title(Str::lower($aluno->nome)) }}</div></td>
+                                <td><div class="ps-4 text-muted fw-bold">{{ Str::title(Str::lower($aluno->nome)) }}</div></td>
                                 <td>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle text-wrap text-start lh-sm" style="max-width: 250px;">
-                                            {{ Str::title(Str::lower($aluno->curso->nome)) ?? 'Curso Desconhecido' }}
-                                        </span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle text-wrap text-start lh-sm" style="max-width: 250px;">
+                                        {{ Str::title(Str::lower($aluno->curso->nome)) ?? 'Curso Desconhecido' }}
+                                    </span>
                                 </td>
                             </tr>
                         @endforeach
