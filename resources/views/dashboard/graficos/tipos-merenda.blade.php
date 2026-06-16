@@ -90,7 +90,7 @@
                                 @endphp
                                 <tr>
                                     <td class="fw-bold text-dark">{{ $lanche }}</td>
-                                    <td class="text-end fw-bold text-primary fs-5">{{ $quantidade }}</td>
+                                    <td class="text-end fw-bold fs-5">{{ $quantidade }}</td>
                                     <td class="text-end text-muted">{{ number_format($porcentagem, 1, ',', '.') }}%</td>
                                 </tr>
                             @endforeach
