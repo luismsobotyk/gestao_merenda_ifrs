@@ -42,7 +42,7 @@
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light text-uppercase small text-secondary">
+                        <thead class="table-light small text-secondary">
                         <tr>
                             <th class="ps-4">Código</th>
                             <th>Curso</th>
@@ -55,7 +55,7 @@
                         @foreach($cursos as $curso)
                             <tr>
                                 <td class="ps-4 text-muted small">{{ $curso->codigo ?? '-' }}</td>
-                                <td class="fw-bold text-primary">{{ $curso->nome }}</td>
+                                <td class="fw-bold text-primary">{{ Str::title(Str::lower($curso->nome)) }}</td>
                                 <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">{{ $curso->nivel }}</span></td>
                                 <td class="text-muted small">{{ $curso->turno ?? '-' }}</td>
                                 {{-- Adicionado position-relative ao td para controlar a posição da mensagem --}}

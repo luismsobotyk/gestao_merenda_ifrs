@@ -86,7 +86,7 @@
                                     $porcentagem = $totalGeral > 0 ? round(($quantidade / $totalGeral) * 100, 1) : 0;
                                 @endphp
                                 <tr>
-                                    <td class="fw-bold text-dark">{{ $turma }}</td>
+                                    <td class="fw-bold text-dark">{{ Str::title(Str::lower($turma)) }}</td>
                                     <td class="text-end fw-bold text-primary fs-5">{{ $quantidade }}</td>
                                     <td class="text-end text-muted">{{ number_format($porcentagem, 1, ',', '.') }}%</td>
                                 </tr>

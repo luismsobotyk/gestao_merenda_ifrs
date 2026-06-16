@@ -53,7 +53,7 @@
             <h1 class="h2 mb-0">Modo Autoatendimento (Totem)</h1>
             {{-- Mostra o turno travado na tela --}}
             <small class="text-muted">
-                Turno Operacional: <strong class="text-primary text-uppercase">{{ $horarioSelecionado->nome }}</strong>
+                Turno Operacional: <strong class="text-primary">{{ Str::title(Str::lower($horarioSelecionado->nome)) }}</strong>
                 ({{ \Carbon\Carbon::parse($horarioSelecionado->hora_inicio)->format('H:i') }} às {{ \Carbon\Carbon::parse($horarioSelecionado->hora_fim)->format('H:i') }})
             </small>
         </div>
@@ -68,7 +68,7 @@
                     {{-- Campo Invisível com o ID do Turno --}}
                     <input type="hidden" id="horarioId" value="{{ $horarioSelecionado->id }}">
 
-                    <label class="form-label text-uppercase fw-bold text-primary w-100 text-center mb-3">Informe sua Matrícula</label>
+                    <label class="form-label fw-bold text-primary w-100 text-center mb-3">Informe sua Matrícula</label>
                     <input type="text" class="form-control input-totem" id="inputMatricula" name="matricula" autocomplete="off" autofocus required maxlength="10" minlength="10" pattern="[0-9]{10}" inputmode="numeric" placeholder="Ex: 2026123456">
                 </form>
                 <div class="text-center mt-3 text-muted small">

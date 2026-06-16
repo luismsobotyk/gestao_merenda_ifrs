@@ -46,7 +46,7 @@
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header bg-light text-uppercase fw-bold small text-body-secondary">
+                <div class="card-header bg-light fw-bold small text-body-secondary">
                     Dados do Processo Principal
                 </div>
 
@@ -81,7 +81,7 @@
                 <div class="col-md-4">
                     <div class="card money-card shadow-sm border-primary bg-primary bg-opacity-10 h-100">
                         <div class="card-body text-center">
-                            <h6 class="text-uppercase text-muted small">Total Contratado</h6>
+                            <h6 class="text-muted small">Total Contratado</h6>
                             <h3 class="card-title text-primary">R$ {{ number_format($totalContratado, 2, ',', '.') }}</h3>
                             <p class="text-muted small mb-0">Valor global do processo</p>
                         </div>
@@ -90,7 +90,7 @@
                 <div class="col-md-4">
                     <div class="card money-card shadow-sm border-info bg-info bg-opacity-10 h-100">
                         <div class="card-body text-center">
-                            <h6 class="text-uppercase text-muted small">Total Empenhado</h6>
+                            <h6 class="text-muted small">Total Empenhado</h6>
                             <h3 class="card-title text-info">R$ {{ number_format($totalEmpenhado, 2, ',', '.') }}</h3>
                             <p class="text-muted small mb-0">Soma de todas as notas</p>
                         </div>
@@ -99,7 +99,7 @@
                 <div class="col-md-4">
                     <div class="card money-card shadow-sm border-{{ $saldoContrato <= 0 ? 'danger' : 'success' }} bg-{{ $saldoContrato <= 0 ? 'danger' : 'success' }} bg-opacity-10 h-100">
                         <div class="card-body text-center">
-                            <h6 class="text-uppercase text-muted small">Saldo do Contrato</h6>
+                            <h6 class="text-muted small">Saldo do Contrato</h6>
                             <h3 class="card-title text-{{ $saldoContrato <= 0 ? 'danger' : 'success' }}">R$ {{ number_format($saldoContrato, 2, ',', '.') }}</h3>
                             <p class="text-muted small mb-0">Disponível em R$</p>
                         </div>
@@ -147,12 +147,12 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-white border-bottom-0 pt-3">
-                    <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">Saldos Quantitativos por Item</h5>
+                    <h5 class="card-title mb-0 fw-bold text-body-secondary small">Saldos Quantitativos por Item</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover table-vencimento mb-0">
-                            <thead class="table-light text-uppercase small">
+                            <thead class="table-light small">
                             <tr>
                                 <th>Item</th>
                                 <th>Unidade</th>
@@ -206,7 +206,7 @@
         <div class="col-lg-4 col-md-12 mb-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white border-bottom-0 pt-3 d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">Últimos Pedidos</h5>
+                    <h5 class="card-title mb-0 fw-bold text-body-secondary small">Últimos Pedidos</h5>
                     <button class="btn btn-sm btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalLancarPedido" title="Solicitar nova entrega">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-cart-plus" viewBox="0 0 16 16"><path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9z"/><path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zm3.915 10L3.102 4h10.796l-1.313 7zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>
                         Novo
@@ -320,7 +320,7 @@
         <div class="col-lg-8 col-md-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3">
-                    <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">Notas de Empenho (NE) Individualizadas</h5>
+                    <h5 class="card-title mb-0 fw-bold text-body-secondary small">Notas de Empenho (NE) Individualizadas</h5>
                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastrarEmpenho">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-plus" viewBox="0 0 16 16">
                             <path d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
@@ -332,7 +332,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped table-hover table-empenhos mb-0">
-                            <thead class="table-light text-uppercase small">
+                            <thead class="table-light small">
                             <tr>
                                 <th>NE / Data</th>
                                 <th>Nº Item</th>
@@ -427,7 +427,7 @@
                             <div class="col-md-6">
                                 <div class="card border-0 bg-body-tertiary h-100">
                                     <div class="card-body">
-                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Resumo Financeiro</h6>
+                                        <h6 class="text-muted small fw-bold mb-3">Resumo Financeiro</h6>
                                         <div class="d-flex justify-content-between mb-1 small">
                                             <span>Valor Original:</span>
                                             <strong>R$ {{ number_format($vlrTotal, 2, ',', '.') }}</strong>
@@ -452,7 +452,7 @@
                             <div class="col-md-6">
                                 <div class="card border-0 bg-body-tertiary h-100">
                                     <div class="card-body">
-                                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Resumo Físico ({{ $nomeAlimento }})</h6>
+                                        <h6 class="text-muted small fw-bold mb-3">Resumo Físico ({{ $nomeAlimento }})</h6>
                                         <div class="d-flex justify-content-between mb-1 small">
                                             <span>Qtd. Empenhada:</span>
                                             <strong>{{ number_format($qtdEmpenhada, 2, ',', '.') }} {{ $siglaUni }}</strong>
@@ -651,7 +651,7 @@
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-sm align-middle" id="tabela-itens-pedido">
-                            <thead class="table-light small text-center text-uppercase">
+                            <thead class="table-light small text-center">
                             <tr>
                                 <th width="45%">Alimento</th>
                                 <th width="25%">Qtd. Desejada</th>
@@ -700,7 +700,7 @@
     {{-- Offcanvas de Histórico Completo de Pedidos --}}
     <div class="offcanvas offcanvas-end shadow" tabindex="-1" id="offcanvasHistoricoPedidos" aria-labelledby="offcanvasHistoricoPedidosLabel">
         <div class="offcanvas-header bg-light border-bottom">
-            <h5 class="offcanvas-title fw-bold text-uppercase small" id="offcanvasHistoricoPedidosLabel">Todos os Pedidos do Contrato</h5>
+            <h5 class="offcanvas-title fw-bold small" id="offcanvasHistoricoPedidosLabel">Todos os Pedidos do Contrato</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body p-0">

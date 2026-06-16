@@ -26,7 +26,7 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle mb-0">
-                    <thead class="table-light text-uppercase small text-secondary">
+                    <thead class="table-light small text-secondary">
                     <tr>
                         <th class="ps-4">Nome do Cardápio</th>
                         <th>Início da Vigência</th>

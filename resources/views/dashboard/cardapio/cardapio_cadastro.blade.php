@@ -65,20 +65,20 @@
             <form id="formCardapio" method="POST" action="{{ isset($cardapio) ? '#' : route('cardapio.salvar') }}">
                 @csrf
                 <div class="card shadow-sm mb-4 border-primary">
-                    <div class="card-header bg-primary bg-opacity-10 text-primary text-uppercase fw-bold small">
+                    <div class="card-header bg-primary bg-opacity-10 text-primary fw-bold small">
                         1. Informações Gerais e Vigência
                     </div>
                     <div class="card-body row g-3">
                         <div class="col-12">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Nome do Cardápio</label>
+                            <label class="form-label small fw-bold text-body-secondary">Nome do Cardápio</label>
                             <input type="text" class="form-control" name="nome_cardapio" required value="{{ $cardapio->nome ?? old('nome_cardapio') }}">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Início da Vigência</label>
+                            <label class="form-label small fw-bold text-body-secondary">Início da Vigência</label>
                             <input type="date" class="form-control" name="data_inicio" required value="{{ isset($cardapio) ? \Carbon\Carbon::parse($cardapio->data_inicio)->format('Y-m-d') : date('Y-m-d') }}">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Fim da Vigência</label>
+                            <label class="form-label small fw-bold text-body-secondary">Fim da Vigência</label>
                             <input type="date" class="form-control" name="data_fim" required value="{{ isset($cardapio) ? \Carbon\Carbon::parse($cardapio->data_fim)->format('Y-m-d') : '' }}">
                         </div>
                     </div>
@@ -88,7 +88,7 @@
             @if(isset($cardapio))
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3">
-                        <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">2. Horários (Repetição)</h5>
+                        <h5 class="card-title mb-0 fw-bold text-body-secondary small">2. Horários (Repetição)</h5>
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalAdicionarHorario">
                             + Adicionar
                         </button>
@@ -116,12 +116,12 @@
             @else
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white border-bottom-0 pt-3">
-                        <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small">3. Grid Semanal Padrão</h5>
+                        <h5 class="card-title mb-0 fw-bold text-body-secondary small">3. Grid Semanal Padrão</h5>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-bordered menu-grid-table mb-0">
-                                <thead class="table-light text-uppercase small text-center">
+                                <thead class="table-light small text-center">
                                 <tr>
                                     <th class="meal-time-column">Horário</th>
                                     <th>Seg.</th>
@@ -139,7 +139,7 @@
 
                 <div class="card shadow-sm exception-card">
                     <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3">
-                        <h5 class="card-title mb-0 text-uppercase fw-bold text-body-secondary small text-warning">4. Exceções e Dias Especiais</h5>
+                        <h5 class="card-title mb-0 fw-bold text-body-secondary small text-warning">4. Exceções e Dias Especiais</h5>
                         <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalAdicionarExcecao">
                             + Adicionar Data Específica
                         </button>
@@ -147,7 +147,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover mb-0 align-middle">
-                                <thead class="table-light text-uppercase small">
+                                <thead class="table-light small">
                                 <tr>
                                     <th>Data Exata</th>
                                     <th>Refeição</th>
@@ -176,19 +176,19 @@
                     </div>
                     <div class="modal-body row g-3">
                         <div class="col-12">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Nome da Refeição</label>
+                            <label class="form-label small fw-bold text-body-secondary">Nome da Refeição</label>
                             <input type="text" class="form-control border-primary" name="nome" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Hora Início</label>
+                            <label class="form-label small fw-bold text-body-secondary">Hora Início</label>
                             <input type="time" class="form-control" name="hora_inicio" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Hora Fim</label>
+                            <label class="form-label small fw-bold text-body-secondary">Hora Fim</label>
                             <input type="time" class="form-control" name="hora_fim" required>
                         </div>
                         <div class="col-12">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Público / Descrição (Opcional)</label>
+                            <label class="form-label small fw-bold text-body-secondary">Público / Descrição (Opcional)</label>
                             <input type="text" class="form-control" name="descricao_publico">
                         </div>
                     </div>
@@ -212,7 +212,7 @@
                             <span id="labelDiaModal">...</span> / <span id="labelHorarioModal">...</span>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-uppercase text-body-secondary small">Estoque Disponível</label>
+                            <label class="form-label fw-bold text-body-secondary small">Estoque Disponível</label>
                             <select class="form-select border-primary" id="selectAlimento" name="item_contrato_uuid" required>
                                 <option value="" selected disabled>Escolha...</option>
                                 @foreach($itensDisponiveis as $item)
@@ -243,11 +243,11 @@
                     </div>
                     <div class="modal-body row g-3">
                         <div class="col-md-6">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Data Exata</label>
+                            <label class="form-label small fw-bold text-body-secondary">Data Exata</label>
                             <input type="date" class="form-control border-warning" name="data_exata" required value="{{ date('Y-m-d') }}">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary">Tipo</label>
+                            <label class="form-label small fw-bold text-body-secondary">Tipo</label>
                             <select class="form-select border-warning" name="tipo_excecao" required>
                                 <option value="" selected disabled>Escolha...</option>
                                 <option value="inclusao">Inclusão (ex: Sábado letivo)</option>
@@ -256,7 +256,7 @@
                             </select>
                         </div>
                         <div class="col-12 mt-4">
-                            <label class="form-label small text-uppercase fw-bold text-body-secondary d-block mb-2">Quais horários serão afetados neste dia?</label>
+                            <label class="form-label small fw-bold text-body-secondary d-block mb-2">Quais horários serão afetados neste dia?</label>
                             <div class="alert alert-light border border-secondary border-opacity-25 p-3">
                                 <div class="mb-2">
                                     <button type="button" class="btn btn-xs btn-outline-secondary py-0" style="font-size: 0.75rem" onclick="toggleTodosHorariosExcecao(true)">Marcar Todos</button>

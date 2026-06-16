@@ -41,7 +41,7 @@
                         <option value="">Todos os Cursos Autorizados</option>
                         @foreach($cursos as $curso)
                             <option value="{{ $curso->id }}" {{ request('curso_id') == $curso->id ? 'selected' : '' }}>
-                                {{ $curso->nome }}
+                                {{ Str::title(Str::lower($curso->nome)) }}
                             </option>
                         @endforeach
                     </select>
@@ -75,7 +75,7 @@
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light text-uppercase small text-secondary">
+                        <thead class="table-light small text-secondary">
                         <tr>
                             <th class="ps-4">Matrícula</th>
                             <th>Nome do Discente</th>
@@ -86,10 +86,10 @@
                         @foreach($alunos as $aluno)
                             <tr>
                                 <td class="ps-4 text-muted fw-bold">{{ $aluno->matricula }}</td>
-                                <td><div class="fw-bold text-dark">{{ $aluno->nome }}</div></td>
+                                <td><div class="fw-bold text-dark">{{ Str::title(Str::lower($aluno->nome)) }}</div></td>
                                 <td>
                                         <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle text-wrap text-start lh-sm" style="max-width: 250px;">
-                                            {{ $aluno->curso->nome ?? 'Curso Desconhecido' }}
+                                            {{ Str::title(Str::lower($aluno->curso->nome)) ?? 'Curso Desconhecido' }}
                                         </span>
                                 </td>
                             </tr>

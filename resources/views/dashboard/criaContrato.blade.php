@@ -103,7 +103,7 @@
 
                     <div class="table-responsive">
                         <table class="table table-bordered bg-white shadow-sm" id="tabela-itens">
-                            <thead class="table-light small text-uppercase">
+                            <thead class="table-light small">
                             <tr>
                                 <th>Nome do Alimento</th>
                                 <th width="15%">Unidade</th>

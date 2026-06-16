@@ -33,7 +33,7 @@
                                 <option value="" selected disabled>Selecione um turno...</option>
                                 @foreach($horarios as $horario)
                                     <option value="{{ $horario->id }}">
-                                        {{ $horario->nome }}
+                                        {{ Str::title(Str::lower($horario->nome)) }}
                                         ({{ \Carbon\Carbon::parse($horario->hora_inicio)->format('H:i') }} às {{ \Carbon\Carbon::parse($horario->hora_fim)->format('H:i') }})
                                     </option>
                                 @endforeach

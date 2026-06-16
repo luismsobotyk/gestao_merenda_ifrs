@@ -33,12 +33,12 @@
             <form class="row g-3" method="GET" action="{{ route('contratos') }}">
 
                 <div class="col-md-4">
-                    <label class="form-label small text-uppercase fw-bold text-body-secondary">Fornecedor</label>
+                    <label class="form-label small fw-bold text-body-secondary">Fornecedor</label>
                     <input type="text" class="form-control form-control-sm" name="fornecedor" placeholder="Ex: Cooperativa..." value="{{ request('fornecedor') }}">
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label small text-uppercase fw-bold text-body-secondary">Ano do Pregão</label>
+                    <label class="form-label small fw-bold text-body-secondary">Ano do Pregão</label>
                     <select class="form-select form-select-sm" name="ano">
                         <option value="">Todos</option>
                         <option value="2026" {{ request('ano') == '2026' ? 'selected' : '' }}>2026</option>
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label small text-uppercase fw-bold text-body-secondary">Status</label>
+                    <label class="form-label small fw-bold text-body-secondary">Status</label>
                     <select class="form-select form-select-sm" name="status">
                         <option value="">Todos</option>
                         <option value="Vigente" {{ request('status') == 'Vigente' ? 'selected' : '' }}>Vigente</option>
@@ -86,7 +86,7 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-striped table-hover table-contratos mb-0">
-                    <thead class="table-light text-uppercase small">
+                    <thead class="table-light small">
                     <tr>
                         <th>#</th>
                         <th>Fornecedor</th>
