@@ -90,7 +90,7 @@
             <div class="card h-100 border-0 shadow-sm text-center p-3 card-dash">
                 <div class="card-body">
                     <div class="dash-icon-wrapper">
-                        <i class="bi bi-calendar-week dash-icon text-primary bg-primary bg-opacity-10 rounded-4"></i>
+                        <i class="bi bi-cup-straw dash-icon text-primary bg-primary bg-opacity-10 rounded-4"></i>
                     </div>
 
                     <h5 class="card-title fw-bold">Cardápios</h5>
@@ -178,10 +178,10 @@
             <div class="card h-100 border-0 shadow-sm text-center p-3 card-dash">
                 <div class="card-body">
                     <div class="dash-icon-wrapper">
-                        <i class="bi bi-people dash-icon text-secondary bg-secondary bg-opacity-10 rounded-4"></i>
+                        <i class="bi bi-gear dash-icon text-secondary bg-secondary bg-opacity-10 rounded-4"></i>
                     </div>
 
-                    <h5 class="card-title fw-bold">Usuários</h5>
+                    <h5 class="card-title fw-bold">Gerenciar Usuários</h5>
 
                     <p class="card-text text-muted small">
                         Autorize novos operadores do sistema consultando diretamente as contas do diretório LDAP.
