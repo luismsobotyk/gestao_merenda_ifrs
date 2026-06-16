@@ -55,7 +55,7 @@
 
         h1, h2, h3, h4, h5, h6 { font-family: 'Rawline', sans-serif !important; }
 
-        /* ---------- App shell (Ocupa a tela inteira) ---------- */
+        /* ---------- App shell ---------- */
         .app {
             width: 100%;
             max-width: 100%;
@@ -67,7 +67,6 @@
             flex-direction: column;
         }
 
-        /* Contêiner para centralizar os limites em monitores muito largos */
         .container-app {
             max-width: 1000px;
             margin: 0 auto;
@@ -114,14 +113,12 @@
             padding: 18px 22px 15px;
             scrollbar-width: none;
             border-bottom: 1px solid var(--hairline);
-            justify-content: flex-start; /* Alinhamento padrão (mobile) */
+            justify-content: flex-start;
         }
         .datestrip::-webkit-scrollbar { display: none; }
 
         @media (min-width: 768px) {
-            .datestrip {
-                justify-content: center; /* Centraliza as abas no Desktop */
-            }
+            .datestrip { justify-content: center; }
         }
 
         .day {
@@ -148,20 +145,18 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* O conteúdo do cardápio centralizado e um abaixo do outro */
         .menu {
             padding: 30px 20px 8px;
             display: flex;
             flex-direction: column;
             gap: 30px;
             max-width: 700px;
-            margin: 0 auto; /* Centraliza a coluna principal */
+            margin: 0 auto;
             width: 100%;
         }
 
         .period { width: 100%; }
 
-        /* Cores dinâmicas para os períodos */
         .p-0 { --accent: #E08A2B; --accent-tint: #FBEFDD; --accent-ink: #9A5E14; }
         .p-1 { --accent: #1F9E8C; --accent-tint: #E2F3F0; --accent-ink: #0E5F54; }
         .p-2 { --accent: #5A57D1; --accent-tint: #ECEBFB; --accent-ink: #3B399A; }
@@ -170,7 +165,7 @@
         .period-head {
             display: flex;
             align-items: center;
-            justify-content: center; /* Cabeçalho do turno centralizado */
+            justify-content: center;
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -187,7 +182,7 @@
             font-size: 13px; font-weight: 800; white-space: nowrap;
             color: var(--accent-ink); background: var(--accent-tint);
             padding: 6px 12px; border-radius: 999px;
-            margin-left: auto; /* Empurra o horário para a direita se houver espaço, ou centraliza */
+            margin-left: auto;
         }
 
         @media (max-width: 450px) {
@@ -196,11 +191,10 @@
             .period-time { margin-left: 0; margin-top: 5px; }
         }
 
-        /* ---------- Horizontal scroller (Centralizado) ---------- */
         .row-wrap {
             position: relative;
             display: flex;
-            justify-content: center; /* Centraliza a fila de alimentos sempre (desktop e mobile) */
+            justify-content: center;
         }
         .row {
             display: inline-flex;
@@ -215,6 +209,10 @@
         }
         .row::-webkit-scrollbar { display: none; }
 
+        @media (max-width: 768px) {
+            .row-wrap { justify-content: flex-start; }
+        }
+
         .item {
             flex: 0 0 150px; scroll-snap-align: start;
             background: var(--card); border: 1px solid var(--hairline); border-radius: 22px;
@@ -226,7 +224,6 @@
         }
         .item:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -16px rgba(0,0,0,.25); }
 
-        /* Faixa de Exceção */
         .item-badge-excecao {
             position: absolute; top: 0; left: 0; width: 100%;
             background: #ffc107; color: #000; font-size: 10px; font-weight: 800;
@@ -245,7 +242,6 @@
             color: var(--c); background: var(--t); padding: 4px 10px; border-radius: 999px;
         }
 
-        /* right-edge fade hint */
         .row-fade {
             position: absolute; top: 0; right: 0; bottom: 8px; width: 50px;
             pointer-events: none; border-radius: 0 22px 22px 0;
@@ -254,7 +250,6 @@
         }
         .row-wrap.at-end .row-fade { opacity: 0; }
 
-        /* click-to-scroll affordance */
         .row-scroll {
             position: absolute; right: -10px; top: calc(50% - 4px); transform: translateY(-50%);
             width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
@@ -273,7 +268,6 @@
             50%      { transform: translateY(-50%) translateX(4px); }
         }
 
-        /* ===================== FOOTER ===================== */
         .foot {
             text-align: center; font-size: 13px; font-weight: 600; color: var(--muted);
             padding: 30px 0 max(30px, env(safe-area-inset-bottom));
@@ -282,6 +276,47 @@
     </style>
 </head>
 <body>
+
+@php
+    // ==============================================================================
+    // HELPER FUNCIONAL: Retorna Cores, Categoria e Ícone (SVG) baseado no nome
+    // ==============================================================================
+    if (!function_exists('getEstiloAlimento')) {
+        function getEstiloAlimento($nomeAlimento) {
+            // 1. Prepara a string (minúsculas e sem acentos) para facilitar a busca
+            $nome = mb_strtolower(trim($nomeAlimento), 'UTF-8');
+            $acentos = ['á'=>'a','à'=>'a','ã'=>'a','â'=>'a','é'=>'e','ê'=>'e','í'=>'i','ó'=>'o','õ'=>'o','ô'=>'o','ú'=>'u','ç'=>'c'];
+            $nome = strtr($nome, $acentos);
+
+            // 2. Frutas (Banana, Maçã, Bergamota)
+            if (str_contains($nome, 'banana')) {
+                return ['c' => '#C99016', 't' => '#FBF1D5', 'cat' => 'Frutas', 'svg' => '<path d="M4 13c3.5-2 8-2 10 2a5.5 5.5 0 0 1 8 5"/><path d="M5.15 17.89c5.52-1.52 8.65-6.89 7-12C11.55 4 11.5 2 13 2c3.22 0 5 5.5 5 8 0 6.5-4.2 12-10.49 12C5.11 22 2 22 2 20c0-1.5 1.14-1.55 3.15-2.11Z"/>'];
+            }
+            if (str_contains($nome, 'maca') || str_contains($nome, 'bergamota') || str_contains($nome, 'laranja')) {
+                return ['c' => '#D9483B', 't' => '#FBEAE8', 'cat' => 'Frutas', 'svg' => '<path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/>'];
+            }
+
+            // 3. Bebidas & Laticínios (Iogurte, Suco, Achocolatado)
+            if (str_contains($nome, 'iogurte') || str_contains($nome, 'suco') || str_contains($nome, 'achocolatado') || str_contains($nome, 'leite')) {
+                return ['c' => '#2F76C9', 't' => '#E7F0FB', 'cat' => 'Bebidas', 'svg' => '<path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.789a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.788V2"/><path d="M7 15a6.472 6.472 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/>'];
+            }
+
+            // 4. Salgados, Sanduíches & Pães (Pastel, Sanduíche, Pão)
+            if (str_contains($nome, 'pastel') || str_contains($nome, 'sanduiche') || str_contains($nome, 'pao')) {
+                return ['c' => '#D35400', 't' => '#FAD7A1', 'cat' => 'Salgados', 'svg' => '<path d="M3 12h18"/><path d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M3 12c0-3.31 2.69-6 6-6h6c3.31 0 6 2.69 6 6"/>'];
+            }
+
+            // 5. Doces e Assados (Bolo, Cookie, Biscoito, Bolacha)
+            if (str_contains($nome, 'bolo') || str_contains($nome, 'cookie') || str_contains($nome, 'biscoito') || str_contains($nome, 'bolacha')) {
+                return ['c' => '#8E44AD', 't' => '#F5EEF8', 'cat' => 'Doces', 'svg' => '<circle cx="12" cy="12" r="9"/><path d="M8 9.5v.01"/><path d="M12 7v.01"/><path d="M15.5 11.5v.01"/><path d="M10.5 15.5v.01"/><path d="M14 16v.01"/>'];
+            }
+
+            // 6. Default (Caso não encontre a palavra, usa ícone de prato genérico)
+            return ['c' => '#1F9E8C', 't' => '#E2F3F0', 'cat' => 'Geral', 'svg' => '<path d="M2 14h20"/><path d="M12 4a8 8 0 0 0-8 8h16a8 8 0 0 0-8-8z"/><path d="M12 2v2"/>'];
+        }
+    }
+@endphp
+
 <main class="app">
 
     <header class="hero">
@@ -356,33 +391,31 @@
 
                                 <div class="row-wrap">
                                     <div class="row" tabindex="0">
-                                        @php
-                                            $paletaItens = [
-                                                ['c' => '#2F76C9', 't' => '#E7F0FB'], // Azul
-                                                ['c' => '#D9483B', 't' => '#FBEAE8'], // Vermelho
-                                                ['c' => '#C99016', 't' => '#FBF1D5'], // Amarelo
-                                                ['c' => '#1F9E8C', 't' => '#E2F3F0'], // Verde Água
-                                                ['c' => '#8E44AD', 't' => '#F5EEF8']  // Roxo
-                                            ];
-                                        @endphp
 
                                         @foreach($horario['itens'] as $iIndex => $item)
-                                            @php $cor = $paletaItens[$iIndex % count($paletaItens)]; @endphp
+                                            @php $estilo = getEstiloAlimento($item['nome']); @endphp
 
-                                            <div class="item" style="--c:{{ $cor['c'] }};--t:{{ $cor['t'] }}">
+                                            <div class="item" style="--c:{{ $estilo['c'] }};--t:{{ $estilo['t'] }}">
                                                 @if($item['origem'] !== 'padrao')
                                                     <div class="item-badge-excecao">Extra</div>
                                                 @endif
 
                                                 <span class="item-ico">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 16 16"><path d="M8 2a2 2 0 0 0-2 2v2h4V4a2 2 0 0 0-2-2m4 4v1.5a.5.5 0 0 1-1 0V6H5v1.5a.5.5 0 0 1-1 0V6H2.5A1.5 1.5 0 0 0 1 7.5v6A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6A1.5 1.5 0 0 0 13.5 6z"/></svg>
-                                                    </span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                                        {!! $estilo['svg'] !!}
+                                                    </svg>
+                                                </span>
                                                 <span class="item-name">{{ $item['nome'] }}</span>
-                                                @if($item['quantidade_estimada_porcao'])
-                                                    <span class="item-cat">Porção: {{ number_format($item['quantidade_estimada_porcao'], 2, ',', '') }}</span>
-                                                @endif
+
+                                                <span class="item-cat">
+                                                    {{ $estilo['cat'] }}
+                                                    @if($item['quantidade_estimada_porcao'])
+                                                        · {{ number_format($item['quantidade_estimada_porcao'], 2, ',', '') }}
+                                                    @endif
+                                                </span>
                                             </div>
                                         @endforeach
+
                                     </div>
                                     <span class="row-fade" aria-hidden="true"></span>
                                     <button class="row-scroll" type="button" aria-label="Ver mais itens">
