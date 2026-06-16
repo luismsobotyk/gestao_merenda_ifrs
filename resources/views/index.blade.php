@@ -209,10 +209,6 @@
         }
         .row::-webkit-scrollbar { display: none; }
 
-        @media (max-width: 768px) {
-            .row-wrap { justify-content: flex-start; }
-        }
-
         .item {
             flex: 0 0 150px; scroll-snap-align: start;
             background: var(--card); border: 1px solid var(--hairline); border-radius: 22px;
