@@ -16,7 +16,10 @@
 
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">{{ $isEdit ? 'Editar Contrato: ' . $contrato->processo : 'Cadastrar Novo Contrato' }}</h1>
+        <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+            <i class="bi bi-file-earmark-plus text-warning bg-warning bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+            {{ $isEdit ? 'Editar Contrato: ' . $contrato->processo : 'Cadastrar Novo Contrato' }}
+        </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('contratos') }}" class="btn btn-sm btn-outline-secondary">
                 Voltar para Lista

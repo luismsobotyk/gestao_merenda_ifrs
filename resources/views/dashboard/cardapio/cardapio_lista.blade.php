@@ -2,7 +2,10 @@
 
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Gestão de Cardápios</h1>
+        <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+            <i class="bi bi-cup-straw text-primary bg-primary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+            Gestão de Cardápios
+        </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('cardapio.novo') }}" class="btn btn-sm btn-primary d-flex align-items-center gap-1 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">

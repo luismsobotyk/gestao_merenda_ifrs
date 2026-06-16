@@ -3,7 +3,10 @@
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
         <div>
-            <h1 class="h2 mb-0">Histórico de Acesso</h1>
+            <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+                <i class="bi bi-gear text-secondary bg-secondary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+                Histórico de Acessos
+            </h1>
             <small class="text-muted">Analisando registos de: <strong>{{ $user->name }}</strong> ({{ $user->username }})</small>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">

@@ -2,7 +2,10 @@
 
 @section('content')
     <div class="pt-4 pb-3 mb-4 border-bottom">
-        <h1 class="h2 fw-bold text-dark mb-1">Abrir Totem</h1>
+        <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+            <i class="bi bi-upc-scan text-success bg-success bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+            Abrir Totem
+        </h1>
         <p class="text-muted mb-0">Selecione o turno operacional para iniciar o modo de autoatendimento.</p>
     </div>
 

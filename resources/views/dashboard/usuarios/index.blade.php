@@ -3,8 +3,11 @@
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
         <div>
-            <h1 class="h2 mb-0">Gestão de Acessos</h1>
-            <small class="text-muted">Controle quais os servidores e bolsistas que podem aceder ao sistema via LDAP.</small>
+            <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+                <i class="bi bi-gear text-secondary bg-secondary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+                Gestão de Acessos
+            </h1>
+            <small class="text-muted">Controle quais os servidores e bolsistas que podem acessar o sistema via LDAP.</small>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
             <button type="button" class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#modalAdicionar" id="btnAbrirModal">

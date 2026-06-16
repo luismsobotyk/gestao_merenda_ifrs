@@ -1,9 +1,31 @@
 @extends('dashboard.layout')
 
+@section('custom_css')
+    <style>
+        .text-lilas { color: #9b59b6 !important; }
+        .bg-lilas { background-color: rgba(155, 89, 182, 0.12) !important; }
+
+        .bg-lilas-solid { background-color: #9b59b6 !important; }
+        .btn-lilas {
+            background-color: #9b59b6;
+            color: #fff;
+            border-color: #9b59b6;
+        }
+        .btn-lilas:hover {
+            background-color: #8e44ad;
+            color: #fff;
+            border-color: #8e44ad;
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
-            <h1 class="h2 mb-0">Discentes Autorizados</h1>
+            <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+                <i class="bi bi-person-badge text-lilas bg-lilas rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+                Discentes Autorizados
+            </h1>
             <small class="text-muted">Última sincronização de alunos: <strong>{{ $ultimaSync }}</strong> | Total na base: <strong>{{ $alunos->total() }}</strong> discentes</small>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">

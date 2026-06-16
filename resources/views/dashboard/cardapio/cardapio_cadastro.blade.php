@@ -25,7 +25,10 @@
 
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">{{ isset($cardapio) ? 'Editando Cardápio: ' . $cardapio->nome : 'Criar Novo Cardápio Flexível' }}</h1>
+        <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+            <i class="bi bi-cup-straw text-primary bg-primary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+            {{ isset($cardapio) ? 'Editando Cardápio: ' . $cardapio->nome : 'Criar Novo Cardápio Flexível' }}
+        </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group me-2">
                 <a href="{{ route('cardapio') }}" class="btn btn-sm btn-outline-secondary">Cancelar</a>

@@ -15,7 +15,12 @@
 
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Contratos de Fornecimento</h1>
+
+        <h1 class="h2 d-flex align-items-center gap-3 mb-0">
+            <i class="bi bi-file-earmark-plus text-warning bg-warning bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+            Contratos de Fornecimento
+        </h1>
+
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('contrato.criar') }}" class="btn btn-sm btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-plus" viewBox="0 0 16 16">
