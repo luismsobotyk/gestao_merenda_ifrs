@@ -345,7 +345,6 @@
                         <thead class="table-light">
                         <tr>
                             <th>Participante</th>
-                            <th>Usuário LDAP</th>
                             <th>Status</th>
                             <th>SUS</th>
                             <th>Último salvamento</th>
