@@ -548,7 +548,6 @@
                             <strong>${escapeHtml(p.codigo || '—')}</strong><br>
                             <small class="text-muted">${escapeHtml(p.perfil || 'Perfil não informado')}</small>
                         </td>
-                        <td>${escapeHtml(s.ldap_username || '—')}</td>
                         <td><span class="badge ${statusClass}">${escapeHtml(s.status || '—')}</span></td>
                         <td><strong>${escapeHtml(String(score))}</strong></td>
                         <td>${escapeHtml(s.last_saved_at || '—')}</td>
