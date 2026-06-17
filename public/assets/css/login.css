@@ -3,6 +3,13 @@ html,
 body {
     height: 100%;
 }
+:root {
+    --bs-font-sans-serif: 'Rawline', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bs-body-font-family: var(--bs-font-sans-serif);
+}
+body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'Rawline', sans-serif !important;
+}
 
 .form-signin {
     max-width: 330px;
@@ -43,19 +50,19 @@ body {
     fill: currentColor;
 }
 .btn-bd-primary {
-    --bd-violet-bg: #198754; /* Alterado para o verde do IFRS */
-    --bd-violet-rgb: 25, 135, 84;
+    --bd-violet-bg: #326a45; /* Cor principal solicitada */
+    --bd-violet-rgb: 50, 106, 69; /* RGB para a sombra/focus */
     --bs-btn-font-weight: 600;
-    --bs-btn-color: var(--bs-white);
+    --bs-btn-color: var(--bs-white); /* Garante o texto branco */
     --bs-btn-bg: var(--bd-violet-bg);
     --bs-btn-border-color: var(--bd-violet-bg);
     --bs-btn-hover-color: var(--bs-white);
-    --bs-btn-hover-bg: #157347;
-    --bs-btn-hover-border-color: #157347;
+    --bs-btn-hover-bg: #285537; /* Tom um pouco mais escuro para o hover */
+    --bs-btn-hover-border-color: #285537;
     --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
     --bs-btn-active-color: var(--bs-btn-hover-color);
-    --bs-btn-active-bg: #146c43;
-    --bs-btn-active-border-color: #146c43;
+    --bs-btn-active-bg: #21462d; /* Tom ainda mais escuro para o clique ativo */
+    --bs-btn-active-border-color: #21462d;
 }
 .bd-mode-toggle {
     z-index: 1500;
