@@ -43,11 +43,9 @@
             ['id'=>'T12', 'mod'=>'merenda',  'cls'=>'mod-merenda',  'label'=>'Faça um pedido de merenda para a semana seguinte.'],
             ['id'=>'T13', 'mod'=>'merenda',  'cls'=>'mod-merenda',  'label'=>'Atualize o status de um pedido para "Recebido".'],
             ['id'=>'T14', 'mod'=>'merenda',  'cls'=>'mod-merenda',  'label'=>'Visualize a lista de pedidos realizados.'],
-            ['id'=>'T15', 'mod'=>'contrato', 'cls'=>'mod-contrato', 'label'=>'Identifique outros contratos vinculados à mesma empresa fornecedora.'],
-            ['id'=>'T16', 'mod'=>'merenda',  'cls'=>'mod-merenda',  'label'=>'Cadastre um novo cardápio para uma data futura.'],
-            ['id'=>'T17', 'mod'=>'merenda',  'cls'=>'mod-merenda',  'label'=>'Simule ou execute a retirada de merenda por um estudante.'],
-            ['id'=>'T18', 'mod'=>'dados',    'cls'=>'mod-dados',    'label'=>'Analise os dados de retirada de merenda em formato de gráfico.'],
-            ['id'=>'T19', 'mod'=>'dados',    'cls'=>'mod-dados',    'label'=>'Visualize o gráfico de acessos mais frequentes, sobras e distribuição por turno.'],
+            ['id'=>'T15', 'mod'=>'merenda',  'cls'=>'mod-merenda',  'label'=>'Cadastre um novo cardápio para uma data futura.'],
+            ['id'=>'T16', 'mod'=>'merenda',  'cls'=>'mod-merenda',  'label'=>'Simule ou execute a retirada de merenda por um estudante.'],
+            ['id'=>'T17', 'mod'=>'dados',    'cls'=>'mod-dados',    'label'=>'Analise os dados de retirada de merenda em formato de gráfico.'],
         ];
     @endphp
 

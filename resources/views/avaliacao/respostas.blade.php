@@ -46,11 +46,6 @@
             overflow: hidden;
         }
 
-        /*
-         * IMPORTANTE:
-         * O Chart.js precisa de um container com altura explícita quando usamos
-         * maintainAspectRatio: false. Sem isso, o canvas pode crescer indefinidamente.
-         */
         .chart-box {
             position: relative;
             width: 100%;
@@ -76,7 +71,9 @@
             margin-bottom: 1rem;
         }
 
-        .task-table th {
+        .task-table th,
+        .answer-table th,
+        .info-table th {
             font-size: .72rem;
             text-transform: uppercase;
             letter-spacing: .06em;
@@ -85,7 +82,11 @@
         }
 
         .task-table td,
-        .task-table th {
+        .task-table th,
+        .answer-table td,
+        .answer-table th,
+        .info-table td,
+        .info-table th {
             vertical-align: middle;
         }
 
@@ -105,13 +106,105 @@
         .mod-merenda { background: #EEF8F3; color: #22754C; }
         .mod-dados { background: #F0F9FF; color: #075985; }
 
-        .qual-box {
+        .qual-box,
+        .text-answer-box {
             white-space: pre-wrap;
             background: #f8faf9;
             border: 1px solid #D5E5DB;
             border-radius: 10px;
             padding: .8rem;
             font-size: .87rem;
+        }
+
+        .full-response-card {
+            border: 1px solid #D5E5DB;
+            border-radius: 14px;
+            background: #fff;
+            overflow: hidden;
+            margin-bottom: .9rem;
+        }
+
+        .full-response-card summary {
+            cursor: pointer;
+            padding: 1rem 1.15rem;
+            background: #f8faf9;
+            border-bottom: 1px solid transparent;
+            list-style-position: inside;
+        }
+
+        .full-response-card[open] summary {
+            border-bottom-color: #D5E5DB;
+        }
+
+        .full-response-body {
+            padding: 1rem 1.15rem 1.15rem;
+        }
+
+        .full-response-header {
+            display: flex;
+            gap: .75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .summary-title {
+            font-weight: 700;
+            color: #14422A;
+        }
+
+        .summary-meta {
+            color: #5c7167;
+            font-size: .86rem;
+        }
+
+        .section-kicker {
+            font-size: .76rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #1B5C3B;
+            margin: 1rem 0 .65rem;
+        }
+
+        .section-kicker:first-child {
+            margin-top: 0;
+        }
+
+        .sus-answer-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 30px;
+            border-radius: 8px;
+            background: #D4EFE0;
+            color: #1B5C3B;
+            font-weight: 800;
+            font-size: .9rem;
+        }
+
+        .sus-type {
+            display: inline-flex;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: .68rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .sus-type-pos { background: #D4EFE0; color: #1B5C3B; }
+        .sus-type-neg { background: #FDEAEA; color: #9B2020; }
+
+        .small-muted {
+            color: #6b8778;
+            font-size: .82rem;
+        }
+
+        .empty-panel {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #6b8778;
+            font-style: italic;
         }
 
         @media (max-width: 900px) {
@@ -267,10 +360,14 @@
 
         <div class="card sus-card mb-4">
             <div class="card-body">
-                <h2 class="h5 mb-3">Respostas qualitativas</h2>
-                <div id="qualitative-list"></div>
+                <h2 class="h5 mb-3">Respostas por participante</h2>
+                <p class="text-muted mb-3">
+                    Abra um participante para visualizar as respostas do formulário SUS, as questões abertas e os dados registrados pelo moderador.
+                </p>
+                <div id="full-responses-list"></div>
             </div>
         </div>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -293,11 +390,22 @@
             { id:'T12', mod:'merenda',  cls:'mod-merenda',  label:'Faça um pedido de merenda para a semana seguinte.' },
             { id:'T13', mod:'merenda',  cls:'mod-merenda',  label:'Atualize o status de um pedido para "Recebido".' },
             { id:'T14', mod:'merenda',  cls:'mod-merenda',  label:'Visualize a lista de pedidos realizados.' },
-            { id:'T15', mod:'contrato', cls:'mod-contrato', label:'Identifique outros contratos vinculados à mesma empresa fornecedora.' },
-            { id:'T16', mod:'merenda',  cls:'mod-merenda',  label:'Cadastre um novo cardápio para uma data futura.' },
-            { id:'T17', mod:'merenda',  cls:'mod-merenda',  label:'Simule ou execute a retirada de merenda por um estudante.' },
-            { id:'T18', mod:'dados',    cls:'mod-dados',    label:'Analise os dados de retirada de merenda em formato de gráfico.' },
-            { id:'T19', mod:'dados',    cls:'mod-dados',    label:'Visualize o gráfico de acessos mais frequentes, sobras e distribuição por turno.' },
+            { id:'T15', mod:'merenda',  cls:'mod-merenda',  label:'Cadastre um novo cardápio para uma data futura.' },
+            { id:'T16', mod:'merenda',  cls:'mod-merenda',  label:'Simule ou execute a retirada de merenda por um estudante.' },
+            { id:'T17', mod:'dados',    cls:'mod-dados',    label:'Analise os dados de retirada de merenda em formato de gráfico.' },
+        ];
+
+        const SUS_LABELS = [
+            { q:'Eu usaria este sistema com frequência.', type:'pos' },
+            { q:'Achei o sistema desnecessariamente complexo.', type:'neg' },
+            { q:'Achei o sistema fácil de usar.', type:'pos' },
+            { q:'Precisaria de apoio técnico para conseguir usar este sistema.', type:'neg' },
+            { q:'As diversas funções do sistema estão bem integradas.', type:'pos' },
+            { q:'Achei que havia muita inconsistência no sistema.', type:'neg' },
+            { q:'Imagino que a maioria das pessoas aprenderia a usar este sistema rapidamente.', type:'pos' },
+            { q:'Achei o sistema muito difícil de usar.', type:'neg' },
+            { q:'Me senti confiante usando o sistema.', type:'pos' },
+            { q:'Precisei aprender muitas coisas antes de conseguir usar este sistema.', type:'neg' },
         ];
 
         const QUAL_LABELS = {
@@ -373,6 +481,42 @@
             return values.length ? Math.round(avg(values)) : null;
         }
 
+        function susAnswers(session) {
+            const payloadAnswers = session.payload?.sus?.respostas;
+            const explicitAnswers = session.sus_respostas;
+
+            if (Array.isArray(payloadAnswers)) return payloadAnswers;
+            if (Array.isArray(explicitAnswers)) return explicitAnswers;
+
+            return [];
+        }
+
+        function qualitativeAnswers(session) {
+            return session.payload?.qualitativo || session.respostas_abertas || {};
+        }
+
+        function moderatorInfo(session) {
+            return session.payload?.participante || {};
+        }
+
+        function moderatorTasks(session) {
+            return session.payload?.tarefas?.resultados || {};
+        }
+
+        function moderatorTaskObs(session) {
+            return session.payload?.tarefas?.obs || '';
+        }
+
+        function susContribution(index, value) {
+            const numeric = Number(value);
+
+            if (!Number.isFinite(numeric) || numeric < 1 || numeric > 5) {
+                return '—';
+            }
+
+            return index % 2 === 0 ? numeric - 1 : 5 - numeric;
+        }
+
         function renderMetrics() {
             const scores = numericScores();
             const avgSus = scores.length ? Math.round(avg(scores)) : null;
@@ -393,9 +537,10 @@
             }
 
             body.innerHTML = SESSIONS.map(s => {
-                const p = s.payload?.participante || {};
+                const p = moderatorInfo(s);
                 const statusClass = s.status === 'Submetida' ? 'bg-success' : 'bg-warning text-dark';
                 const score = s.sus_score ?? s.payload?.sus?.score ?? '—';
+                const fullId = `resposta-completa-${s.id}`;
 
                 return `
                     <tr>
@@ -408,7 +553,10 @@
                         <td><strong>${escapeHtml(String(score))}</strong></td>
                         <td>${escapeHtml(s.last_saved_at || '—')}</td>
                         <td>
-                            <a class="btn btn-sm btn-outline-primary" href="${escapeHtml(s.moderacao_url || '#')}">Preencher observação</a>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a class="btn btn-sm btn-outline-success" href="#${escapeHtml(fullId)}" onclick="openFullResponse('${escapeJs(fullId)}')">Ver respostas</a>
+                                <a class="btn btn-sm btn-outline-primary" href="${escapeHtml(s.moderacao_url || '#')}">Preencher observação</a>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -430,34 +578,161 @@
             `).join('');
         }
 
-        function renderQualitative() {
-            const list = document.getElementById('qualitative-list');
+        function renderFullResponses() {
+            const list = document.getElementById('full-responses-list');
 
             if (!SESSIONS.length) {
-                list.innerHTML = '<div class="text-muted">Nenhuma resposta qualitativa encontrada.</div>';
+                list.innerHTML = '<div class="empty-panel">Nenhuma avaliação encontrada.</div>';
                 return;
             }
 
             list.innerHTML = SESSIONS.map(s => {
-                const q = s.payload?.qualitativo || {};
-                const answers = Object.keys(QUAL_LABELS).map(key => `
+                const p = moderatorInfo(s);
+                const q = qualitativeAnswers(s);
+                const answers = susAnswers(s);
+                const taskResults = moderatorTasks(s);
+                const taskObs = moderatorTaskObs(s);
+                const score = s.sus_score ?? s.payload?.sus?.score ?? '—';
+                const statusClass = s.status === 'Submetida' ? 'bg-success' : 'bg-warning text-dark';
+                const fullId = `resposta-completa-${s.id}`;
+
+                const infoRows = [
+                    ['Código do participante', p.codigo],
+                    // ['Usuário LDAP', s.ldap_username],
+                    ['Data da sessão', p.data],
+                    ['Hora de início', p.hora],
+                    ['Moderador', p.moderador],
+                    ['Função na escola', p.perfil],
+                    ['Faixa etária', p.idade],
+                    ['Experiência com sistemas web', p.experiencia],
+                    ['Já usou o SISGEM antes?', p.uso_prev],
+                    ['Observações iniciais do moderador', p.obs],
+                    ['Submetida em', s.submitted_at],
+                    ['Último salvamento', s.last_saved_at],
+                ].map(([label, value]) => `
+                    <tr>
+                        <th style="width: 260px">${escapeHtml(label)}</th>
+                        <td>${formatMultiline(value)}</td>
+                    </tr>
+                `).join('');
+
+                const susRows = SUS_LABELS.map((item, i) => {
+                    const value = answers[i];
+                    const contribution = susContribution(i, value);
+                    const typeLabel = item.type === 'pos' ? 'Positiva' : 'Negativa';
+                    const typeClass = item.type === 'pos' ? 'sus-type-pos' : 'sus-type-neg';
+
+                    return `
+                        <tr>
+                            <td><strong>Q${i + 1}</strong></td>
+                            <td>${escapeHtml(item.q)}</td>
+                            <td><span class="sus-type ${typeClass}">${typeLabel}</span></td>
+                            <td><span class="sus-answer-badge">${escapeHtml(value ?? '—')}</span></td>
+                            <td>${escapeHtml(String(contribution))}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const qualitativeRows = Object.keys(QUAL_LABELS).map(key => `
                     <div class="mb-3">
                         <div class="fw-semibold">${escapeHtml(QUAL_LABELS[key])}</div>
-                        <div class="qual-box mt-1">${escapeHtml(q[key] || '—')}</div>
+                        <div class="text-answer-box mt-1">${formatMultiline(q[key])}</div>
                     </div>
                 `).join('');
 
+                const taskRows = TASKS.map(task => {
+                    const r = taskResults[task.id] || {};
+
+                    return `
+                        <tr>
+                            <td><strong>${escapeHtml(task.id)}</strong></td>
+                            <td><span class="task-module ${escapeHtml(task.cls)}">${escapeHtml(task.mod)}</span></td>
+                            <td>${escapeHtml(task.label)}</td>
+                            <td>${escapeHtml(r.result || '—')}</td>
+                            <td>${escapeHtml(r.time ? r.time + 's' : '—')}</td>
+                            <td>${escapeHtml(errorLabel(r.errorLevel))}</td>
+                        </tr>
+                    `;
+                }).join('');
+
                 return `
-                    <details class="mb-3">
-                        <summary class="fw-semibold">
-                            ${escapeHtml(participanteLabel(s))}
-                            · ${escapeHtml(s.ldap_username || '')}
-                            · SUS ${escapeHtml(String(s.sus_score ?? s.payload?.sus?.score ?? '—'))}
+                    <details class="full-response-card" id="${escapeHtml(fullId)}">
+                        <summary>
+                            <div class="full-response-header">
+                                <span class="summary-title">${escapeHtml(participanteLabel(s))}</span>
+
+                                <span class="badge ${statusClass}">${escapeHtml(s.status || '—')}</span>
+                                <span class="badge bg-primary">SUS ${escapeHtml(String(score))}</span>
+                            </div>
                         </summary>
-                        <div class="mt-3">${answers}</div>
+
+                        <div class="full-response-body">
+                            <div class="d-flex gap-2 flex-wrap mb-3">
+                                <a class="btn btn-sm btn-outline-primary" href="${escapeHtml(s.moderacao_url || '#')}">Editar observação do moderador</a>
+                            </div>
+
+                            <div class="section-kicker">Identificação e informações do moderador</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm info-table">
+                                    <tbody>${infoRows}</tbody>
+                                </table>
+                            </div>
+
+                            <div class="section-kicker">Respostas do formulário SUS</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm answer-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Questão</th>
+                                        <th>Afirmação</th>
+                                        <th>Tipo</th>
+                                        <th>Resposta</th>
+                                        <th>Contribuição SUS</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>${susRows}</tbody>
+                                </table>
+                            </div>
+                            <div class="small-muted mb-3">Pontuação final registrada: <strong>${escapeHtml(String(score))}</strong>.</div>
+
+                            <div class="section-kicker">Questões abertas</div>
+                            ${qualitativeRows}
+
+                            <div class="section-kicker">Tarefas observadas pelo moderador</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm task-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Tarefa</th>
+                                        <th>Módulo</th>
+                                        <th>Descrição</th>
+                                        <th>Resultado</th>
+                                        <th>Tempo</th>
+                                        <th>Nível de erro</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>${taskRows}</tbody>
+                                </table>
+                            </div>
+
+                            <div class="section-kicker">Observações gerais das tarefas</div>
+                            <div class="text-answer-box">${formatMultiline(taskObs)}</div>
+                        </div>
                     </details>
                 `;
             }).join('');
+        }
+
+        function openFullResponse(id) {
+            const el = document.getElementById(id);
+
+            if (!el) return;
+
+            el.open = true;
+
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
         }
 
         function destroyCharts() {
@@ -639,7 +914,7 @@
 
             const susItemMeans = Array.from({ length: 10 }, (_, i) => {
                 const values = SESSIONS
-                    .map(s => Number(s.payload?.sus?.respostas?.[i]))
+                    .map(s => Number(susAnswers(s)[i]))
                     .filter(v => Number.isFinite(v) && v >= 1 && v <= 5);
 
                 return values.length ? Number(avg(values).toFixed(2)) : 0;
@@ -683,23 +958,45 @@
                 'status',
                 'sus_score',
                 'submitted_at',
-                'last_saved_at'
+                'last_saved_at',
+                'moderador',
+                'perfil',
+                'idade',
+                'experiencia',
+                'uso_prev',
+                ...Array.from({ length: 10 }, (_, i) => 'sus_q' + (i + 1)),
+                ...Object.keys(QUAL_LABELS).map(key => 'qualitativo_' + key),
+                'observacoes_tarefas'
             ];
 
-            const rows = SESSIONS.map(s => [
-                participanteLabel(s),
-                s.ldap_username || '',
-                s.status || '',
-                s.sus_score ?? s.payload?.sus?.score ?? '',
-                s.submitted_at || '',
-                s.last_saved_at || ''
-            ]);
+            const rows = SESSIONS.map(s => {
+                const p = moderatorInfo(s);
+                const answers = susAnswers(s);
+                const q = qualitativeAnswers(s);
+
+                return [
+                    participanteLabel(s),
+                    s.ldap_username || '',
+                    s.status || '',
+                    s.sus_score ?? s.payload?.sus?.score ?? '',
+                    s.submitted_at || '',
+                    s.last_saved_at || '',
+                    p.moderador || '',
+                    p.perfil || '',
+                    p.idade || '',
+                    p.experiencia || '',
+                    p.uso_prev || '',
+                    ...Array.from({ length: 10 }, (_, i) => answers[i] ?? ''),
+                    ...Object.keys(QUAL_LABELS).map(key => q[key] || ''),
+                    moderatorTaskObs(s) || ''
+                ];
+            });
 
             const csv = [header, ...rows]
-                .map(row => row.map(value => '"' + String(value).replaceAll('"', '""') + '"').join(';'))
+                .map(row => row.map(value => '"' + String(value ?? '').replaceAll('"', '""') + '"').join(';'))
                 .join('\n');
 
-            download(csv, 'avaliacao_sus_resumo.csv', 'text/csv;charset=utf-8');
+            download(csv, 'avaliacao_sus_respostas_completas.csv', 'text/csv;charset=utf-8');
         }
 
         function download(content, filename, mime) {
@@ -708,6 +1005,26 @@
             a.download = filename;
             a.click();
             URL.revokeObjectURL(a.href);
+        }
+
+        function formatMultiline(value) {
+            if (value === undefined || value === null || value === '') {
+                return '—';
+            }
+
+            return escapeHtml(value).replaceAll('\n', '<br>');
+        }
+
+        function errorLabel(value) {
+            const level = String(value ?? '');
+
+            if (level === '0') return 'Sem erro';
+            if (level === '1') return '1 – Catastrófico';
+            if (level === '2') return '2 – Sério';
+            if (level === '3') return '3 – Menor';
+            if (level === '4') return '4 – Cosmético';
+
+            return '—';
         }
 
         function escapeHtml(value) {
@@ -719,11 +1036,19 @@
                 .replaceAll("'", '&#039;');
         }
 
+        function escapeJs(value) {
+            return String(value ?? '')
+                .replaceAll('\\', '\\\\')
+                .replaceAll("'", "\\'")
+                .replaceAll('\n', '\\n')
+                .replaceAll('\r', '');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             renderMetrics();
             renderSessionsTable();
             renderTaskTable();
-            renderQualitative();
+            renderFullResponses();
             renderCharts();
         });
     </script>
