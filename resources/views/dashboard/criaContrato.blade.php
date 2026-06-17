@@ -22,6 +22,7 @@
         </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('contratos') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
                 Voltar para Lista
             </a>
         </div>
@@ -101,7 +102,7 @@
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold mb-0">Itens do Contrato</h5>
-                        <button type="button" class="btn btn-sm btn-primary" id="btn-add-item">+ Adicionar Alimento</button>
+                        <button type="button" class="btn btn-sm btn-primary" id="btn-add-item"><i class="bi bi-plus"></i> Adicionar Alimento</button>
                     </div>
 
                     <div class="table-responsive">
