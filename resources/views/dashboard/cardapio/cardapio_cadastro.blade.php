@@ -9,7 +9,7 @@
         .exception-card { border-left: 4px solid #ffc107; }
 
         .cell-actions {
-            opacity: 0.3;
+            opacity: 1;
             transition: opacity 0.2s;
         }
         td:hover .cell-actions {
