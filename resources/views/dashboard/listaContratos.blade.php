@@ -115,7 +115,7 @@
 
                             <td>
                                 @if(strtolower($contrato->status) === 'vigente')
-                                    <span class="badge bg-success">Vigente</span>
+                                    <span class="badge border border-secondary text-secondary bg-transparent">Vigente</span>
                                 @else
                                     <span class="badge bg-secondary">Encerrado</span>
                                 @endif
