@@ -140,4 +140,40 @@ select.text-primary {
 select.text-primary option {
     color: #212529 !important;
 }
+/* =========================================
+   ESTILO MODERNO PARA A BARRA LATERAL
+   ========================================= */
 
+.sidebar .nav-link {
+    color: #495057 !important; /* Cor cinza chumbo para links inativos (mais clean) */
+    font-size: .875rem;
+    font-weight: 500;
+    padding: 0.65rem 1rem;
+    margin: 0.25rem 0.8rem; /* Desgruda os links das bordas laterais */
+    border-radius: 8px; /* Cantos arredondados modernos */
+    transition: all 0.2s ease-in-out; /* Suaviza as animações */
+}
+
+/* Efeito ao passar o mouse */
+.sidebar .nav-link:hover {
+    color: #1a8654 !important;
+    background-color: rgba(26, 134, 84, 0.08); /* Fundo verde bem transparente */
+    transform: translateX(4px); /* Animação de um leve empurrãozinho para a direita */
+}
+
+/* Estado ativo (Página atual) */
+.sidebar .nav-link.active {
+    color: #1a8654 !important;
+    font-weight: 600;
+    background-color: rgba(26, 134, 84, 0.12); /* Fundo verde um pouco mais marcado */
+    box-shadow: inset 4px 0 0 #1a8654; /* Linha de destaque elegante na lateral esquerda */
+}
+
+/* Modernização dos Títulos das sessões (Painel, Contratos, etc.) */
+.sidebar-heading {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em; /* Espaçamento entre as letras para dar um ar mais sofisticado */
+    color: #adb5bd;
+    padding: 0 1.2rem;
+}
