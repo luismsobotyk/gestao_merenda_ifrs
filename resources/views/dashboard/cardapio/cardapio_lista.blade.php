@@ -50,10 +50,10 @@
                                 $badge = '<span class="badge bg-secondary">Encerrado</span>';
                                 $linhaClass = 'opacity-75';
                             } elseif ($inicio->isAfter($hoje)) {
-                                $badge = '<span class="badge bg-warning text-dark">Programado</span>';
+                                $badge = '<span class="badge border border-secondary text-secondary bg-transparent">Programado</span>';
                                 $linhaClass = '';
                             } else {
-                                $badge = '<span class="badge bg-success">Vigente</span>';
+                                $badge = '<span class="badge border border-secondary text-secondary bg-transparent">Vigente</span>';
                                 $linhaClass = 'fw-medium';
                             }
                         @endphp
