@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/avaliacao/{avaliacao}/moderacao', [AvaliacaoSusController::class, 'salvarModeracao'])
         ->name('avaliacao.moderacao.salvar');
+    Route::delete('/avaliacao/{avaliacao}', [AvaliacaoSusController::class, 'destroy'])->name('avaliacao.destroy');
 
 
 

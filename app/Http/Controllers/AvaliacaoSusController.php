@@ -112,18 +112,18 @@ class AvaliacaoSusController extends Controller
     {
         abort_unless($this->isAdmin(Auth::user()), 403);
 
-        $avaliacoes = AvaliacaoSus::query()
-            ->orderByRaw('submitted_at IS NULL')
-            ->orderByDesc('submitted_at')
-            ->orderByDesc('last_saved_at')
-            ->get();
+        $avaliacoes = AvaliacaoSus::all();
 
         $sessions = $avaliacoes->map(function (AvaliacaoSus $avaliacao) {
             $payload = $this->normalizarPayload($avaliacao->payload);
 
+            // Define o código para ordenação
+            $codigo = $payload['participante']['codigo'] ?: $avaliacao->ldap_username ?: ('ID ' . $avaliacao->id);
+
             return [
                 'id' => $avaliacao->id,
                 'ldap_username' => $avaliacao->ldap_username,
+                'codigo_ordenacao' => strtolower($codigo), // Garante ordenação ignorando maiúsculas/minúsculas
                 'sus_score' => $avaliacao->sus_score ?? ($payload['sus']['score'] ?? null),
                 'submitted_at' => optional($avaliacao->submitted_at)->format('d/m/Y H:i'),
                 'last_saved_at' => optional($avaliacao->last_saved_at)->format('d/m/Y H:i'),
@@ -131,12 +131,21 @@ class AvaliacaoSusController extends Controller
                 'payload' => $payload,
                 'moderacao_url' => route('avaliacao.moderacao', $avaliacao),
             ];
-        })->values();
+        })->sortBy('codigo_ordenacao', SORT_NATURAL)->values();
 
         return view('avaliacao.respostas', [
             'avaliacoes' => $avaliacoes,
             'sessions' => $sessions,
         ]);
+    }
+
+    public function destroy(AvaliacaoSus $avaliacao)
+    {
+        abort_unless($this->isAdmin(Auth::user()), 403);
+
+        $avaliacao->delete();
+
+        return back()->with('success', 'Avaliação excluída com sucesso.');
     }
 
     public function moderacao(AvaliacaoSus $avaliacao)

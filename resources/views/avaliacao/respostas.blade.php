@@ -337,6 +337,29 @@
             </div>
         </div>
 
+        <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-danger">
+                    <div class="modal-header bg-danger text-white border-danger">
+                        <h5 class="modal-title fw-bold" id="modalExcluirLabel">Excluir Avaliação</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-danger bg-light">
+                        <p class="mb-1">Tem certeza que deseja excluir a avaliação do participante <strong id="excluir-participante"></strong>?</p>
+                        <p class="mb-0 fw-bold small">Esta ação não pode ser desfeita e todos os dados e respostas desta sessão serão perdidos permanentemente.</p>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form method="POST" id="form-excluir">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger fw-bold">Sim, Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card sus-card mb-4">
             <div class="card-body">
                 <h2 class="h5 mb-3">Avaliações individuais</h2>
@@ -527,53 +550,14 @@
             document.getElementById('metric-completion').textContent = avgCompletion !== null ? avgCompletion + '%' : '—';
         }
 
-        function renderSessionsTable() {
-            const body = document.getElementById('sessions-table-body');
+        function confirmarExclusao(id, participante) {
+            document.getElementById('excluir-participante').textContent = participante;
 
-            if (!SESSIONS.length) {
-                body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Nenhuma avaliação encontrada.</td></tr>';
-                return;
-            }
+            // Monta a URL de exclusão concatenando o ID da avaliação
+            document.getElementById('form-excluir').action = '{{ url("avaliacao") }}/' + id;
 
-            body.innerHTML = SESSIONS.map(s => {
-                const p = moderatorInfo(s);
-                const statusClass = s.status === 'Submetida' ? 'bg-success' : 'bg-warning text-dark';
-                const score = s.sus_score ?? s.payload?.sus?.score ?? '—';
-                const fullId = `resposta-completa-${s.id}`;
-
-                return `
-                    <tr>
-                        <td>
-                            <strong>${escapeHtml(p.codigo || '—')}</strong><br>
-                            <small class="text-muted">${escapeHtml(p.perfil || 'Perfil não informado')}</small>
-                        </td>
-                        <td><span class="badge ${statusClass}">${escapeHtml(s.status || '—')}</span></td>
-                        <td><strong>${escapeHtml(String(score))}</strong></td>
-                        <td>${escapeHtml(s.last_saved_at || '—')}</td>
-                        <td>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <a class="btn btn-sm btn-outline-success" href="#${escapeHtml(fullId)}" onclick="openFullResponse('${escapeJs(fullId)}')">Ver respostas</a>
-                                <a class="btn btn-sm btn-outline-primary" href="${escapeHtml(s.moderacao_url || '#')}">Preencher observação</a>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function renderTaskTable() {
-            const body = document.querySelector('#task-summary-table tbody');
-            const rows = taskStats();
-
-            body.innerHTML = rows.map(t => `
-                <tr>
-                    <td><strong>${escapeHtml(t.id)}</strong></td>
-                    <td><span class="task-module ${escapeHtml(t.cls)}">${escapeHtml(t.mod)}</span></td>
-                    <td>${t.completion !== null ? t.completion + '%' : '—'}</td>
-                    <td>${t.avgTime !== null ? t.avgTime + 's' : '—'}</td>
-                    <td>${t.errors || '—'}</td>
-                </tr>
-            `).join('');
+            const modal = new bootstrap.Modal(document.getElementById('modalExcluir'));
+            modal.show();
         }
 
         function renderFullResponses() {
@@ -1040,6 +1024,66 @@
                 .replaceAll("'", "\\'")
                 .replaceAll('\n', '\\n')
                 .replaceAll('\r', '');
+        }
+        function renderSessionsTable() {
+            const body = document.getElementById('sessions-table-body');
+
+            if (!SESSIONS.length) {
+                body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Nenhuma avaliação encontrada.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = SESSIONS.map(s => {
+                const p = moderatorInfo(s);
+                const statusClass = s.status === 'Submetida' ? 'bg-success' : 'bg-warning text-dark';
+                const score = s.sus_score ?? s.payload?.sus?.score ?? '—';
+                const fullId = `resposta-completa-${s.id}`;
+
+                // Pega o nome/código do participante para exibir no modal de exclusão
+                const nomeParticipante = p.codigo || s.ldap_username || ('ID ' + s.id);
+
+                return `
+                    <tr>
+                        <td>
+                            <strong>${escapeHtml(p.codigo || '—')}</strong><br>
+                            <small class="text-muted">${escapeHtml(p.perfil || 'Perfil não informado')}</small>
+                        </td>
+                        <td><span class="badge ${statusClass}">${escapeHtml(s.status || '—')}</span></td>
+                        <td><strong>${escapeHtml(String(score))}</strong></td>
+                        <td>${escapeHtml(s.last_saved_at || '—')}</td>
+                        <td>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a class="btn btn-sm btn-outline-success" href="#${escapeHtml(fullId)}" onclick="openFullResponse('${escapeJs(fullId)}')">Ver respostas</a>
+                                <a class="btn btn-sm btn-outline-primary" href="${escapeHtml(s.moderacao_url || '#')}">Preencher observação</a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao(${s.id}, '${escapeJs(nomeParticipante)}')">Excluir</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        function renderTaskTable() {
+            const body = document.querySelector('#task-summary-table tbody');
+            const rows = taskStats();
+
+            body.innerHTML = rows.map(t => `
+                <tr>
+                    <td><strong>${escapeHtml(t.id)}</strong></td>
+                    <td><span class="task-module ${escapeHtml(t.cls)}">${escapeHtml(t.mod)}</span></td>
+                    <td>${t.completion !== null ? t.completion + '%' : '—'}</td>
+                    <td>${t.avgTime !== null ? t.avgTime + 's' : '—'}</td>
+                    <td>${t.errors || '—'}</td>
+                </tr>
+            `).join('');
+        }
+        function confirmarExclusao(id, participante) {
+            document.getElementById('excluir-participante').textContent = participante;
+
+            // Monta a URL de exclusão concatenando o ID da avaliação
+            document.getElementById('form-excluir').action = '{{ url("avaliacao") }}/' + id;
+
+            const modal = new bootstrap.Modal(document.getElementById('modalExcluir'));
+            modal.show();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
