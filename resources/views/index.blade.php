@@ -276,6 +276,34 @@
             padding: 30px 0 max(30px, env(safe-area-inset-bottom));
             margin-top: auto;
         }
+
+        /* Botão do dia SEM cardápio cadastrado (um pouco mais escuro) */
+        .day--empty {
+            background: #e9ecef;
+            border-color: #dee2e6;
+            opacity: 0.85; /* Aumentado para não ficar tão "apagado" */
+        }
+
+        .day--empty .day-wd {
+            color: #868e96; /* Mais escuro */
+        }
+
+        .day--empty .day-n {
+            color: #495057; /* Mais escuro */
+        }
+
+        /* Estado ativo E vazio */
+        .day--active.day--empty {
+            background: #dce0de;
+            border-color: #c4c9c6;
+            box-shadow: none;
+            opacity: 1;
+        }
+
+        .day--active.day--empty .day-wd,
+        .day--active.day--empty .day-n {
+            color: #3b413c;
+        }
     </style>
 </head>
 <body>
@@ -362,7 +390,7 @@
     @if($dias->isNotEmpty())
         <nav class="datestrip" aria-label="Selecionar dia">
             @foreach($dias as $index => $dia)
-                <button class="day {{ $index === $indiceAtivo ? 'day--active' : '' }}"
+                <button class="day {{ $index === $indiceAtivo ? 'day--active' : '' }} {{ !$dia['possui_cardapio'] ? 'day--empty' : '' }}"
                         onclick="selectDay({{ $index }})"
                         id="btn-day-{{ $index }}"
                         data-name="{{ $dia['nome_dia'] }}"
@@ -384,8 +412,8 @@
             <div id="panel-day-{{ $index }}" class="day-panel {{ $index === $indiceAtivo ? 'active' : '' }}">
 
                 @if(!$dia['possui_cardapio'])
-                    <div style="padding: 60px 20px; text-align: center; color: var(--muted); margin: 0 auto;">
-                        Não há cardápio cadastrado para esta data.
+                    <div style="padding: 20px; text-align: center; color: #a96a0a; margin: 40px auto; max-width: 450px; border: 1px solid orange; border-radius: 8px; font-size: 15px; font-weight: 600; background-color: #fffdf5;">
+                        ⚠️ ️Não há cardápio cadastrado para esta data.
                     </div>
                 @else
                     <section class="menu">
