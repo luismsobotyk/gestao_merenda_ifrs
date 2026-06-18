@@ -32,14 +32,12 @@ class CardapioController extends Controller
             return ($empenhada - $consumida) > 0;
         });
 
-        // DEFINA A VARIÁVEL AQUI
         $diasMapa = [1 => 'Segunda', 2 => 'Terça', 3 => 'Quarta', 4 => 'Quinta', 5 => 'Sexta'];
 
         return view('dashboard.cardapio.cardapio_cadastro', compact('cardapio', 'itensDisponiveis', 'diasMapa'));
     }
     public function store(Request $request)
     {
-        // 1. Validação dos dados base
         $request->validate([
             'nome_cardapio' => 'required|string|max:255',
             'data_inicio' => 'required|date',
@@ -48,7 +46,6 @@ class CardapioController extends Controller
             'data_fim.after_or_equal' => 'A data de término não pode ser anterior à data de início.',
         ]);
 
-        // 2. VERIFICAÇÃO DE SOBREPOSIÇÃO DE DATAS
         $conflito = \App\Models\Cardapio::where('data_inicio', '<=', $request->data_fim)
             ->where('data_fim', '>=', $request->data_inicio)
             ->first();
@@ -62,14 +59,12 @@ class CardapioController extends Controller
             ])->withInput();
         }
 
-        // 3. Criação do registro mestre se não houver conflitos
         $cardapio = \App\Models\Cardapio::create([
             'nome' => $request->nome_cardapio,
             'data_inicio' => $request->data_inicio,
             'data_fim' => $request->data_fim,
         ]);
 
-        // 4. Redireciona para a tela de edição
         return redirect()->route('cardapio.editar', $cardapio->id)
             ->with('success', 'Cardápio iniciado! Agora defina os horários e alimentos.');
     }
@@ -78,7 +73,6 @@ class CardapioController extends Controller
     {
         $cardapio = Cardapio::findOrFail($id);
 
-        // 1. VERIFICAÇÃO DE SOBREPOSIÇÃO NA EDIÇÃO (Ignorando o cardápio atual)
         $conflito = \App\Models\Cardapio::where('id', '!=', $id)
             ->where('data_inicio', '<=', $request->data_fim)
             ->where('data_fim', '>=', $request->data_inicio)
@@ -93,22 +87,18 @@ class CardapioController extends Controller
             ]);
         }
 
-        // Inicia a transação com o Banco de Dados
         DB::beginTransaction();
 
         try {
-            // 2. Atualiza as Informações Básicas
             $cardapio->update([
                 'nome' => $request->nome_cardapio,
                 'data_inicio' => $request->data_inicio,
                 'data_fim' => $request->data_fim,
             ]);
 
-            // 3. Limpeza Cirúrgica
             $cardapio->horarios()->delete();
             $cardapio->excecoes()->delete();
 
-            // 4. Reconstrói os Horários e Itens da Grid
             $mapaHorarios = [];
             foreach ($request->horarios ?? [] as $hIndex => $hData) {
                 $horario = $cardapio->horarios()->create([
@@ -128,7 +118,6 @@ class CardapioController extends Controller
                 }
             }
 
-            // 5. Reconstrói as Exceções
             foreach ($request->excecoes ?? [] as $excData) {
                 $horarioRealId = $mapaHorarios[$excData['horario_index']];
 

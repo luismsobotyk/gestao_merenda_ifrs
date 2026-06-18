@@ -10,13 +10,11 @@ class GraficoController extends Controller
 {
     public function tiposMerenda(\Illuminate\Http\Request $request)
     {
-        // 1. Lógica de "Cache" na Sessão
         if ($request->has('limpar')) {
             session()->forget(['filtro_tipos_data_inicial', 'filtro_tipos_data_final', 'filtro_tipos_grafico']);
             return redirect()->route('graficos.tipos_merenda');
         }
 
-        // Se o formulário foi enviado (sabemos disso pois o campo tipo_grafico sempre é enviado)
         if ($request->has('tipo_grafico')) {
             session(['filtro_tipos_grafico' => $request->tipo_grafico]);
 
@@ -33,7 +31,6 @@ class GraficoController extends Controller
         $dataFinal = session('filtro_tipos_data_final');
         $tipoGrafico = session('filtro_tipos_grafico', 'bar');
 
-        // 2. Constrói a consulta baseada no filtro
         $query = \Illuminate\Support\Facades\DB::table('retiradas')
             ->join('cardapio_horarios', 'retiradas.cardapio_horario_id', '=', 'cardapio_horarios.id')
             ->select(
@@ -64,7 +61,6 @@ class GraficoController extends Controller
                 ->pluck('item_contrato.nome');
 
             if ($itensExcecao->isNotEmpty()) {
-                // MUDANÇA AQUI: Removido o . " (Exceção)" para agrupar junto com os itens padrão
                 $nomeLanche = $itensExcecao->unique()->implode(' + ');
             } else {
                 $itensPadrao = \Illuminate\Support\Facades\DB::table('cardapio_itens_padrao')
@@ -82,28 +78,23 @@ class GraficoController extends Controller
             $consumoPorLanche[$nomeLanche] += $retirada->total;
         }
 
-        // 3. Ordena o array para formar um Ranking
         arsort($consumoPorLanche);
 
         $labels = array_keys($consumoPorLanche);
         $valores = array_values($consumoPorLanche);
 
-        // Passamos também o $tipoGrafico para a view
         return view('dashboard.graficos.tipos-merenda', compact('labels', 'valores', 'dataInicial', 'dataFinal', 'tipoGrafico'));
     }
     public function porDiaSemana(\Illuminate\Http\Request $request)
     {
-        // 1. Lógica de "Cache" na Sessão
         if ($request->has('limpar')) {
             session()->forget(['filtro_data_inicial', 'filtro_data_final', 'filtro_dias_grafico']);
             return redirect()->route('graficos.por_dia_semana');
         }
 
-        // Se o formulário foi enviado
         if ($request->has('tipo_grafico')) {
             session(['filtro_dias_grafico' => $request->tipo_grafico]);
 
-            // Se preencheu as datas, salva. Se deixou em branco, limpa as datas.
             if ($request->filled('data_inicial') && $request->filled('data_final')) {
                 session(['filtro_data_inicial' => $request->data_inicial]);
                 session(['filtro_data_final' => $request->data_final]);
@@ -116,7 +107,6 @@ class GraficoController extends Controller
         $dataFinal = session('filtro_data_final');
         $tipoGrafico = session('filtro_dias_grafico', 'pie');
 
-        // 2. Constrói a consulta baseada no filtro
         $query = \Illuminate\Support\Facades\DB::table('retiradas')
             ->select('data_retirada', \Illuminate\Support\Facades\DB::raw('COUNT(id) as total'));
 
@@ -126,7 +116,6 @@ class GraficoController extends Controller
 
         $retiradas = $query->groupBy('data_retirada')->get();
 
-        // 3. Inicializa o array garantindo os dias úteis
         $consumoPorDia = [
             1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0,
         ];
@@ -153,13 +142,11 @@ class GraficoController extends Controller
             $valores[] = $total;
         }
 
-        // Passamos o $tipoGrafico para a view
         return view('dashboard.graficos.por-dia-semana', compact('labels', 'valores', 'dataInicial', 'dataFinal', 'tipoGrafico'));
     }
 
     public function porTurma(\Illuminate\Http\Request $request)
     {
-        // 1. Lógica de "Cache" na Sessão
         if ($request->has('limpar')) {
             session()->forget(['filtro_turma_data_inicial', 'filtro_turma_data_final', 'filtro_turma_grafico']);
             return redirect()->route('graficos.por_turma');
@@ -179,10 +166,8 @@ class GraficoController extends Controller
         $dataInicial = session('filtro_turma_data_inicial');
         $dataFinal = session('filtro_turma_data_final');
 
-        // Mantemos 'bar' como padrão pois costumam existir muitas turmas
         $tipoGrafico = session('filtro_turma_grafico', 'bar');
 
-        // 2. Constrói a consulta cruzando Retiradas -> Alunos -> Cursos
         $query = \Illuminate\Support\Facades\DB::table('retiradas')
             ->join('alunos', 'retiradas.aluno_id', '=', 'alunos.id')
             ->join('cursos', 'alunos.curso_id', '=', 'cursos.id')
@@ -192,7 +177,6 @@ class GraficoController extends Controller
             $query->whereBetween('retiradas.data_retirada', [$dataInicial, $dataFinal]);
         }
 
-        // Agrupa pelo nome do curso e já ordena do maior para o menor
         $retiradas = $query->groupBy('cursos.nome')
             ->orderByDesc('total')
             ->get();

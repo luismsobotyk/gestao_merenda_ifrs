@@ -14,14 +14,12 @@ class CursoController extends Controller
     {
         $cursos = Curso::orderBy('nivel')->orderBy('nome')->get();
 
-        // Captura a data do último curso atualizado no banco
         $ultimaSync = Curso::max('updated_at');
         $ultimaSync = $ultimaSync ? \Carbon\Carbon::parse($ultimaSync)->format('d/m/Y H:i') : 'Nunca';
 
         return view('dashboard.cursos.index', compact('cursos', 'ultimaSync'));
     }
 
-    // 2. Bate na API, puxa os dados e atualiza o Banco Local (Upsert)
     public function sync(IfrsApiService $api)
     {
         $response = $api->buscarCursos();
@@ -37,7 +35,6 @@ class CursoController extends Controller
         DB::beginTransaction();
         try {
             foreach ($cursosApi as $item) {
-                // updateOrCreate procura pelo id_curso. Se achar, atualiza. Se não, cria.
                 $curso = Curso::updateOrCreate(
                     ['id_curso' => $item['id_curso']],
                     [
@@ -45,7 +42,6 @@ class CursoController extends Controller
                         'nome' => $item['curso'],
                         'nivel' => $item['nivel'] ?? null,
                         'turno' => $item['turno'] ?? null,
-                        // Não tocamos no 'direito_merenda' aqui, para não apagar a decisão do usuário!
                     ]
                 );
 
@@ -64,7 +60,6 @@ class CursoController extends Controller
         }
     }
 
-    // 3. Atualiza o direito à merenda via botão "Toggle" sem recarregar a tela
     public function toggleMerenda(Request $request, $id)
     {
         $curso = Curso::findOrFail($id);
@@ -102,8 +97,6 @@ class CursoController extends Controller
             foreach ($alunosLote as $item) {
                 if (!is_array($item) || empty($item['matricula'])) continue;
 
-                // CORREÇÃO: O operador ?: trata strings vazias "" como falso,
-                // pulando para a próxima alternativa até achar um nome preenchido.
                 $nomeAluno = $item['nome_social'] ?: ($item['nome_civil'] ?: ($item['nome_completo'] ?: 'Sem Nome'));
 
                 \App\Models\Aluno::updateOrCreate(

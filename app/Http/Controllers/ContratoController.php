@@ -125,13 +125,10 @@ class ContratoController extends Controller
 
     public function editar($id)
     {
-        // Busca o contrato com os seus relacionamentos necessários
         $contrato = Contrato::with(['fornecedor.responsaveis.contatos', 'itens'])->findOrFail($id);
 
-        // Busca as unidades para preencher o select de alimentos
         $unidades = DB::table('unidade')->orderBy('descricao')->get();
 
-        // CORREÇÃO: Aponta exatamente para o ficheiro criaContrato dentro de dashboard
         return view('dashboard.criaContrato', compact('contrato', 'unidades'));
     }
 
@@ -139,49 +136,39 @@ class ContratoController extends Controller
     {
         $contrato = Contrato::findOrFail($id);
 
-        // 1. Atualiza os dados básicos do Contrato
         $contrato->update([
             'processo' => $request->processo,
             'pregao' => $request->pregao,
             'inicio_vigencia' => $request->inicio_vigencia,
             'fim_vigencia' => $request->fim_vigencia,
-            // Converte a string "R$ 1.500,00" para float "1500.00"
             'valor_global' => $this->converterMoeda($request->valor_global),
         ]);
 
-        // 2. Atualização do E-mail do Contato Principal do Fornecedor
         if ($request->filled('email_contato') && $contrato->fornecedor) {
-            // Busca o responsável principal ou cria um genérico caso o fornecedor não tenha nenhum
             $responsavelPrincipal = $contrato->fornecedor->responsaveis()->firstOrCreate(
                 ['is_principal' => true],
                 ['nome' => 'Responsável Legal']
             );
 
-            // Atualiza o contato do tipo 'Email' se existir, ou cria um novo se não existir
             $responsavelPrincipal->contatos()->updateOrCreate(
                 ['tipo' => 'Email'],
                 ['valor' => $request->email_contato]
             );
         }
 
-        // 3. Sincronização Dinâmica dos Itens (Alimentos)
         $itensRecebidos = $request->input('itens', []);
 
-        // Recolhe apenas os IDs dos itens que vieram no formulário
         $idsRecebidos = collect($itensRecebidos)->pluck('id')->filter()->toArray();
 
         try {
-            // Remove do banco os itens que foram apagados na tela pelo utilizador
-            // (O Laravel só exclui se não houver restrição de chave estrangeira, ex: se já tiver empenho gerado)
             $contrato->itens()->whereNotIn('id', $idsRecebidos)->delete();
         } catch (\Exception $e) {
             return back()->withErrors('Não é possível remover um alimento que já possui Notas de Empenho vinculadas.')->withInput();
         }
 
-        // Atualiza os itens existentes ou cria os novos adicionados na tela
         foreach ($itensRecebidos as $itemData) {
             $contrato->itens()->updateOrCreate(
-                ['id' => $itemData['id'] ?? null], // Critério de busca (se tiver ID, atualiza; se não, cria)
+                ['id' => $itemData['id'] ?? null],
                 [
                     'nome' => $itemData['nome'],
                     'unidade_uuid' => $itemData['unidade_uuid'],
@@ -201,13 +188,10 @@ class ContratoController extends Controller
     private function converterMoeda($valor)
     {
         if (!$valor) return 0;
-        // Remove os pontos de milhar
         $valor = str_replace('.', '', $valor);
-        // Troca a vírgula decimal por ponto
         $valor = str_replace(',', '.', $valor);
         return (float) $valor;
     }
-
 
     public function salvaEmpenho(Request $request, $id)
     {
@@ -238,7 +222,6 @@ class ContratoController extends Controller
     }
     public function salvaPedido(Request $request, $id)
     {
-        // 1. Validação (Adicionado o ja_recebido como booleano opcional)
         $validated = $request->validate([
             'data_pedido' => 'required|date',
             'hora_pedido' => 'nullable|date_format:H:i',
@@ -251,18 +234,13 @@ class ContratoController extends Controller
         $contrato = Contrato::findOrFail($id);
         $dataSelecionada = Carbon::parse($request->data_pedido);
 
-        // ========================================================
-        // NOVA REGRA DE NEGÓCIO: CÁLCULO INTELIGENTE DO STATUS
-        // ========================================================
         if ($dataSelecionada->isFuture()) {
             $statusCalculado = 'Programado';
         } elseif ($dataSelecionada->isToday()) {
             $statusCalculado = 'Solicitado';
         } else {
-            // Se for passado (retroativo), verifica se marcou o switch liga/desliga
             $statusCalculado = $request->boolean('ja_recebido') ? 'Recebido' : 'Solicitado';
         }
-        // ========================================================
 
         if ($dataSelecionada->isToday()) {
             $dataHoraFinal = now();
@@ -271,16 +249,13 @@ class ContratoController extends Controller
             $dataHoraFinal = Carbon::parse($request->data_pedido . ' ' . $hora);
         }
 
-        // 2. CRIA O PEDIDO MESTRE COM O STATUS CALCULADO
         $pedidoMaster = \App\Models\Pedido::create([
             'contrato_uuid' => $contrato->id,
             'data_pedido' => $dataHoraFinal,
             'status' => $statusCalculado,
-            // Se já entra como recebido, a "data de entrega" é a mesma data que ele informou no pedido
             'data_prevista_entrega' => $statusCalculado === 'Recebido' ? $dataHoraFinal : null,
         ]);
 
-        // 3. Loop pelos itens que o usuário preencheu na tela
         foreach ($request->itens as $linhaPedido) {
             $qtdRestanteParaAbater = $linhaPedido['quantidade_pedida'];
 
@@ -288,7 +263,6 @@ class ContratoController extends Controller
                 ->orderBy('created_at', 'asc')
                 ->get();
 
-            // 4. Abatimento Automático dos Empenhos
             foreach ($itensEmpenho as $itemEmpenho) {
                 if ($qtdRestanteParaAbater <= 0) {
                     break;
@@ -301,14 +275,12 @@ class ContratoController extends Controller
                 if ($saldoDesteEmpenho > 0) {
                     $qtdSendoAbatidaAgora = min($qtdRestanteParaAbater, $saldoDesteEmpenho);
 
-                    // Cria o Item do Pedido e amarra ao nosso Pedido Mestre Único!
                     \App\Models\ItemPedido::create([
                         'pedido_uuid' => $pedidoMaster->id,
                         'item_empenho_uuid' => $itemEmpenho->id,
                         'quantidade' => $qtdSendoAbatidaAgora,
                     ]);
 
-                    // Atualiza o financeiro do Empenho
                     $empenhoPai = $itemEmpenho->empenho;
                     $valorFinanceiroConsumido = $qtdSendoAbatidaAgora * $itemEmpenho->itemContrato->valor_unitario;
                     $empenhoPai->valor_utilizado += $valorFinanceiroConsumido;
@@ -325,10 +297,8 @@ class ContratoController extends Controller
     {
         $pedido = \App\Models\Pedido::findOrFail($id);
 
-        // Atualiza o status
         $pedido->status = 'Recebido';
 
-        // NOVA LINHA: Registra a data/hora exata do recebimento na coluna
         $pedido->data_prevista_entrega = now();
 
         $pedido->save();

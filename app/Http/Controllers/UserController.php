@@ -16,7 +16,6 @@ class UserController extends Controller
         return view('dashboard.usuarios.index', compact('usuarios'));
     }
 
-    // --- NOVO MÉTODO: Pesquisa no LDAP ---
     public function searchLdap(Request $request)
     {
         $term = $request->get('term');
@@ -26,21 +25,18 @@ class UserController extends Controller
         }
 
         try {
-            // 2. Usamos LdapEntry para não filtrar pelo objectClass=user
-            // 3. Adicionamos a busca pelo 'uid' (onde normalmente ficam os CPFs)
+
             $ldapUsers = LdapEntry::where('cn', 'contains', $term)
                 ->orWhere('samaccountname', 'contains', $term)
                 ->orWhere('uid', 'contains', $term)
-                ->limit(15) // Aumentei um pouco o limite para turmas grandes
+                ->limit(15)
                 ->get();
 
             $results = [];
 
             foreach ($ldapUsers as $user) {
-                // 4. Captura o login, dando prioridade ao samaccountname, com fallback para o uid
                 $login = $user->getFirstAttribute('samaccountname') ?? $user->getFirstAttribute('uid');
 
-                // Só adiciona ao resultado se tiver um login válido
                 if ($login) {
                     $results[] = [
                         'name' => $user->getFirstAttribute('cn') ?? $user->getFirstAttribute('displayname') ?? 'Utilizador sem nome',
@@ -79,7 +75,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Atualização da chamada aqui:
         if (\App\Models\User::isSuperAdmin($user)) {
             return back()->withErrors('Operação negada: Não é possível revogar o acesso de um Administrador Principal do sistema.');
         }

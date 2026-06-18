@@ -13,11 +13,6 @@ class MainController extends Controller
     {
         $hoje = Carbon::today();
 
-        /*
-         * Janela exibida no carrossel:
-         * - hoje
-         * - 9 dias seguintes
-         */
         $dataInicial = $hoje->copy();
         $dataFinal = $hoje->copy()->addDays(9);
 
@@ -32,10 +27,6 @@ class MainController extends Controller
             $dias->push($this->montarCardapioDoDia($data->copy(), $cardapios));
         }
 
-        /*
-         * Define qual slide ficará ativo ao carregar a página:
-         * Como solicitado, carrega sempre o dia atual (índice 0 da lista)
-         */
         $indiceAtivo = 0;
 
         return view('index', [
@@ -52,7 +43,6 @@ class MainController extends Controller
         $horariosDoDia = collect();
 
         foreach ($cardapios as $cardapio) {
-            // Verifica se a data consultada está dentro do período de vigência deste cardápio
             $inicioVigencia = Carbon::parse($cardapio->data_inicio)->startOfDay();
             $fimVigencia = Carbon::parse($cardapio->data_fim)->endOfDay();
 
@@ -92,7 +82,6 @@ class MainController extends Controller
             }
         }
 
-        // Ordena os horários do dia pelo horário de início para exibição correta na tela
         $horariosDoDia = $horariosDoDia->sortBy('hora_inicio')->values();
 
         return [

@@ -25,14 +25,9 @@ class AlunoController extends Controller
         }
 
         $alunos = $query->orderBy('nome')->paginate(30)->withQueryString();
-
-        // 1. Faz a busca no banco APENAS UMA VEZ
         $cursos = Curso::where('direito_merenda', true)->orderBy('nome')->get();
-
-        // 2. Extrai os valores limpos (Collection) para o JavaScript usar no Modal
         $cursosAutorizados = $cursos->values();
 
-        // Captura a data do último aluno inserido/atualizado na base
         $ultimaSync = Aluno::max('created_at');
         $ultimaSync = $ultimaSync ? \Carbon\Carbon::parse($ultimaSync)->format('d/m/Y H:i') : 'Nunca';
 

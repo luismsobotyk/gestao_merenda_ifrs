@@ -63,23 +63,19 @@ class RetiradaController extends Controller
 
     public function modoTotem(Request $request)
     {
-        // Se o ID do turno não foi passado na URL (?horario_id=...), mostra a tela de seleção
         if (!$request->has('horario_id')) {
             $horarios = DB::table('cardapio_horarios')->orderBy('hora_inicio')->get();
             return view('dashboard.retirada.selecionar_turno', compact('horarios'));
         }
 
-        // Se foi passado, busca o turno específico
         $horarioSelecionado = DB::table('cardapio_horarios')
             ->where('id', $request->horario_id)
             ->first();
 
-        // Proteção: Se o usuário manipular a URL e colocar um ID que não existe
         if (!$horarioSelecionado) {
             return redirect()->route('retirada.totem')->withErrors(['Turno não encontrado.']);
         }
 
-        // Retorna a view do Totem (que você já criou) passando o turno validado
         return view('dashboard.retirada.totem', compact('horarioSelecionado'));
     }
     public function registrarTotem(Request $request)
@@ -116,7 +112,6 @@ class RetiradaController extends Controller
             return response()->json(['success' => false, 'tipo' => 'duplicado', 'message' => "Merenda já retirada hoje às {$horaRegistro}.", 'aluno' => $dadosAluno], 422);
         }
 
-        // GRAVAÇÃO COM O HORÁRIO REINSERIDA AQUI
         Retirada::create([
             'aluno_id' => $aluno->id,
             'data_retirada' => $hoje,
