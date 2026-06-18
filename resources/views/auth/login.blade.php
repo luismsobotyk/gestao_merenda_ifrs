@@ -7,7 +7,7 @@
     <title>Login · {{ config('app.name', 'IFRS') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/img/favicon.svg') }}">
     <link href="{{ asset('assets/css/login.css') }}" rel="stylesheet">
 
 </head>

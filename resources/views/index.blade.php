@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Cardápio de Merenda · {{ env('APP_NAME', 'IFRS') }}</title>
-
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/img/favicon.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>

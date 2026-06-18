@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>Dashboard · {{ env('APP_NAME', 'IFRS') }}</title>
+
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/img/favicon.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="{{ asset('assets/css/dashboard.css') }}" rel="stylesheet">
     <style>
