@@ -14,7 +14,7 @@ class CardapioSeeder extends Seeder
         $agora = Carbon::now();
 
         // =====================================================================
-        // 1. RECUPERA OS ITENS DO CONTRATO PARA O CARDÁPIO
+        // RECUPERA OS ITENS DO CONTRATO PARA O CARDÁPIO
         // =====================================================================
         $nomesAlimentos = ['Iogurte', 'Maçã', 'Suco de Caju', 'Banana', 'Pão de Batata', 'Pastel Assado'];
         $itensContratoUuids = [];
@@ -29,7 +29,7 @@ class CardapioSeeder extends Seeder
         }
 
         // =====================================================================
-        // 2. CARDÁPIO (01/01/2026 a 31/07/2026)
+        // CARDÁPIO (01/01/2026 a 31/07/2026)
         // =====================================================================
         $cardapioId = Str::uuid()->toString();
         DB::table('cardapios')->insert([

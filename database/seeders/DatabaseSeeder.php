@@ -8,9 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // =====================================================================
-        // ORQUESTRAÇÃO DAS SEEDERS DE DOMÍNIO (A ORDEM IMPORTA!)
-        // =====================================================================
         $this->call([
 //            LdapAdminSeeder::class,    // 1. Cria o Super Admin
             ConfiguracaoSeeder::class, // 2. Configurações base do sistema

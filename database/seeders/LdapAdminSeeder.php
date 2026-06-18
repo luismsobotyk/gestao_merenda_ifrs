@@ -21,7 +21,6 @@ class LdapAdminSeeder extends Seeder
             return;
         }
 
-        // Transforma a string separada por vírgulas num array e remove espaços em branco acidentais
         $adminUsernames = array_filter(array_map('trim', explode(',', $adminUsernamesString)));
 
         if (empty($adminUsernames)) {
@@ -33,11 +32,9 @@ class LdapAdminSeeder extends Seeder
             $this->command->info("A procurar o administrador padrão '{$adminUsername}' no LDAP...");
 
             try {
-                // Mantemos a busca pelo sAMAccountName conforme a sua infraestrutura
                 $ldapUser = LdapUser::where('samaccountname', '=', $adminUsername)->first();
 
                 if (!$ldapUser) {
-                    // Usamos continue em vez de return para não impedir a criação dos restantes administradores da lista
                     $this->command->error("Erro: O utilizador '{$adminUsername}' não foi encontrado no servidor LDAP. O administrador não foi criado.");
                     continue;
                 }

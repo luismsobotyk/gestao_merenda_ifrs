@@ -13,7 +13,6 @@ class ContratoSeeder extends Seeder
     {
         $agora = Carbon::now();
 
-        // 1. RECUPERA AS UNIDADES (Criadas na UnidadeSeeder)
         $unidadeKgId = DB::table('unidade')->where('sigla', 'KG')->value('id');
         $unidadeUnId = DB::table('unidade')->where('sigla', 'UN')->value('id');
 
@@ -22,9 +21,6 @@ class ContratoSeeder extends Seeder
             return;
         }
 
-        // =====================================================================
-        // 2. FORNECEDORES
-        // =====================================================================
         $fornecedores = [
             ['id' => Str::uuid()->toString(), 'cnpj' => '11.111.111/0001-11', 'nome' => 'Laticínios Sul', 'sigla' => 'LATSUL'],
             ['id' => Str::uuid()->toString(), 'cnpj' => '22.222.222/0001-22', 'nome' => 'Hortifruti Fazenda', 'sigla' => 'HORTI'],
@@ -35,9 +31,6 @@ class ContratoSeeder extends Seeder
             DB::table('fornecedor')->insert(array_merge($f, ['created_at' => $agora]));
         }
 
-        // =====================================================================
-        // 3. CONTRATOS, ITENS, EMPENHOS E PEDIDOS
-        // =====================================================================
         $alimentos = [
             0 => [
                 ['nome' => 'Iogurte', 'unidade' => $unidadeUnId, 'qtd' => 5000, 'preco' => 1.50],

@@ -20,7 +20,6 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     z-index: 2;
 }
 
-/* Alterado de input[type="email"] para input[type="text"] */
 .form-signin input[type="text"] {
     margin-bottom: -1px;
     border-bottom-right-radius: 0;
