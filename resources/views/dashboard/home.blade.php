@@ -181,7 +181,7 @@
                         <i class="bi bi-person-badge dash-icon text-lilas bg-lilas rounded-4"></i>
                     </div>
 
-                    <h5 class="card-title fw-bold">Alunos</h5>
+                    <h5 class="card-title fw-bold">Discentes Autorizados</h5>
 
                     <p class="card-text text-muted small">
                         Consulte a listagem de alunos matriculados, turmas e acompanhe o status de direito à merenda.

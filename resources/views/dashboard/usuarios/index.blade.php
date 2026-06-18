@@ -1,5 +1,22 @@
 @extends('dashboard.layout')
 
+@section('custom_css')
+<style>
+    span.border-primary,
+    .input-group-text.border-primary {
+        border-color: #1a8654 !important;
+    }
+    .input-group-text {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .input-group-text .bi {
+        line-height: 0 !important;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
         <div>
@@ -40,7 +57,7 @@
                     <thead class="table-light text-secondary">
                     <tr>
                         <th class="ps-4">Nome</th>
-                        <th>Login LDAP (sAMAccountName)</th>
+                        <th>Usuário</th>
                         <th>E-mail</th>
                         <th class="text-end pe-4">Ações</th>
                     </tr>
@@ -51,15 +68,12 @@
                             <td class="ps-4 fw-bold text-dark">
                                 <i class="bi bi-person-circle text-muted me-2 fs-5"></i>
                                 {{ $user->name }}
-
                                 {{-- Selo visual para o Super Admin --}}
                                 @if(\App\Models\User::isSuperAdmin($user))
-                                    <span class="badge bg-danger ms-2" title="Conta gerida pelo ficheiro .env">
-                                        <i class="bi bi-star-fill me-1"></i>Super Admin
-                                    </span>
+                                    <small class="text-muted fw-normal ms-1">(Admin)</small>
                                 @endif
                             </td>
-                            <td><span class="badge bg-secondary">{{ $user->username }}</span></td>
+                            <td>{{ $user->username }}</td>
                             <td><a href="mailto:{{ $user->email }}" class="text-decoration-none text-dark">{{ $user->email }}</a></td>
                             <td class="text-end pe-4">
                                 <div class="btn-group">
@@ -106,7 +120,7 @@
 
                 <div class="modal-body bg-light">
                     <div class="input-group mb-3">
-                        <span class="input-group-text bg-white border-primary text-primary"><i class="bi bi-search"></i></span>
+                        <span class="input-group-text bg-white border-primary"><i class="bi bi-search"></i></span>
                         <input type="text" id="ldap_search_input" class="form-control border-primary" placeholder="Escreva o nome ou login (mínimo 3 letras)..." autocomplete="off">
                     </div>
 
