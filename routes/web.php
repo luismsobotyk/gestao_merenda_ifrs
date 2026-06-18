@@ -12,7 +12,7 @@ use App\Http\Controllers\RetiradaController;
 use App\Http\Controllers\GraficoController;
 use App\Http\Controllers\AvaliacaoSusController;
 
-Route::get('/', [MainController::class, 'index']);
+Route::get('/', [MainController::class, 'index'])->name('index');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');

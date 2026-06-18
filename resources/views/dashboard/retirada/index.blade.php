@@ -153,7 +153,7 @@
                 <form action="{{ route('retirada.totem') }}" method="GET">
                     <div class="modal-body p-4">
                         <label class="form-label fw-bold text-secondary mb-3">Qual turno será servido agora?</label>
-                        <select class="form-select form-select-lg border-primary text-primary fw-bold shadow-sm" name="horario_id" required>
+                        <select class="form-select form-select-lg fw-bold shadow-sm" name="horario_id" required>
                             <option value="">-- Escolha o Turno --</option>
                             @foreach($horarios as $h)
                                 <option value="{{ $h->id }}">

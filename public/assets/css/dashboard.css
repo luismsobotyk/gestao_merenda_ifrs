@@ -35,7 +35,7 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 /* Nova regra para o fundo da navbar */
-header.navbar {
+header.navbar{
     background-color: #1c6d46 !important;
 }
 
@@ -57,3 +57,87 @@ header.navbar {
 .navbar .form-control {
     padding: .75rem 1rem;
 }
+
+/* Sobrescreve o padrão do btn-primary do Bootstrap */
+.btn-primary {
+    background-color: #1a8654 !important;
+    border-color: #1a8654 !important;
+    color: #ffffff !important;
+    padding: 0.5rem 1.2rem !important; /* Aumenta o espaçamento interno (Cima/Baixo e Laterais) */
+}
+
+/* Efeito ao passar o mouse */
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: #156b43 !important; /* Tom levemente mais escuro */
+    border-color: #156b43 !important;
+    color: #ffffff !important;
+}
+.btn-outline-primary{
+    border-color: #1a8654 !important;
+    color: #1a8654 !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: #156b43 !important; /* Tom levemente mais escuro */
+    border-color: #156b43 !important;
+    color: #ffffff !important;
+}
+
+.modal-header.bg-primary {
+    background-color: #1c6d46 !important;
+    border-bottom-color: #1c6d46 !important; /* Evita que a bordinha padrão destoe */
+}
+
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: #1a8654 !important;
+    box-shadow: 0 0 0 0.25rem rgba(26, 134, 84, 0.25) !important;
+}
+
+/* Opcional: Se você tiver checkboxes ou radio buttons, isso garante que eles fiquem verdes quando marcados */
+.form-check-input:checked {
+    background-color: #1a8654 !important;
+    border-color: #1a8654 !important;
+}
+/* 1. Cor do texto dos números e setas (Normal) */
+.page-link {
+    color: #1a8654 !important;
+}
+
+/* 2. Cor ao passar o mouse (Hover) */
+.page-link:hover {
+    color: #156b43 !important; /* Tom levemente mais escuro */
+}
+
+/* 3. Estilo do botão ativo (Página atual) */
+.page-item.active .page-link {
+    background-color: #1a8654 !important;
+    border-color: #1a8654 !important;
+    color: #ffffff !important;
+}
+
+/* 4. Brilho ao focar (Clicar ou usar o "Tab" do teclado) */
+.page-link:focus {
+    color: #156b43 !important;
+    box-shadow: 0 0 0 0.25rem rgba(26, 134, 84, 0.25) !important;
+}
+input.border-primary,
+select.border-primary {
+    border-color: #1a8654 !important;
+}
+
+input.text-primary,
+select.text-primary {
+    color: #1a8654 !important;
+}
+
+/* Garante que as opções DENTRO do select não fiquem verdes de forma estranha, mantendo o texto escuro padrão */
+select.text-primary option {
+    color: #212529 !important;
+}
+

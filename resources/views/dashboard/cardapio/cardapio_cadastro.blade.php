@@ -20,6 +20,9 @@
             font-size: 0.7rem;
             line-height: 1;
         }
+        .btn-custom{
+            padding: 0.5rem 1.2rem !important;
+        }
     </style>
 @endsection
 
@@ -31,9 +34,9 @@
         </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group me-2">
-                <a href="{{ route('cardapio') }}" class="btn btn-sm btn-outline-secondary">Cancelar</a>
+                <a href="{{ route('cardapio') }}" class="btn btn-sm btn-outline-secondary btn-custom">Cancelar</a>
 
-                <button type="submit" form="formCardapio" class="btn btn-sm btn-success shadow-sm fw-bold">
+                <button type="submit" form="formCardapio" class="btn btn-sm btn-success shadow-sm fw-bold btn-custom" >
                     <i class="bi bi-cloud-upload"></i>
                     Salvar
                 </button>
@@ -140,7 +143,7 @@
                 <div class="card shadow-sm exception-card">
                     <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3">
                         <h5 class="card-title mb-0 fw-bold text-body-secondary small text-warning">4. Exceções e Dias Especiais</h5>
-                        <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalAdicionarExcecao">
+                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modalAdicionarExcecao">
                             + Adicionar Data Específica
                         </button>
                     </div>
@@ -244,11 +247,11 @@
                     <div class="modal-body row g-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-body-secondary">Data Exata</label>
-                            <input type="date" class="form-control border-warning" name="data_exata" required value="{{ date('Y-m-d') }}">
+                            <input type="date" class="form-control" name="data_exata" required value="{{ date('Y-m-d') }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-body-secondary">Tipo</label>
-                            <select class="form-select border-warning" name="tipo_excecao" required>
+                            <select class="form-select" name="tipo_excecao" required>
                                 <option value="" selected disabled>Escolha...</option>
                                 <option value="inclusao">Inclusão (ex: Sábado letivo)</option>
                                 <option value="substituicao">Substituição (Mudar cardápio do dia)</option>

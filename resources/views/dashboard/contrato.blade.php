@@ -8,6 +8,9 @@
         .table-vencimento td, .table-vencimento th,
         .table-empenhos td, .table-empenhos th { vertical-align: middle; }
         .item-row:hover { background-color: rgba(25, 135, 84, 0.05) !important; }
+        .btn-outline-secondary{
+            padding: 0.5rem 1.2rem !important;
+        }
     </style>
 @endsection
 
@@ -121,9 +124,10 @@
                                 @forelse($contrato->fornecedor->responsaveis as $responsavel)
                                     <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center p-2">
                                         <div>
-                                            <strong>{{ $responsavel->nome }}</strong> {!! $responsavel->is_principal ? '<span class="badge bg-primary ms-1">Principal</span>' : '' !!} <br>
+{{--                                            <strong>{{ $responsavel->nome }}</strong> {!! $responsavel->is_principal ? '<span class="badge bg-primary ms-1">Principal</span>' : '' !!} <br>--}}
+                                            <strong>{{ $responsavel->nome }}</strong><br>
                                             @foreach($responsavel->contatos as $contato)
-                                                <strong class="text-primary">•</strong> {{ $contato->tipo }}: {{ $contato->valor }} <br>
+                                                <strong>•</strong> {{ $contato->tipo }}: {{ $contato->valor }} <br>
                                             @endforeach
                                         </div>
                                     </li>
@@ -516,7 +520,7 @@
             {{-- A action agora aponta para a rota real passando o ID do contrato --}}
             <form class="modal-content" method="POST" action="{{ route('empenho.salvar', $contrato->id) }}">
                 @csrf
-                <div class="modal-header">
+                <div class="modal-header bg-primary text-white">
                     <h1 class="modal-title h5">Inserir Nova Nota de Empenho (NE)</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>

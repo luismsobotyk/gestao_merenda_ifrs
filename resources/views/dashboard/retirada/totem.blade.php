@@ -43,6 +43,11 @@
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        .btn-outline-secondary{
+            padding: 0.5rem 1.2rem !important;
+        }
+
     </style>
 @endsection
 
@@ -58,11 +63,14 @@
                 ({{ \Carbon\Carbon::parse($horarioSelecionado->hora_inicio)->format('H:i') }} às {{ \Carbon\Carbon::parse($horarioSelecionado->hora_fim)->format('H:i') }})
             </small>
         </div>
-        <a href="{{ route('retirada.index') }}" class="btn btn-sm btn-outline-secondary">Voltar ao Painel</a>
+        <a href="{{ route('retirada.index') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Voltar para o Painel
+        </a>
     </div>
 
     <div class="totem-container">
-        <div class="card shadow-sm border-primary border-opacity-50 mb-4">
+        <div class="card shadow-sm border-opacity-50 mb-4">
             <div class="card-body p-5">
                 <form id="formTotem">
                     <input type="hidden" id="horarioId" value="{{ $horarioSelecionado->id }}">

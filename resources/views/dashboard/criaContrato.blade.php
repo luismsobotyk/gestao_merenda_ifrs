@@ -14,6 +14,14 @@
     }
 @endphp
 
+@section('custom_css')
+<style>
+    .btn-outline-secondary{
+        padding: 0.5rem 1.2rem !important;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2 d-flex align-items-center gap-3 mb-0">
@@ -146,7 +154,7 @@
                     </div>
                 </div>
                 <div class="col-12 mt-4 text-end">
-                    <button type="submit" class="btn btn-success px-4">{{ $isEdit ? 'Atualizar Contrato' : 'Salvar Contrato' }}</button>
+                    <button type="submit" class="btn btn-sm btn-primary px-4">{{ $isEdit ? 'Atualizar Contrato' : 'Salvar Contrato' }}</button>
                 </div>
             </form>
         </div>
