@@ -12,7 +12,6 @@ class CardapioExcecaoItem extends Model
     protected $table = 'cardapio_excecao_itens';
     protected $guarded = [];
 
-    // Traz o nome e dados do alimento do contrato
     public function itemContrato()
     {
         return $this->belongsTo(ItemContrato::class, 'item_contrato_uuid');

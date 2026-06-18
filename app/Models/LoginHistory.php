@@ -14,7 +14,6 @@ class LoginHistory extends Model
         'user_agent'
     ];
 
-    // Relação com o utilizador
     public function user()
     {
         return $this->belongsTo(User::class);

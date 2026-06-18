@@ -33,7 +33,6 @@ class User extends Authenticatable implements LdapAuthenticatable
         ];
     }
 
-    // Relação para acessar o histórico de logins do usuário
     public function loginHistories()
     {
         return $this->hasMany(LoginHistory::class)->orderBy('login_date', 'desc')->orderBy('login_time', 'desc');

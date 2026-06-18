@@ -27,11 +27,9 @@ class CardapioHorario extends Model
         return $this->hasMany(CardapioExcecao::class, 'cardapio_horario_id');
     }
 
-    // 👇 ADICIONE ESTE BLOCO AQUI
     protected static function booted()
     {
         static::deleting(function ($horario) {
-            // Remove automaticamente todos os alimentos vinculados a este horário na grid
             $horario->itensPadrao()->delete();
         });
     }

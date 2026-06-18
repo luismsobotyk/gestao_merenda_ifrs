@@ -18,13 +18,11 @@ class Cardapio extends Model
         'data_fim',
     ];
 
-    // Relacionamento 1: Um cardápio tem vários horários (refeições)
     public function horarios()
     {
         return $this->hasMany(CardapioHorario::class, 'cardapio_id');
     }
 
-    // Relacionamento 2: Um cardápio tem várias exceções (dias especiais)
     public function excecoes()
     {
         return $this->hasMany(CardapioExcecao::class, 'cardapio_id');

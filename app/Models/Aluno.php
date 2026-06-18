@@ -13,7 +13,6 @@ class Aluno extends Model
         'curso_id'
     ];
 
-    // Um aluno pertence a um curso local
     public function curso()
     {
         return $this->belongsTo(Curso::class);

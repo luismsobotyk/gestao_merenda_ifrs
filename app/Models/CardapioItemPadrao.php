@@ -11,14 +11,10 @@ class CardapioItemPadrao extends Model
 
     protected $table = 'cardapio_itens_padrao';
     protected $guarded = [];
-
-    // Sabe a qual horário pertence
     public function horario()
     {
         return $this->belongsTo(CardapioHorario::class, 'cardapio_horario_id');
     }
-
-    // Traz o nome e dados do alimento do contrato
     public function itemContrato()
     {
         return $this->belongsTo(ItemContrato::class, 'item_contrato_uuid');
