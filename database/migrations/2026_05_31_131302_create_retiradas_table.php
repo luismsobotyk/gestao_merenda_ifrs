@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('aluno_id')->constrained('alunos')->cascadeOnDelete();
 
-            // Usamos um campo do tipo 'date' puro para facilitar a busca por "hoje"
             $table->date('data_retirada');
 
             $table->timestamps();

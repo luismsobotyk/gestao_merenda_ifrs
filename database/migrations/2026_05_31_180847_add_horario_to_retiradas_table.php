@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('retiradas', function (Blueprint $table) {
-            // Permite nulo inicial apenas para não quebrar os registros que já existem no seu banco
             $table->foreignUuid('cardapio_horario_id')->nullable()->constrained('cardapio_horarios')->cascadeOnDelete();
         });
     }

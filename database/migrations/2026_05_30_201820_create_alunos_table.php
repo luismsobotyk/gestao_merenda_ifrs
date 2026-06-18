@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('alunos', function (Blueprint $table) {
             $table->id();
-            $table->string('matricula')->unique(); // Matricula como identificador único
+            $table->string('matricula')->unique();
             $table->string('nome');
-            $table->string('login')->nullable(); // Útil caso haja integração com LDAP/AD no futuro
+            $table->string('login')->nullable(); // Para futura integração com LDAP/AD
 
-            // Relacionamento com a tabela de cursos local
             $table->foreignId('curso_id')->constrained('cursos')->cascadeOnDelete();
 
             $table->timestamps();

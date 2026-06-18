@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('chave')->unique(); // Ex: 'modo_totem_ativo'
             $table->string('descricao');
-            $table->string('valor');           // Ex: '1' ou '0'
+            $table->string('valor'); // Ex: '1' ou '0' - ativo ou não
             $table->timestamps();
         });
     }
