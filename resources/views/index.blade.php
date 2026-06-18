@@ -8,9 +8,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /* ============================================================
-           FONTE RAWLINE (Padrão Gov.br)
-           ============================================================ */
         @font-face {
             font-family: 'Rawline';
             src: url('{{ asset('fonts/rawline/rawline-400.ttf') }}') format('truetype');
@@ -18,6 +15,7 @@
             font-style: normal;
             font-display: swap;
         }
+
         @font-face {
             font-family: 'Rawline';
             src: url('{{ asset('fonts/rawline/rawline-700.ttf') }}') format('truetype');
@@ -26,9 +24,6 @@
             font-display: swap;
         }
 
-        /* ============================================================
-           VARIÁVEIS GLOBAIS E ESTILOS BASE
-           ============================================================ */
         :root {
             --bs-font-sans-serif: 'Rawline', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             --bs-body-font-family: var(--bs-font-sans-serif);
@@ -55,7 +50,6 @@
 
         h1, h2, h3, h4, h5, h6 { font-family: 'Rawline', sans-serif !important; }
 
-        /* ---------- App shell ---------- */
         .app {
             width: 100%;
             max-width: 100%;
@@ -73,7 +67,6 @@
             width: 100%;
         }
 
-        /* ===================== HERO ===================== */
         .hero {
             background: linear-gradient(165deg, #159150 0%, var(--green-deep) 100%);
             padding-bottom: 26px;
@@ -81,6 +74,7 @@
             overflow: hidden;
             flex-shrink: 0;
         }
+
         .hero-blob { position: absolute; border-radius: 50%; pointer-events: none; }
         .hero-blob--a { right: -40px; top: -30px; width: 170px; height: 170px; background: rgba(255,255,255,.07); }
         .hero-blob--b { left: -30px; bottom: -50px; width: 130px; height: 130px; background: rgba(255,255,255,.05); }
@@ -89,17 +83,22 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 24px 22px 18px; position: relative;
         }
+
         .brand { display: flex; align-items: center; gap: 10px; }
+
         .brand-mark {
             width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,.18);
             color: #fff; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;
         }
+
         .brand-name { font-size: 14px; font-weight: 700; color: #fff; }
+
         .login {
             font-size: 13px; font-weight: 700; color: var(--green-deep);
             background: #fff; border-radius: 999px; padding: 7px 16px; text-decoration: none;
             transition: transform .15s ease;
         }
+
         .login:active { transform: scale(.96); }
 
         .hero-title { padding: 12px 24px 0; position: relative; text-align: center; }
@@ -107,7 +106,6 @@
         .hero-title h1 { margin: 6px 0 0; font-size: 34px; font-weight: 800; color: #fff; letter-spacing: -.02em; line-height: 1.05; }
         .hero-date { margin: 8px 0 0; font-size: 15px; font-weight: 600; color: #CDEBD8; text-transform: capitalize; }
 
-        /* ===================== DATE STRIP ===================== */
         .datestrip {
             display: flex; gap: 9px; overflow-x: auto;
             padding: 18px 22px 15px;
@@ -115,6 +113,7 @@
             border-bottom: 1px solid var(--hairline);
             justify-content: flex-start;
         }
+
         .datestrip::-webkit-scrollbar { display: none; }
 
         @media (min-width: 768px) {
@@ -136,10 +135,10 @@
             background: var(--green); border-color: var(--green);
             box-shadow: 0 12px 22px -10px rgba(17,122,67,.5);
         }
+
         .day--active .day-wd { color: #A9E0C0; }
         .day--active .day-n  { color: #fff; }
 
-        /* ===================== MENU CONTENT ===================== */
         .day-panel { display: none; flex: 1; overflow-y: auto; padding-bottom: 20px;}
         .day-panel.active { display: block; animation: fadeIn .3s ease; }
 

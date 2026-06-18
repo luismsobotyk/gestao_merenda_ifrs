@@ -178,7 +178,7 @@
             <div class="card h-100 border-0 shadow-sm text-center p-3 card-dash">
                 <div class="card-body">
                     <div class="dash-icon-wrapper">
-                        <i class="bi bi-person-badge dash-icon text-lilas bg-lilas rounded-4"></i>
+                        <i class="bi bi-people dash-icon text-lilas bg-lilas rounded-4"></i>
                     </div>
 
                     <h5 class="card-title fw-bold">Discentes Autorizados</h5>

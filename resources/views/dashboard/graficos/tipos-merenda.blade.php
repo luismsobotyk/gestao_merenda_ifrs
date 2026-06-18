@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
         <div>
             <h1 class="h2 d-flex align-items-center gap-3 mb-0">
-                <i class="bi bi-pie-chart text-primary bg-primary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+                <i class="bi bi-bar-chart-line text-primary bg-primary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
                 Consumo por Tipo de Merenda
             </h1>
             <small class="text-muted">Cruzamento histórico de retiradas com o cardápio efetivamente servido no dia.</small>

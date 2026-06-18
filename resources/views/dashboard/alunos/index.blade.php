@@ -23,7 +23,7 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
             <h1 class="h2 d-flex align-items-center gap-3 mb-0">
-                <i class="bi bi-person-badge text-lilas bg-lilas rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
+                <i class="bi bi-people text-lilas bg-lilas rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
                 Discentes Autorizados
             </h1>
             <small class="text-muted">Última sincronização de alunos: <strong>{{ $ultimaSync }}</strong> | Total na base: <strong>{{ $alunos->total() }}</strong> discentes</small>
