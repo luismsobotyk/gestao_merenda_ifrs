@@ -2,6 +2,7 @@
     --bs-font-sans-serif: 'Rawline', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --bs-body-font-family: var(--bs-font-sans-serif);
 }
+
 body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     font-family: 'Rawline', sans-serif !important;
 }
@@ -23,29 +24,9 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     }
 }
 
-.sidebar .nav-link {
-    color: #198754 !important;
-    font-size: .875rem;
-    font-weight: 500;
-}
-
-.sidebar .nav-link.active {
-    color: #198754; /* Nova cor dos links ativos */
-    font-weight: 550;
-}
-
-/* Nova regra para o fundo da navbar */
 header.navbar{
     background-color: #1c6d46 !important;
 }
-
-.sidebar-heading {
-    font-size: .75rem;
-}
-
-/*
- * Navbar
- */
 
 .navbar-brand {
     padding-top: 1rem;
@@ -58,22 +39,21 @@ header.navbar{
     padding: .75rem 1rem;
 }
 
-/* Sobrescreve o padrão do btn-primary do Bootstrap */
 .btn-primary {
     background-color: #1a8654 !important;
     border-color: #1a8654 !important;
     color: #ffffff !important;
-    padding: 0.5rem 1.2rem !important; /* Aumenta o espaçamento interno (Cima/Baixo e Laterais) */
+    padding: 0.5rem 1.2rem !important;
 }
 
-/* Efeito ao passar o mouse */
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active {
-    background-color: #156b43 !important; /* Tom levemente mais escuro */
+    background-color: #156b43 !important;
     border-color: #156b43 !important;
     color: #ffffff !important;
 }
+
 .btn-outline-primary{
     border-color: #1a8654 !important;
     color: #1a8654 !important;
@@ -82,14 +62,14 @@ header.navbar{
 .btn-outline-primary:hover,
 .btn-outline-primary:focus,
 .btn-outline-primary:active {
-    background-color: #156b43 !important; /* Tom levemente mais escuro */
+    background-color: #156b43 !important;
     border-color: #156b43 !important;
     color: #ffffff !important;
 }
 
 .modal-header.bg-primary {
     background-color: #1c6d46 !important;
-    border-bottom-color: #1c6d46 !important; /* Evita que a bordinha padrão destoe */
+    border-bottom-color: #1c6d46 !important;
 }
 
 .form-control:focus,
@@ -99,33 +79,30 @@ header.navbar{
     box-shadow: 0 0 0 0.25rem rgba(26, 134, 84, 0.25) !important;
 }
 
-/* Opcional: Se você tiver checkboxes ou radio buttons, isso garante que eles fiquem verdes quando marcados */
 .form-check-input:checked {
     background-color: #1a8654 !important;
     border-color: #1a8654 !important;
 }
-/* 1. Cor do texto dos números e setas (Normal) */
+
 .page-link {
     color: #1a8654 !important;
 }
 
-/* 2. Cor ao passar o mouse (Hover) */
 .page-link:hover {
-    color: #156b43 !important; /* Tom levemente mais escuro */
+    color: #156b43 !important;
 }
 
-/* 3. Estilo do botão ativo (Página atual) */
 .page-item.active .page-link {
     background-color: #1a8654 !important;
     border-color: #1a8654 !important;
     color: #ffffff !important;
 }
 
-/* 4. Brilho ao focar (Clicar ou usar o "Tab" do teclado) */
 .page-link:focus {
     color: #156b43 !important;
     box-shadow: 0 0 0 0.25rem rgba(26, 134, 84, 0.25) !important;
 }
+
 input.border-primary,
 select.border-primary {
     border-color: #1a8654 !important;
@@ -136,44 +113,38 @@ select.text-primary {
     color: #1a8654 !important;
 }
 
-/* Garante que as opções DENTRO do select não fiquem verdes de forma estranha, mantendo o texto escuro padrão */
 select.text-primary option {
     color: #212529 !important;
 }
-/* =========================================
-   ESTILO MODERNO PARA A BARRA LATERAL
-   ========================================= */
 
+/* Customização Menu Lateral */
 .sidebar .nav-link {
-    color: #495057 !important; /* Cor cinza chumbo para links inativos (mais clean) */
+    color: #495057 !important;
     font-size: .875rem;
     font-weight: 500;
     padding: 0.65rem 1rem;
-    margin: 0.25rem 0.8rem; /* Desgruda os links das bordas laterais */
-    border-radius: 8px; /* Cantos arredondados modernos */
-    transition: all 0.2s ease-in-out; /* Suaviza as animações */
+    margin: 0.25rem 0.8rem;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
 }
 
-/* Efeito ao passar o mouse */
 .sidebar .nav-link:hover {
     color: #1a8654 !important;
-    background-color: rgba(26, 134, 84, 0.08); /* Fundo verde bem transparente */
-    transform: translateX(4px); /* Animação de um leve empurrãozinho para a direita */
+    background-color: rgba(26, 134, 84, 0.08);
+    transform: translateX(4px);/
 }
 
-/* Estado ativo (Página atual) */
 .sidebar .nav-link.active {
     color: #1a8654 !important;
     font-weight: 600;
-    background-color: rgba(26, 134, 84, 0.12); /* Fundo verde um pouco mais marcado */
-    box-shadow: inset 4px 0 0 #1a8654; /* Linha de destaque elegante na lateral esquerda */
+    background-color: rgba(26, 134, 84, 0.12);
+    box-shadow: inset 4px 0 0 #1a8654;
 }
 
-/* Modernização dos Títulos das sessões (Painel, Contratos, etc.) */
 .sidebar-heading {
     font-size: .7rem;
     font-weight: 700;
-    letter-spacing: 0.08em; /* Espaçamento entre as letras para dar um ar mais sofisticado */
+    letter-spacing: 0.08em;
     color: #adb5bd;
     padding: 0 1.2rem;
 }
