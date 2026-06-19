@@ -1,7 +1,7 @@
 @extends('dashboard.layout')
 
 @section('content')
-    <div class="pt-4 pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center flex-wrap">
+    <div class="pt-4 pb-3 mb-4 d-flex justify-content-between align-items-center flex-wrap">
         <div>
             <h1 class="h2 fw-bold text-dark mb-1">Painel de Controle</h1>
             <p class="text-muted mb-0">Bem-vindo(a) ao SISGEM - Sistema de Gestão da Merenda Escolar.</p>

@@ -228,7 +228,7 @@
 
 @section('content')
     <div class="sus-admin-wrap">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 pt-3 pb-2 mb-3 border-bottom">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 pt-3 pb-2 mb-3">
             <div>
                 <h1 class="h2 mb-1">Respostas consolidadas da avaliação SUS</h1>
                 <p class="text-muted mb-0">

@@ -1,7 +1,7 @@
 @extends('dashboard.layout')
 
 @section('content')
-    <div class="pt-4 pb-3 mb-4 border-bottom">
+    <div class="pt-4 pb-3 mb-4">
         <h1 class="h2 d-flex align-items-center gap-3 mb-0">
             <i class="bi bi-upc-scan text-success bg-success bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.5rem;"></i>
             Abrir Totem

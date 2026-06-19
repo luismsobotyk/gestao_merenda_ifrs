@@ -174,14 +174,14 @@
             background: var(--accent); color: #fff;
             box-shadow: 0 10px 18px -8px color-mix(in srgb, var(--accent) 70%, transparent);
         }
-        .period-meta { text-align: left; }
+        .period-meta { text-align: left; text-transform: lowercase;}
         .period-meta h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
         .period-meta p  { margin: 0; font-size: 12px; font-weight: 600; color: var(--muted); }
+        .period-meta::first-letter{ text-transform: uppercase;}
         .period-time {
             font-size: 13px; font-weight: 800; white-space: nowrap;
             color: var(--accent-ink); background: var(--accent-tint);
             padding: 6px 12px; border-radius: 999px;
-            margin-left: auto;
         }
 
         @media (max-width: 450px) {
