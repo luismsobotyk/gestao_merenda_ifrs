@@ -14,7 +14,7 @@
                 @csrf
                 <button type="submit" class="btn btn-sm btn-primary shadow-sm" id="btnSyncCursos">
                     <i class="bi bi-arrow-repeat"></i>
-                    Sincronizar com API IFRS
+                    Sincronizar Cursos
                 </button>
             </form>
         </div>
