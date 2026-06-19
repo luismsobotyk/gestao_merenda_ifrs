@@ -33,7 +33,7 @@
                 @csrf
                 <button type="submit" class="btn btn-sm btn-primary shadow-sm" id="btnSyncAlunos">
                     <i class="bi bi-arrow-repeat"></i>
-                    Sincronizar Alunos Autorizados
+                    Sincronizar Alunos
                 </button>
             </form>
         </div>
