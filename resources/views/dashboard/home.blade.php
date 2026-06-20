@@ -61,6 +61,10 @@
             margin-bottom: 0;
         }
 
+        .card,.card-footer{
+            background-color: #f5f5f5;
+        }
+
         /* ==========================================
            Classes Personalizadas: Lilás
            ========================================== */
@@ -100,7 +104,7 @@
                     </p>
                 </div>
 
-                <div class="card-footer bg-white border-0 pb-3 pt-0">
+                <div class="card-footer border-0 pb-3 pt-0">
                     <a href="{{ route('retirada.totem') }}" class="btn btn-outline-success w-100 fw-medium">
                         Abrir Totem
                     </a>
@@ -122,7 +126,7 @@
                     </p>
                 </div>
 
-                <div class="card-footer bg-white border-0 pb-3 pt-0">
+                <div class="card-footer border-0 pb-3 pt-0">
                     <a href="{{ route('cardapio') }}" class="btn btn-outline-primary w-100 fw-medium">
                         Acessar Cardápios
                     </a>
@@ -144,7 +148,7 @@
                     </p>
                 </div>
 
-                <div class="card-footer bg-white border-0 pb-3 pt-0">
+                <div class="card-footer border-0 pb-3 pt-0">
                     <a href="{{ route('contrato.criar') }}" class="btn btn-outline-warning text-dark w-100 fw-medium">
                         Criar Contrato
                     </a>
@@ -166,7 +170,7 @@
                     </p>
                 </div>
 
-                <div class="card-footer bg-white border-0 pb-3 pt-0">
+                <div class="card-footer border-0 pb-3 pt-0">
                     <a href="{{ route('cursos.index') }}" class="btn btn-outline-info text-dark w-100 fw-medium">
                         Acessar Cursos
                     </a>
@@ -188,7 +192,7 @@
                     </p>
                 </div>
 
-                <div class="card-footer bg-white border-0 pb-3 pt-0">
+                <div class="card-footer border-0 pb-3 pt-0">
                     <a href="{{ route('alunos.index') }}" class="btn btn-outline-lilas w-100 fw-medium">
                         Acessar Alunos
                     </a>
@@ -210,7 +214,7 @@
                     </p>
                 </div>
 
-                <div class="card-footer bg-white border-0 pb-3 pt-0">
+                <div class="card-footer border-0 pb-3 pt-0">
                     <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary w-100 fw-medium">
                         Acessar Usuários
                     </a>
