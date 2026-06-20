@@ -63,9 +63,9 @@
                 <div class="card-body p-4">
                     <h5 class="fw-bold text-secondary mb-4">Detalhamento dos Dados
                         @if($dataInicial && $dataFinal)
-                            <span class="badge bg-primary ms-2 fs-6 fw-normal">Período: {{ \Carbon\Carbon::parse($dataInicial)->format('d/m/Y') }} a {{ \Carbon\Carbon::parse($dataFinal)->format('d/m/Y') }}</span>
+                            <small class="text-muted fw-normal ms-1">({{ \Carbon\Carbon::parse($dataInicial)->format('d/m/Y') }} a {{ \Carbon\Carbon::parse($dataFinal)->format('d/m/Y') }})</small>
                         @else
-                            <span class="badge bg-secondary ms-2 fs-6 fw-normal">Período: Histórico Completo</span>
+                            <small class="text-muted fw-normal ms-1">(Histórico Completo)</small>
                         @endif
                     </h5>
 

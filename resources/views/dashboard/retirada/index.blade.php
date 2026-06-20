@@ -11,12 +11,18 @@
             border-color: #0d6efd !important;
         }
         .icon-circle {
-            width: 80px;
-            height: 80px;
+            width: 80px; /* Voltou para 80px */
+            height: 80px; /* Voltou para 80px */
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+        }
+        /* Nova regra para aumentar o ícone SVG dentro do círculo */
+        .icon-circle svg {
+            width: auto;
+            height: 50%; /* O ícone ocupará 50% da altura do círculo (40px) */
+            font-size: 2.5rem; /* Garante tamanho para ícones de fonte se usados */
         }
         /* Ajuste para o toggle ficar maior e mais fácil de clicar */
         .form-switch .form-check-input.toggle-modo {
@@ -50,7 +56,7 @@
             <div class="card h-100 shadow-sm border-secondary border-opacity-25 hover-card">
                 {{-- Cabeçalho com Badge e Toggle --}}
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-4">
-                    <span id="badge-totem" class="badge {{ $totemAtivo ? 'bg-success' : 'bg-danger' }} px-3 py-2">
+                    <span id="badge-totem" class="badge bg-transparent border {{ $totemAtivo ? 'border-success text-success' : 'border-secondary text-secondary' }} px-3 py-2">
                         {{ $totemAtivo ? 'Habilitado' : 'Desabilitado' }}
                     </span>
                     <div class="form-check form-switch mb-0">
@@ -60,7 +66,8 @@
 
                 <div class="card-body p-4 text-center">
                     <div class="icon-circle bg-primary bg-opacity-10 text-primary mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-display" viewBox="0 0 16 16">
+                        {{-- Atributos width/height removidos, controlados pelo CSS --}}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-display" viewBox="0 0 16 16">
                             <path d="M0 4s0-2 2-2h12s2 0 2 2v6s0 2-2 2h-4c0 .667.083 1.167.25 1.5H11a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1h.75c.167-.333.25-.833.25-1.5H2s-2 0-2-2zm1.398-.855a.758.758 0 0 0-.254.302A1.46 1.46 0 0 0 1 4.01V10c0 .325.078.502.145.602.07.105.17.188.302.254a1.464 1.464 0 0 0 .538.143L2.01 11H14c.325 0 .502-.078.602-.145a.758.758 0 0 0 .254-.302 1.464 1.464 0 0 0 .143-.538L15 9.99V4c0-.325-.078-.502-.145-.602a.757.757 0 0 0-.302-.254A1.46 1.46 0 0 0 13.99 3H2c-.325 0-.502.078-.602.145z"/>
                         </svg>
                     </div>
@@ -70,7 +77,7 @@
                     </p>
 
                     {{-- O botão agora abre um Modal em vez de ir direto para o link --}}
-                    <button type="button" id="btn-totem" class="btn btn-primary mt-2 rounded-pill px-5 fw-bold {{ $totemAtivo ? '' : 'disabled' }}" data-bs-toggle="modal" data-bs-target="#modalConfiguraTotem">
+                    <button type="button" id="btn-totem" class="btn btn-primary mt-2 px-5 fw-bold {{ $totemAtivo ? '' : 'disabled' }}" data-bs-toggle="modal" data-bs-target="#modalConfiguraTotem">
                         Acessar Totem
                     </button>
                 </div>
@@ -78,38 +85,40 @@
         </div>
 
         {{-- CARD 2: MODO LANÇAMENTO MANUAL --}}
-        {{-- CARD 2: MODO LANÇAMENTO MANUAL --}}
         <div class="col-md-6">
             <div class="card h-100 shadow-sm border-secondary border-opacity-25 hover-card">
                 {{-- Cabeçalho com Badge e Toggle --}}
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 px-4">
-            <span id="badge-manual" class="badge bg-danger px-3 py-2">
-                Desabilitado
-            </span>
+                    <span id="badge-manual" class="badge bg-transparent border border-secondary text-secondary px-3 py-2">
+                        Desabilitado
+                    </span>
 
                     <span
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
                         data-bs-title="Funcionalidade em desenvolvimento"
                     >
-                <div class="form-check form-switch mb-0">
-                    <input
-                        class="form-check-input toggle-modo"
-                        type="checkbox"
-                        role="switch"
-                        data-modo="manual"
-                        disabled
-                        aria-disabled="true"
-                        style="cursor: not-allowed;"
-                    >
-                </div>
-            </span>
+                        <div class="form-check form-switch mb-0">
+                            <input
+                                class="form-check-input toggle-modo"
+                                type="checkbox"
+                                role="switch"
+                                data-modo="manual"
+                                disabled
+                                aria-disabled="true"
+                                style="cursor: not-allowed;"
+                            >
+                        </div>
+                    </span>
                 </div>
 
                 <div class="card-body p-4 text-center">
                     <div class="icon-circle bg-success bg-opacity-10 text-success mx-auto mb-4 opacity-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-person-lines-fill" viewBox="0 0 16 16">
-                            <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"/>
+                        {{-- Atributos width/height removidos, controlados pelo CSS --}}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+                            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/>
+                            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/>
                         </svg>
                     </div>
 
@@ -126,22 +135,23 @@
                         data-bs-placement="top"
                         data-bs-title="Funcionalidade em desenvolvimento"
                     >
-                <a
-                    href="#"
-                    id="btn-manual"
-                    class="btn btn-success mt-2 rounded-pill px-5 fw-bold disabled"
-                    onclick="return false;"
-                    tabindex="-1"
-                    aria-disabled="true"
-                    style="pointer-events: none;"
-                >
-                    Acessar Painel
-                </a>
-            </span>
+                        <a
+                            href="#"
+                            id="btn-manual"
+                            class="btn btn-success mt-2 px-5 fw-bold disabled"
+                            onclick="return false;"
+                            tabindex="-1"
+                            aria-disabled="true"
+                            style="pointer-events: none;"
+                        >
+                            Acessar Painel
+                        </a>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
+
     {{-- MODAL DE CONFIGURAÇÃO DO TOTEM --}}
     <div class="modal fade" id="modalConfiguraTotem" tabindex="-1" aria-labelledby="modalConfiguraTotemLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -205,11 +215,11 @@
 
                     // 1. Atualização Visual Imediata (Feedback instantâneo na tela)
                     if (isChecked) {
-                        badge.classList.replace('bg-danger', 'bg-success');
+                        badge.className = 'badge bg-transparent border border-success text-success px-3 py-2';
                         badge.innerText = 'Habilitado';
                         btn.classList.remove('disabled');
                     } else {
-                        badge.classList.replace('bg-success', 'bg-danger');
+                        badge.className = 'badge bg-transparent border border-secondary text-secondary px-3 py-2';
                         badge.innerText = 'Desabilitado';
                         btn.classList.add('disabled');
                     }
@@ -240,11 +250,11 @@
                         this.disabled = false;
 
                         if (!isChecked) {
-                            badge.classList.replace('bg-danger', 'bg-success');
+                            badge.className = 'badge bg-transparent border border-success text-success px-3 py-2';
                             badge.innerText = 'Habilitado';
                             btn.classList.remove('disabled');
                         } else {
-                            badge.classList.replace('bg-success', 'bg-danger');
+                            badge.className = 'badge bg-transparent border border-secondary text-secondary px-3 py-2';
                             badge.innerText = 'Desabilitado';
                             btn.classList.add('disabled');
                         }
