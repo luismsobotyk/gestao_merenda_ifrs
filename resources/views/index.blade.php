@@ -112,6 +112,7 @@
             scrollbar-width: none;
             border-bottom: 1px solid var(--hairline);
             justify-content: flex-start;
+            padding-top: 2rem;
         }
 
         .datestrip::-webkit-scrollbar { display: none; }
