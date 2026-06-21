@@ -218,7 +218,7 @@ class ContratoController extends Controller
             'quantidade_empenhada' => $request->quantidade_empenhada,
         ]);
 
-        return redirect()->route('contrato.visualizaradd .', $contrato->id)->with('success', 'Nota de Empenho registrada com sucesso!');
+        return redirect()->route('contrato.visualizar', $contrato->id)->with('success', 'Nota de Empenho registrada com sucesso!');
     }
     public function salvaPedido(Request $request, $id)
     {

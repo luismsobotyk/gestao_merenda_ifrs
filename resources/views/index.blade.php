@@ -414,7 +414,7 @@
 
                 @if(!$dia['possui_cardapio'])
                     <div style="padding: 20px; text-align: center; color: #a96a0a; margin: 40px auto; max-width: 450px; border: 1px solid orange; border-radius: 8px; font-size: 15px; font-weight: 600; background-color: #fffdf5;">
-                        ⚠️ ️Não há cardápio cadastrado para esta data.
+                        ⚠️ Sem previsão de cardápio.
                     </div>
                 @else
                     <section class="menu">
@@ -471,7 +471,10 @@
         @endforeach
     @endif
 
-    <footer class="foot">IFRS · SISGEM — {{ env('IFRS_CAMPUS', 'Campus') }}</footer>
+    <footer class="foot d-flex align-items-center justify-content-center">
+{{--        {{ env('IFRS_CAMPUS', 'Campus') }} · SISGEM--}}
+        <img src="{{ asset('assets/img/logo_ifrs.png') }}" alt="Logo IFRS" style="height: 50px; margin-left: 15px;">
+    </footer>
 </main>
 
 <script>

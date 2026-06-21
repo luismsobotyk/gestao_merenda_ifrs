@@ -85,7 +85,11 @@
             Entrar
         </button>
 
-        <p class="mt-5 mb-3 text-body-secondary small">&copy; {{ date('Y') }} SISGEM - IFRS PoA</p>
+        <div class="d-flex justify-content-center align-items-center gap-4 w-100 mt-5 mb-3 text-body-secondary small">
+            <div>
+                <img src="{{ asset('assets/img/logo_ifrs.png') }}" alt="Logo IFRS" style="height: 45px;">
+            </div>
+        </div>
     </form>
 </main>
 
