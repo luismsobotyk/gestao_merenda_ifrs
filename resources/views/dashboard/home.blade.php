@@ -76,16 +76,56 @@
             background-color: rgba(155, 89, 182, 0.12) !important; /* Fundo com opacidade imitando o Bootstrap */
         }
 
-        .btn-outline-lilas {
-            color: #9b59b6;
-            border-color: #9b59b6;
+        /* ==========================================
+           Botões do Dashboard (Borda da cor, texto escurecido)
+           ========================================== */
+        .btn-dash {
+            border: 1px solid transparent;
+            background-color: transparent;
+            transition: all 0.15s ease-in-out;
         }
 
-        .btn-outline-lilas:hover {
-            color: #fff;
-            background-color: #9b59b6;
-            border-color: #9b59b6;
+        /* Success (Verde) */
+        .btn-dash-success {
+            border-color: #198754;
+            color: color-mix(in srgb, #198754, black 35%);
         }
+        .btn-dash-success:hover { background-color: #198754; color: #fff; }
+
+        /* Primary (Azul) */
+        .btn-dash-primary {
+            border-color: #0d6efd;
+            color: color-mix(in srgb, #0d6efd, black 35%);
+        }
+        .btn-dash-primary:hover { background-color: #0d6efd; color: #fff; }
+
+        /* Warning (Amarelo) - Misturado com mais preto para dar leitura */
+        .btn-dash-warning {
+            border-color: #ffc107;
+            color: color-mix(in srgb, #ffc107, black 55%);
+        }
+        .btn-dash-warning:hover { background-color: #ffc107; color: #000; }
+
+        /* Info (Ciano) - Misturado com mais preto para dar leitura */
+        .btn-dash-info {
+            border-color: #0dcaf0;
+            color: color-mix(in srgb, #0dcaf0, black 50%);
+        }
+        .btn-dash-info:hover { background-color: #0dcaf0; color: #000; }
+
+        /* Lilás (Roxo) */
+        .btn-dash-lilas {
+            border-color: #9b59b6;
+            color: color-mix(in srgb, #9b59b6, black 35%);
+        }
+        .btn-dash-lilas:hover { background-color: #9b59b6; color: #fff; }
+
+        /* Secondary (Cinza) */
+        .btn-dash-secondary {
+            border-color: #6c757d;
+            color: color-mix(in srgb, #6c757d, black 35%);
+        }
+        .btn-dash-secondary:hover { background-color: #6c757d; color: #fff; }
     </style>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
@@ -105,7 +145,7 @@
                 </div>
 
                 <div class="card-footer border-0 pb-3 pt-0">
-                    <a href="{{ route('retirada.totem') }}" class="btn btn-outline-success w-100 fw-medium">
+                    <a href="{{ route('retirada.totem') }}" class="btn btn-dash btn-dash-success w-100 fw-medium">
                         Abrir Totem
                     </a>
                 </div>
@@ -127,7 +167,7 @@
                 </div>
 
                 <div class="card-footer border-0 pb-3 pt-0">
-                    <a href="{{ route('cardapio') }}" class="btn btn-outline-primary w-100 fw-medium">
+                    <a href="{{ route('cardapio') }}" class="btn btn-dash btn-dash-primary w-100 fw-medium">
                         Acessar Cardápios
                     </a>
                 </div>
@@ -149,7 +189,7 @@
                 </div>
 
                 <div class="card-footer border-0 pb-3 pt-0">
-                    <a href="{{ route('contrato.criar') }}" class="btn btn-outline-warning text-dark w-100 fw-medium">
+                    <a href="{{ route('contrato.criar') }}" class="btn btn-dash btn-dash-warning w-100 fw-medium">
                         Criar Contrato
                     </a>
                 </div>
@@ -171,7 +211,7 @@
                 </div>
 
                 <div class="card-footer border-0 pb-3 pt-0">
-                    <a href="{{ route('cursos.index') }}" class="btn btn-outline-info text-dark w-100 fw-medium">
+                    <a href="{{ route('cursos.index') }}" class="btn btn-dash btn-dash-info w-100 fw-medium">
                         Acessar Cursos
                     </a>
                 </div>
@@ -193,7 +233,7 @@
                 </div>
 
                 <div class="card-footer border-0 pb-3 pt-0">
-                    <a href="{{ route('alunos.index') }}" class="btn btn-outline-lilas w-100 fw-medium">
+                    <a href="{{ route('alunos.index') }}" class="btn btn-dash btn-dash-lilas w-100 fw-medium">
                         Acessar Alunos
                     </a>
                 </div>
@@ -215,7 +255,7 @@
                 </div>
 
                 <div class="card-footer border-0 pb-3 pt-0">
-                    <a href="{{ route('usuarios.index') }}" class="btn btn-outline-secondary w-100 fw-medium">
+                    <a href="{{ route('usuarios.index') }}" class="btn btn-dash btn-dash-secondary w-100 fw-medium">
                         Acessar Usuários
                     </a>
                 </div>
