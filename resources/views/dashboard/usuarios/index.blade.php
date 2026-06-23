@@ -28,7 +28,7 @@
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAdicionar" id="btnAbrirModal">
-                <i class="bi bi-person-plus-fill me-1"></i> Autorizar Novo Acesso
+                <i class="bi bi-person-add me-1"></i> Autorizar Novo Acesso
             </button>
         </div>
     </div>
