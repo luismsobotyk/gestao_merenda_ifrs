@@ -930,7 +930,18 @@
         }
 
         function exportJSON() {
-            download(JSON.stringify(SESSIONS, null, 2), 'avaliacao_sus_respostas.json', 'application/json');
+            // Cria um clone anonimizado para não alterar a tabela visível na tela
+            const anonymizedSessions = SESSIONS.map((s, index) => {
+                const pId = 'P' + String(index + 1).padStart(2, '0');
+                const clone = JSON.parse(JSON.stringify(s));
+
+                clone.ldap_username = pId;
+                if (clone.payload && clone.payload.participante) {
+                    clone.payload.participante.codigo = pId;
+                }
+                return clone;
+            });
+            download(JSON.stringify(anonymizedSessions, null, 2), 'avaliacao_sus_respostas.json', 'application/json');
         }
 
         function exportCSV() {
@@ -951,14 +962,15 @@
                 'observacoes_tarefas'
             ];
 
-            const rows = SESSIONS.map(s => {
+            const rows = SESSIONS.map((s, index) => {
+                const pId = 'P' + String(index + 1).padStart(2, '0');
                 const p = moderatorInfo(s);
                 const answers = susAnswers(s);
                 const q = qualitativeAnswers(s);
 
                 return [
-                    participanteLabel(s),
-                    s.ldap_username || '',
+                    pId, // Substitui o nome/código real por P01, P02...
+                    pId, // Substitui o ldap_username por P01, P02...
                     s.status || '',
                     s.sus_score ?? s.payload?.sus?.score ?? '',
                     s.submitted_at || '',
