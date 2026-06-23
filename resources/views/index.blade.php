@@ -413,7 +413,7 @@
             <div id="panel-day-{{ $index }}" class="day-panel {{ $index === $indiceAtivo ? 'active' : '' }}">
 
                 @if(!$dia['possui_cardapio'])
-                    <div style="padding: 15px; text-align: center; color: #a96a0a; margin: 40px auto; width: calc(100% - 32px); max-width: 400px; border: 1px solid orange; border-radius: 8px; font-size: 14px; font-weight: 600; background-color: #fffdf5; box-sizing: border-box;">
+                    <div style="padding: 40px; text-align: center; color: #a96a0a; margin: 40px auto; width: calc(100% - 32px); max-width: 300px; border: 1px solid orange; border-radius: 8px; font-size: 14px; font-weight: 600; background-color: #fffdf5; box-sizing: border-box;">
                         ⚠️ Sem previsão de cardápio.
                     </div>
                 @else
