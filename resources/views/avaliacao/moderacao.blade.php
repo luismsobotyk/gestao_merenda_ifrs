@@ -54,7 +54,8 @@
             <div>
                 <h1 class="h2 mb-1">Observação da avaliação</h1>
                 <div class="sus-muted">
-                    Participante: <strong>{{ $avaliacao->ldap_username }}</strong>
+{{--                    Participante: <strong>{{ $avaliacao->ldap_username }}</strong>--}}
+                    Participante: <strong>[omitido]</strong>
                     @if($avaliacao->submitted_at)
                         · <span class="badge bg-success">Submetida em {{ $avaliacao->submitted_at->format('d/m/Y H:i') }}</span>
                     @else

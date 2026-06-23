@@ -1,20 +1,20 @@
 @extends('dashboard.layout')
 
 @section('custom_css')
-<style>
-    span.border-primary,
-    .input-group-text.border-primary {
-        border-color: #1a8654 !important;
-    }
-    .input-group-text {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    .input-group-text .bi {
-        line-height: 0 !important;
-    }
-</style>
+    <style>
+        span.border-primary,
+        .input-group-text.border-primary {
+            border-color: #1a8654 !important;
+        }
+        .input-group-text {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .input-group-text .bi {
+            line-height: 0 !important;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -64,17 +64,34 @@
                     </thead>
                     <tbody>
                     @forelse($usuarios as $user)
+                        @php
+                            $usuariosPesquisa = ['usuario1', 'usuario2', 'usuario3'];
+                            $ocultar = in_array($user->username, $usuariosPesquisa);
+                        @endphp
                         <tr>
                             <td class="ps-4 fw-bold text-dark">
-                                <i class="bi bi-person-circle text-muted me-2 fs-5"></i>
-                                {{ $user->name }}
+                                <i class="bi {{ $ocultar ? 'bi-incognito' : 'bi-person-circle' }} text-muted me-2 fs-5"></i>
+                                {{ $ocultar ? 'Participante da Pesquisa' : $user->name }}
+
                                 {{-- Selo visual para o Super Admin --}}
-                                @if(\App\Models\User::isSuperAdmin($user))
+                                @if(\App\Models\User::isSuperAdmin($user) && !$ocultar)
                                     <small class="text-muted fw-normal ms-1">(Admin)</small>
                                 @endif
                             </td>
-                            <td>{{ $user->username }}</td>
-                            <td><a href="mailto:{{ $user->email }}" class="text-decoration-none text-dark">{{ $user->email }}</a></td>
+                            <td>
+                                @if($ocultar)
+                                    <span class="text-muted">***</span>
+                                @else
+                                    {{ $user->username }}
+                                @endif
+                            </td>
+                            <td>
+                                @if($ocultar)
+                                    <span class="text-muted">***@***.***</span>
+                                @else
+                                    <a href="mailto:{{ $user->email }}" class="text-decoration-none text-dark">{{ $user->email }}</a>
+                                @endif
+                            </td>
                             <td class="text-end pe-4">
                                 <div class="btn-group">
                                     <a href="{{ route('usuarios.historico', $user->id) }}" class="btn btn-sm btn-outline-primary" title="Histórico de Acesso">
