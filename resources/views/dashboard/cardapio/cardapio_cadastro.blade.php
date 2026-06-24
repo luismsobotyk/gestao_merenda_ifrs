@@ -439,9 +439,9 @@
                     const horarioRef = state.horarios[exc.horario_index];
                     if(!horarioRef) return;
 
-                    let badgeTipo = exc.tipo === 'inclusao' ? '<span class="badge bg-info text-uppercase">Inclusão</span>'
-                        : exc.tipo === 'substituicao' ? '<span class="badge bg-warning text-dark text-uppercase">Substituição</span>'
-                            : '<span class="badge bg-dark text-uppercase">Supressão</span>';
+                    let badgeTipo = exc.tipo === 'inclusao' ? '<span class="badge bg-secondary">Inclusão</span>'
+                        : exc.tipo === 'substituicao' ? '<span class="badge bg-secondary">Substituição</span>'
+                            : '<span class="badge bg-dark">Supressão</span>';
 
                     let tdAlimentos = '';
                     if(exc.tipo === 'supressao') {
@@ -478,7 +478,7 @@
                     tbody.innerHTML += `
                     <tr>
                         <td class="align-middle"><strong>${exc.data_exata.split('-').reverse().join('/')}</strong></td>
-                        <td class="align-middle"><strong class="text-primary text-uppercase">${horarioRef.nome}</strong><br><span class="text-muted small">${horarioRef.hora_inicio}</span></td>
+                        <td class="align-middle"><strong class="text-dark text-uppercase">${horarioRef.nome}</strong><br><span class="text-muted small">${horarioRef.hora_inicio}</span></td>
                         <td class="align-middle">${badgeTipo}</td>
                         <td class="align-top p-2" style="min-width: 200px;">${tdAlimentos}</td>
                         <td class="align-middle text-end">
