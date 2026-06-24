@@ -437,9 +437,9 @@
                                             @php $estilo = getEstiloAlimento($item['nome']); @endphp
 
                                             <div class="item" style="--c:{{ $estilo['c'] }};--t:{{ $estilo['t'] }}">
-                                                @if($item['origem'] !== 'padrao')
-                                                    <div class="item-badge-excecao">Extra</div>
-                                                @endif
+{{--                                                @if($item['origem'] !== 'padrao')--}}
+{{--                                                    <div class="item-badge-excecao">Extra</div>--}}
+{{--                                                @endif--}}
 
                                                 <span class="item-ico">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
