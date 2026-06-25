@@ -218,8 +218,12 @@
             width: 150px; /* Ajuda o Safari a entender o tamanho exato */
             min-width: 150px; /* Impede o Safari de tentar esmagar o item */
             scroll-snap-align: start;
-            background: var(--card); border: 1px solid var(--hairline); border-radius: 22px;
-            padding: 20px 12px; text-align: center; cursor: pointer;
+            background: var(--card);
+            border: 1px solid var(--c); /* Borda com a mesma cor do ícone */
+            border-radius: 22px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
             box-shadow: 0 8px 24px -16px rgba(0,0,0,.15);
             transition: transform .18s ease, box-shadow .18s ease;
             position: relative;
@@ -239,7 +243,13 @@
             display: flex; align-items: center; justify-content: center;
             background: var(--t); color: var(--c);
         }
-        .item-name { display: block; font-size: 15px; font-weight: 800; line-height: 1.2; }
+        .item-name {
+            display: block;
+            font-size: 15px;
+            font-weight: 800;
+            line-height: 1.2;
+            color: color-mix(in srgb, var(--c), black 55%); /* Texto escurecido utilizando a cor base */
+        }
         .item-cat {
             display: inline-block; margin-top: 10px;
             font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
@@ -413,21 +423,23 @@
             <div id="panel-day-{{ $index }}" class="day-panel {{ $index === $indiceAtivo ? 'active' : '' }}">
 
                 @if(!$dia['possui_cardapio'])
-                    <div style="padding: 40px; text-align: center; color: #a96a0a; margin: 40px auto; width: calc(100% - 32px); max-width: 300px; border: 1px solid orange; border-radius: 8px; font-size: 14px; font-weight: 600; background-color: #fffdf5; box-sizing: border-box;">
+                    <div style="padding: 20px; text-align: center; color: #a96a0a; margin: 40px auto; width: 90%; max-width: 450px; border: 1px solid orange; border-radius: 8px; font-size: 15px; font-weight: 600; background-color: #fffdf5;">
                         ⚠️ Sem previsão de cardápio.
                     </div>
                 @else
                     <section class="menu">
                         @foreach($dia['horarios'] as $hIndex => $horario)
                             <article class="period p-{{ $hIndex % 4 }}">
-                                <div class="period-head">
-                                        <span class="period-ico">
+                                <div class="d-flex align-items-center justify-content-between w-100 mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="period-ico m-0">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
                                         </span>
-                                    <div class="period-meta">
-                                        <h2>{{ $horario['nome'] }}</h2>
+                                        <div class="period-meta text-start m-0">
+                                            <h2>{{ $horario['nome'] }}</h2>
+                                        </div>
                                     </div>
-                                    <span class="period-time">{{ substr($horario['hora_inicio'], 0, 5) }}–{{ substr($horario['hora_fim'], 0, 5) }}</span>
+                                    <span class="period-time m-0">{{ substr($horario['hora_inicio'], 0, 5) }}–{{ substr($horario['hora_fim'], 0, 5) }}</span>
                                 </div>
 
                                 <div class="row-wrap">
@@ -437,9 +449,9 @@
                                             @php $estilo = getEstiloAlimento($item['nome']); @endphp
 
                                             <div class="item" style="--c:{{ $estilo['c'] }};--t:{{ $estilo['t'] }}">
-{{--                                                @if($item['origem'] !== 'padrao')--}}
-{{--                                                    <div class="item-badge-excecao">Extra</div>--}}
-{{--                                                @endif--}}
+                                                @if($item['origem'] !== 'padrao')
+                                                    <div class="item-badge-excecao">Extra</div>
+                                                @endif
 
                                                 <span class="item-ico">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -472,7 +484,7 @@
     @endif
 
     <footer class="foot d-flex align-items-center justify-content-center">
-{{--        {{ env('IFRS_CAMPUS', 'Campus') }} · SISGEM--}}
+        {{--        {{ env('IFRS_CAMPUS', 'Campus') }} · SISGEM--}}
         <img src="{{ asset('assets/img/logo_ifrs.png') }}" alt="Logo IFRS" style="height: 50px; margin-left: 15px;">
     </footer>
 </main>
