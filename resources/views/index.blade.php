@@ -218,12 +218,8 @@
             width: 150px; /* Ajuda o Safari a entender o tamanho exato */
             min-width: 150px; /* Impede o Safari de tentar esmagar o item */
             scroll-snap-align: start;
-            background: var(--card);
-            border: 1px solid var(--c); /* Borda com a mesma cor do ícone */
-            border-radius: 22px;
-            padding: 20px 12px;
-            text-align: center;
-            cursor: pointer;
+            background: var(--card); border: 1px solid var(--hairline); border-radius: 22px;
+            padding: 20px 12px; text-align: center; cursor: pointer;
             box-shadow: 0 8px 24px -16px rgba(0,0,0,.15);
             transition: transform .18s ease, box-shadow .18s ease;
             position: relative;
@@ -243,13 +239,7 @@
             display: flex; align-items: center; justify-content: center;
             background: var(--t); color: var(--c);
         }
-        .item-name {
-            display: block;
-            font-size: 15px;
-            font-weight: 800;
-            line-height: 1.2;
-            color: color-mix(in srgb, var(--c), black 55%); /* Texto escurecido utilizando a cor base */
-        }
+        .item-name { display: block; font-size: 15px; font-weight: 800; line-height: 1.2; }
         .item-cat {
             display: inline-block; margin-top: 10px;
             font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
@@ -423,7 +413,7 @@
             <div id="panel-day-{{ $index }}" class="day-panel {{ $index === $indiceAtivo ? 'active' : '' }}">
 
                 @if(!$dia['possui_cardapio'])
-                    <div style="padding: 20px; text-align: center; color: #a96a0a; margin: 40px auto; width: 90%; max-width: 450px; border: 1px solid orange; border-radius: 8px; font-size: 15px; font-weight: 600; background-color: #fffdf5;">
+                    <div style="padding: 40px; text-align: center; color: #a96a0a; margin: 40px auto; width: calc(100% - 32px); max-width: 300px; border: 1px solid orange; border-radius: 8px; font-size: 14px; font-weight: 600; background-color: #fffdf5; box-sizing: border-box;">
                         ⚠️ Sem previsão de cardápio.
                     </div>
                 @else
@@ -449,9 +439,9 @@
                                             @php $estilo = getEstiloAlimento($item['nome']); @endphp
 
                                             <div class="item" style="--c:{{ $estilo['c'] }};--t:{{ $estilo['t'] }}">
-                                                @if($item['origem'] !== 'padrao')
-                                                    <div class="item-badge-excecao">Extra</div>
-                                                @endif
+                                                {{--                                                @if($item['origem'] !== 'padrao')--}}
+                                                {{--                                                    <div class="item-badge-excecao">Extra</div>--}}
+                                                {{--                                                @endif--}}
 
                                                 <span class="item-ico">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
